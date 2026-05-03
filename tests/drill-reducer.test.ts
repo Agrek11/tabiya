@@ -112,6 +112,33 @@ describe('drillReducer — terminal + irrelevant transitions', () => {
   });
 });
 
+describe('drillReducer — RESET action', () => {
+  it('from complete + RESET → auto_playing(0) for a non-empty line', () => {
+    const next = reducer({ kind: 'complete' }, { type: 'RESET' });
+    expect(next).toEqual({ kind: 'auto_playing', lineIndex: 0 });
+  });
+
+  it('from any state + RESET → initial state', () => {
+    const states: DrillState[] = [
+      { kind: 'awaiting_player', lineIndex: 3 },
+      { kind: 'flash_correct', lineIndex: 2, square: 'e5' },
+      { kind: 'flash_wrong', lineIndex: 1, square: 'd5' },
+      { kind: 'auto_playing', lineIndex: 4 },
+      { kind: 'complete' },
+    ];
+    states.forEach((s) => {
+      expect(reducer(s, { type: 'RESET' })).toEqual({ kind: 'auto_playing', lineIndex: 0 });
+    });
+  });
+
+  it('empty line + RESET → complete', () => {
+    const r = createDrillReducer([]);
+    expect(r({ kind: 'auto_playing', lineIndex: 0 }, { type: 'RESET' })).toEqual({
+      kind: 'complete',
+    });
+  });
+});
+
 describe('drillReducer — empty line edge', () => {
   it('reducer with empty line still handles all actions safely', () => {
     const r = createDrillReducer([]);

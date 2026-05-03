@@ -1,0 +1,24 @@
+node_modules
+dist
+dist-ssr
+.git
+.github
+.vscode
+.idea
+.DS_Store
+
+# SDD docs — not needed in image, would leak design state
+ctx
+specs
+features.md
+
+# logs
+*.log
+
+# meta
+.gitignore
+.dockerignore
+
+# env / secrets
+.env
+.env.*

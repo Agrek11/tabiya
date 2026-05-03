@@ -16,8 +16,8 @@ Estimate: 1 weekend (~6-8 hrs).
   *(Req 1.5 · Article 14) — `eslint.config.js` shipped; `npm run lint` script present; removed stray duplicate from devDependencies*
 - [x] **1.5** Verify `npm run dev` starts Vite, `npm run build` produces `dist/`, `npm run preview` serves the build
   *(Req 1.2, 1.3) — verified on Mac*
-- [ ] **1.6** Delete unused vite defaults (`App.css`, sample logo CSS, counter component) to keep LOC budget tight
-  *(Req 7.1) — deferred until app code lands (section 5)*
+- [x] **1.6** Delete unused vite defaults (`App.css`, sample logo CSS, counter component) to keep LOC budget tight
+  *(Req 7.1) — done at section 5: removed `src/App.css` + `src/assets/`, replaced counter App.tsx with `<DrillView />`*
 - [x] **1.7** Add `.gitignore` with `node_modules/`, `dist/`, `.DS_Store`, `*.log`, `.env*`
   *(Vite scaffold provided most; added `.env*` block for secrets hygiene)*
 
@@ -34,69 +34,117 @@ Estimate: 1 weekend (~6-8 hrs).
 
 ## 3. Drill Logic (Pure)
 
-- [ ] **3.1** Create `src/drill/sample-line.ts` exporting `SAMPLE_LINE_SAN` and `SAMPLE_LINE_NAME`
+- [x] **3.1** Create `src/drill/sample-line.ts` exporting `SAMPLE_LINE_SAN` and `SAMPLE_LINE_NAME`
   *(Req 3.1 · Articles 9, 10)*
-- [ ] **3.2** Create `src/drill/move-comparator.ts` with `compareMove(chess, expectedSan, attempt)` returning `{kind: 'correct'|'wrong'|'illegal'}`
-  *(Req 3.3, 3.6 · Article 9 · AD3, AD5)*
+- [x] **3.2** Create `src/drill/move-comparator.ts` with `compareMove(chess, expectedSan, attempt)` returning `{kind: 'correct'|'wrong'|'illegal'}`
+  *(Req 3.3, 3.6 · Article 9 · AD3, AD5) — uses try/catch for chess.js v1 throw-on-illegal API*
 - [ ] **3.3** Add canonicalization helper that round-trips each SAN in the line through chess.js once at module load to normalize form (handles `O-O` vs `0-0`, disambiguation)
-  *(Risk: SAN form mismatch)*
+  *(Risk: SAN form mismatch) — DEFERRED. YAGNI for skeleton; Ruy Lopez sample line is plain SAN with no edge cases.*
 
 ## 4. Drill Hook (`useDrill`)
 
-- [ ] **4.1** Create `src/drill/useDrill.ts` with discriminated-union `DrillState` type
+- [x] **4.1** Create `src/drill/useDrill.ts` with discriminated-union `DrillState` type
   *(Design — state machine)*
-- [ ] **4.2** Implement reducer for events `PLAYER_MOVE_ATTEMPTED`, `FLASH_TIMER_DONE`, `AUTO_PLAY_TIMER_DONE`
-  *(Req 3.3-3.7, 4.1-4.4 · Design transitions)*
-- [ ] **4.3** Wire `setTimeout(400)` for flash states and `setTimeout(300)` for auto-play, with `useEffect` cleanup
-  *(Req 4.1, 4.2 · Req 3.4)*
-- [ ] **4.4** On enter `awaiting_player` with first move being White, dispatch auto-play immediately so White's first move appears on the board
-  *(Req 3.2)*
-- [ ] **4.5** Wrong moves do NOT mutate chess.js (AD8) — board snaps back via re-render
-  *(Req 4.3 · Design AD8)*
-- [ ] **4.6** Expose to `DrillView`: `{ state, fen, squareStyles, statusText, onPieceDrop }`
+- [x] **4.2** Implement reducer for events `PLAYER_MOVE_ATTEMPTED`, `FLASH_TIMER_DONE`, `AUTO_PLAY_TIMER_DONE`
+  *(Req 3.3-3.7, 4.1-4.4 · Design transitions) — extracted as `createDrillReducer(line)` factory for testability*
+- [x] **4.3** Wire `setTimeout(400)` for flash states and `setTimeout(300)` for auto-play, with `useEffect` cleanup
+  *(Req 4.1, 4.2 · Req 3.4) — `clearTimeout` on cleanup; auto-play guards via chess.history().length for StrictMode idempotency*
+- [x] **4.4** On enter `awaiting_player` with first move being White, dispatch auto-play immediately so White's first move appears on the board
+  *(Req 3.2) — implemented via initial state = `auto_playing(0)` (eliminates kickoff effect)*
+- [x] **4.5** Wrong moves do NOT mutate chess.js (AD8) — board snaps back via re-render
+  *(Req 4.3 · Design AD8) — onPieceDrop only calls chess.move(attempt) on `correct` result*
+- [x] **4.6** Expose to `DrillView`: `{ state, fen, squareStyles, statusText, onPieceDrop }`
 
 ## 5. UI Components
 
-- [ ] **5.1** Create `src/ui/StatusBar.tsx` — pure presentational, takes `text: string` prop
+- [x] **5.1** Create `src/ui/StatusBar.tsx` — pure presentational, takes `text: string` prop
   *(Req 4.4)*
-- [ ] **5.2** Create `src/ui/ChessBoardPanel.tsx` — wraps `<Chessboard>`, accepts `position` (FEN), `customSquareStyles`, `onPieceDrop` props
-  *(Req 2.1, 2.3, 2.4 · Article 9 boundary conversion)*
-- [ ] **5.3** Set board width 480px desktop, responsive on mobile (CSS clamp or media query)
-  *(Req 2.3)*
-- [ ] **5.4** Set board orientation White by default
-  *(Req 2.4)*
-- [ ] **5.5** Create `src/ui/DrillView.tsx` — calls `useDrill()`, renders `<ChessBoardPanel />` and `<StatusBar />`
-  *(Design — composition)*
-- [ ] **5.6** Update `src/App.tsx` to render only `<DrillView />`
-- [ ] **5.7** Update `src/index.css` with minimal body reset + center the drill view; remove default vite styles
-  *(Req 7.1 — LOC discipline)*
+- [x] **5.2** Create `src/ui/ChessBoardPanel.tsx` — wraps `<Chessboard>`, accepts `position` (FEN), `squareStyles`, `onPieceDrop` props
+  *(Req 2.1, 2.3, 2.4 · Article 9 boundary conversion) — adapter handles react-chessboard v5 `targetSquare: string | null` by returning false on null*
+- [x] **5.3** Set board width 480px desktop, responsive on mobile (CSS clamp or media query)
+  *(Req 2.3) — `width: min(480px, 92vw)` wrapper*
+- [x] **5.4** Set board orientation White by default
+  *(Req 2.4) — `boardOrientation: 'white'` option*
+- [x] **5.5** Create `src/ui/DrillView.tsx` — calls `useDrill()`, renders `<ChessBoardPanel />` and `<StatusBar />`
+  *(Design — composition) — also renders project title + sample line name*
+- [x] **5.6** Update `src/App.tsx` to render only `<DrillView />`
+- [x] **5.7** Update `src/index.css` with minimal body reset + center the drill view; remove default vite styles
+  *(Req 7.1 — LOC discipline) — cut from ~110 LOC of vite-template CSS to ~25 LOC of minimal reset*
 
 ## 6. Tests
 
-- [ ] **6.1** Configure `vitest` in `vite.config.ts` with `test: { environment: 'jsdom' }`
-  *(Req 7.3)*
-- [ ] **6.2** Create `tests/move-comparator.test.ts` with three cases: correct / wrong / illegal
-  *(Req 7.3 · Design test snippet)*
-- [ ] **6.3** Verify `npm run test` passes
-  *(Req 7.3)*
-- [ ] **6.4** Add `npm run test` to `package.json` scripts if not auto-generated
+- [x] **6.1** Configure `vitest` in `vite.config.ts` with `test: { environment: 'jsdom' }`
+  *(Req 7.3) — also added test glob `tests/**/*.test.ts(x)`*
+- [x] **6.2** Create `tests/move-comparator.test.ts` with three cases: correct / wrong / illegal
+  *(Req 7.3 · Design test snippet) — 6 cases total (3 result kinds + 3 mutation-preservation guards). Plus `tests/drill-reducer.test.ts` with 11 cases covering reducer transitions + edge cases.*
+- [x] **6.3** Verify `npm run test` passes
+  *(Req 7.3) — 17 tests green on user's Mac*
+- [x] **6.4** Add `npm run test` to `package.json` scripts if not auto-generated
+  *(Added `test` and `test:watch` scripts)*
 
 ## 7. Containerization
 
-- [ ] **7.1** Create `docker/frontend.Dockerfile` per design (multi-stage, `node:20.11-alpine` builder, `nginx:1.27-alpine` runtime)
+- [x] **7.1** Create `docker/frontend.Dockerfile` per design (multi-stage, `node:20.11-alpine` builder, `nginx:1.27-alpine` runtime)
   *(Req 6.1, 6.5 · Article 16)*
-- [ ] **7.2** Create `docker/nginx.conf` with SPA fallback `try_files`
-  *(Design)*
-- [ ] **7.3** Create `docker-compose.yml` at repo root, single `frontend` service mapped `8080:80`, image tag `tabiya/frontend:0.1`
+- [x] **7.2** Create `docker/nginx.conf` with SPA fallback `try_files`
+  *(Design) — also added 1y immutable cache for `/assets/`*
+- [x] **7.3** Create `docker-compose.yml` at repo root, single `frontend` service mapped `8080:80`, image tag `tabiya/frontend:0.1`
   *(Req 6.2, 6.3 · Article 16)*
-- [ ] **7.4** Create `.dockerignore` excluding `node_modules`, `dist`, `.git`, `steering`, `ctx`, `specs`, `*.md`
-  *(Req 6.6)*
+- [x] **7.4** Create `.dockerignore` excluding `node_modules`, `dist`, `.git`, `ctx`, `specs`, `features.md`
+  *(Req 6.6) — note: project README and LICENSE are NOT excluded so OSS users see them when extracted*
 - [ ] **7.5** Run `docker compose build` — verify success
-  *(Req 6.3)*
+  *(Req 6.3) — pending: user runs on Mac with Docker Desktop*
 - [ ] **7.6** Run `docker compose up` — verify `http://localhost:8080` renders the drill and accepts moves
-  *(Req 6.3, 6.4)*
+  *(Req 6.3, 6.4) — pending: user runs on Mac*
 - [ ] **7.7** Run `docker images tabiya/frontend:0.1 --format '{{.Size}}'` — verify under 50 MB
-  *(Req 6.7)*
+  *(Req 6.7) — pending: user verifies after build*
+
+## 7b. Polish Features (added post-initial-design)
+
+### 7b.1 Sound effects (Req 7)
+- [x] Create `src/sound/sounds.ts` with Web Audio API tone synthesizer
+  *(Req 7.1-7.5 · Article 1 — no audio assets)*
+- [x] Define 4 events: `move`, `correct`, `wrong`, `illegal`
+  *(Req 7.1, 7.2, 7.3, 7.4)*
+- [x] Lazy-init AudioContext; no-op before any user gesture
+  *(Req 7.6)*
+- [x] Wire `unlockAudio()` to `onPointerDown` on the board wrapper
+  *(Req 7.7)*
+- [x] Hook into `useDrill`: play `correct` on flash_correct, `wrong` on flash_wrong, `illegal` on illegal result, `move` on each successful chess.move
+
+### 7b.2 Player-side orientation (Req 8)
+- [x] Add `playerColorFor(line)` to `useDrill.ts`
+  *(Req 8.3 — single source of truth)*
+- [x] Return `playerColor` from `useDrill`
+- [x] `DrillView` passes to `ChessBoardPanel` as `boardOrientation`
+  *(Req 8.1, 8.2)*
+- [x] Verify Ruy Lopez sample line orients with Black at bottom
+
+### 7b.3 Board theme picker (Req 9)
+- [x] Create `src/theme/themes.ts` with `THEMES` (Classic / Mocha / Slate)
+  *(Req 9.1)*
+- [x] `loadStoredTheme()` + `saveTheme()` with localStorage namespaced key `tabiya:boardTheme`
+  *(Req 9.3, 9.4, 9.5, 9.6)*
+- [x] Create `src/ui/ThemePicker.tsx` segmented control
+  *(Req 9.2)*
+- [x] Wire into `DrillView` state + `ChessBoardPanel.lightSquareStyle`/`darkSquareStyle`
+  *(Req 9.3 immediate recolor)*
+- [x] Verify theme persistence via reload
+
+### 7b.4 Completion confetti (Req 10)
+- [x] Add `canvas-confetti` (ISC) + `@types/canvas-confetti` to `package.json`
+  *(Req 10.2 · Article 1)*
+- [x] Implement `fireConfetti()` helper (twin-burst pattern) in `DrillView`
+- [x] `useEffect` triggers fire when `state.kind === 'complete'` (deps `[state.kind]` ensures once-per-completion)
+  *(Req 10.1, 10.3)*
+
+### 7b.5 Tick / cross overlay (Req 4 amended)
+- [x] Define inline SVG data URIs for tick (✓) and cross (✗) in `useDrill.ts`
+  *(Req 4.5 · Article 1)*
+- [x] `squareStylesFor` returns `backgroundImage` with the SVG, centered, 70% size
+  *(Req 4.1, 4.2)*
+- [x] FLASH_MS bumped to 500ms (was 400)
+- [x] Test cases in `tests/drill-helpers.test.ts` assert SVG keys + colors
 
 ## 8. Verification (Manual)
 

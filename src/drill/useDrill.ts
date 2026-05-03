@@ -4,13 +4,15 @@
  * Owns:
  *   - the canonical Chess instance (source of truth for the position)
  *   - drill progression (lineIndex into the SAN array)
- *   - feedback state (flash square + color)
- *   - timer wiring (flash decay, auto-play delay)
+ *   - feedback state (flash square + kind)
+ *   - timer wiring (flash decay, auto-play delay, completion-reset)
+ *   - sound effect dispatch on transitions
  *
  * Exposes to the view:
  *   - position (FEN string for react-chessboard)
- *   - squareStyles (customSquareStyles for flash)
+ *   - flashSquare + flashKind (for corner-overlay tick/cross via squareRenderer)
  *   - statusText (human-readable status line)
+ *   - playerColor ('white' | 'black') — for board orientation
  *   - onPieceDrop (callback for react-chessboard drag-drop)
  *
  * See specs/phase-0a-skeleton/design.md — state machine table + AD2, AD3, AD4, AD8.
@@ -20,9 +22,9 @@
 
 import { useEffect, useReducer, useMemo } from 'react';
 import { Chess } from 'chess.js';
-import type { CSSProperties } from 'react';
 import { compareMove, type MoveAttempt } from './move-comparator';
 import { SAMPLE_LINE_SAN } from './sample-line';
+import { playMove } from '../sound/sounds';
 
 // ---------------------------------------------------------------------------
 // State machine — discriminated union.
@@ -48,26 +50,35 @@ export type DrillAction =
       destSquare: string;
     }
   | { type: 'FLASH_TIMER_DONE' }
-  | { type: 'AUTO_PLAY_TIMER_DONE' };
+  | { type: 'AUTO_PLAY_TIMER_DONE' }
+  | { type: 'RESET' };
 
 // ---------------------------------------------------------------------------
 // Tunables
 // ---------------------------------------------------------------------------
 
-const FLASH_MS = 400;
+const FLASH_MS = 500;
 const AUTO_PLAY_MS = 300;
+const RESET_AFTER_COMPLETE_MS = 2200; // long enough for confetti to land
 
 // ---------------------------------------------------------------------------
-// Reducer factory — closes over `line` so length checks have what they need.
+// Reducer factory — closes over `line` for length checks.
 // Exported for unit testing without a React render harness.
 // ---------------------------------------------------------------------------
 
+function makeInitial(line: readonly string[]): DrillState {
+  if (line.length === 0) return { kind: 'complete' };
+  return { kind: 'auto_playing', lineIndex: 0 };
+}
+
 export function createDrillReducer(line: readonly string[]) {
   return function drillReducer(state: DrillState, action: DrillAction): DrillState {
-    // Player just attempted a move while it was their turn.
+    if (action.type === 'RESET') {
+      return makeInitial(line);
+    }
+
     if (state.kind === 'awaiting_player' && action.type === 'PLAYER_MOVE_ATTEMPTED') {
       if (action.result === 'correct') {
-        // Move was applied to chess.js by onPieceDrop; advance lineIndex.
         return {
           kind: 'flash_correct',
           lineIndex: state.lineIndex + 1,
@@ -75,18 +86,15 @@ export function createDrillReducer(line: readonly string[]) {
         };
       }
       if (action.result === 'wrong') {
-        // Move NOT applied to chess.js (AD8); lineIndex unchanged.
         return {
           kind: 'flash_wrong',
           lineIndex: state.lineIndex,
           square: action.destSquare,
         };
       }
-      // illegal → no-op
       return state;
     }
 
-    // Player's correct flash decayed — either drill is done, or opponent plays next.
     if (state.kind === 'flash_correct' && action.type === 'FLASH_TIMER_DONE') {
       if (state.lineIndex >= line.length) {
         return { kind: 'complete' };
@@ -94,12 +102,10 @@ export function createDrillReducer(line: readonly string[]) {
       return { kind: 'auto_playing', lineIndex: state.lineIndex };
     }
 
-    // Wrong-flash decayed — back to awaiting_player at same lineIndex.
     if (state.kind === 'flash_wrong' && action.type === 'FLASH_TIMER_DONE') {
       return { kind: 'awaiting_player', lineIndex: state.lineIndex };
     }
 
-    // Opponent finished playing their move (chess.js was mutated by the effect).
     if (state.kind === 'auto_playing' && action.type === 'AUTO_PLAY_TIMER_DONE') {
       const next = state.lineIndex + 1;
       if (next >= line.length) {
@@ -127,28 +133,29 @@ export function statusText(state: DrillState): string {
     case 'auto_playing':
       return 'Opponent…';
     case 'complete':
-      return 'Line complete';
+      return 'Line complete — restarting…';
   }
 }
 
-export function squareStylesFor(state: DrillState): Record<string, CSSProperties> {
-  if (state.kind === 'flash_correct') {
-    return {
-      [state.square]: {
-        backgroundColor: 'rgba(0, 200, 0, 0.4)',
-        transition: 'background-color 200ms ease-out',
-      },
-    };
-  }
-  if (state.kind === 'flash_wrong') {
-    return {
-      [state.square]: {
-        backgroundColor: 'rgba(220, 40, 40, 0.45)',
-        transition: 'background-color 200ms ease-out',
-      },
-    };
-  }
-  return {};
+/**
+ * Returns the square (e.g. 'e5') and kind ('correct' | 'wrong') of the current
+ * flash, or null if no flash is active. Consumed by `squareRenderer` to render
+ * an overlay icon on top of the destination square's piece.
+ */
+export function flashOverlayFor(
+  state: DrillState
+): { square: string; kind: 'correct' | 'wrong' } | null {
+  if (state.kind === 'flash_correct') return { square: state.square, kind: 'correct' };
+  if (state.kind === 'flash_wrong') return { square: state.square, kind: 'wrong' };
+  return null;
+}
+
+/**
+ * Player color is derived from the line: assume the first move is White's
+ * (system plays it), so the player drills as Black.
+ */
+export function playerColorFor(line: readonly string[]): 'white' | 'black' {
+  return line.length > 0 ? 'black' : 'white';
 }
 
 // ---------------------------------------------------------------------------
@@ -158,34 +165,18 @@ export function squareStylesFor(state: DrillState): Record<string, CSSProperties
 export type UseDrillReturn = {
   state: DrillState;
   fen: string;
-  squareStyles: Record<string, CSSProperties>;
+  flashOverlay: { square: string; kind: 'correct' | 'wrong' } | null;
   statusText: string;
+  playerColor: 'white' | 'black';
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
 };
 
-function initialStateFor(line: readonly string[]): DrillState {
-  if (line.length === 0) return { kind: 'complete' };
-  // First move always plays via the auto-play effect.
-  // (Phase 0a assumption: opening lines start with White, system plays it.)
-  return { kind: 'auto_playing', lineIndex: 0 };
-}
-
 export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillReturn {
-  // One Chess instance per mount. Never replaced, so timer callbacks always
-  // see the current board state without needing refs.
   const chess = useMemo(() => new Chess(), []);
-
-  // Re-create the reducer if `line` changes (tests + future multi-line UI).
   const reducer = useMemo(() => createDrillReducer(line), [line]);
+  const [state, dispatch] = useReducer(reducer, line, makeInitial);
 
-  const [state, dispatch] = useReducer(reducer, line, initialStateFor);
-
-  // -------------------------------------------------------------------------
-  // Flash timer — when in a flash state, schedule decay; clean up on change.
-  // Without clearTimeout cleanup, fast user moves would leak stale timers
-  // that fire after the next state has already moved on, causing skipped
-  // transitions or stuck flashes.
-  // -------------------------------------------------------------------------
+  // Flash timer.
   useEffect(() => {
     if (state.kind !== 'flash_correct' && state.kind !== 'flash_wrong') return;
     const id = window.setTimeout(() => {
@@ -194,20 +185,14 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     return () => window.clearTimeout(id);
   }, [state.kind]);
 
-  // -------------------------------------------------------------------------
-  // Auto-play timer — when entering auto_playing, apply the next SAN to
-  // chess.js, then schedule the timer that flips us to awaiting_player.
-  //
-  // StrictMode safety: chess.history().length increases by 1 each play;
-  // it equals state.lineIndex iff this move hasn't been applied yet. Guards
-  // against React 18 dev double-invocation of effects.
-  // -------------------------------------------------------------------------
+  // Auto-play timer + chess.js mutation (StrictMode-safe via history-length guard).
   useEffect(() => {
     if (state.kind !== 'auto_playing') return;
     if (chess.history().length === state.lineIndex) {
       const san = line[state.lineIndex];
       if (san !== undefined) {
         chess.move(san);
+        playMove();
       }
     }
     const id = window.setTimeout(() => {
@@ -216,9 +201,17 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     return () => window.clearTimeout(id);
   }, [state, chess, line]);
 
-  // -------------------------------------------------------------------------
-  // Drag-drop handler from react-chessboard.
-  // -------------------------------------------------------------------------
+  // Auto-reset on completion: revert chess.js to starting position and dispatch RESET
+  // after the confetti settles, so the player can re-drill the line.
+  useEffect(() => {
+    if (state.kind !== 'complete') return;
+    const id = window.setTimeout(() => {
+      chess.reset();
+      dispatch({ type: 'RESET' });
+    }, RESET_AFTER_COMPLETE_MS);
+    return () => window.clearTimeout(id);
+  }, [state.kind, chess]);
+
   const onPieceDrop = ({
     sourceSquare,
     targetSquare,
@@ -234,14 +227,14 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     const attempt: MoveAttempt = {
       from: sourceSquare,
       to: targetSquare,
-      promotion: 'q', // hardcode for skeleton; full handling in Phase 1
+      promotion: 'q',
     };
 
     const result = compareMove(chess, expectedSan, attempt);
 
     if (result.kind === 'correct') {
-      // compareMove always undoes — re-apply for real.
       chess.move(attempt);
+      playMove();
       dispatch({
         type: 'PLAYER_MOVE_ATTEMPTED',
         attempt,
@@ -259,7 +252,6 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
       });
       return false;
     }
-    // illegal
     dispatch({
       type: 'PLAYER_MOVE_ATTEMPTED',
       attempt,
@@ -272,8 +264,9 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
   return {
     state,
     fen: chess.fen(),
-    squareStyles: squareStylesFor(state),
+    flashOverlay: flashOverlayFor(state),
     statusText: statusText(state),
+    playerColor: playerColorFor(line),
     onPieceDrop,
   };
 }

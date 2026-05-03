@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.Dockerfile
+    image: tabiya/frontend:0.1
+    container_name: tabiya-frontend
+    ports:
+      - "8080:80"
+    restart: unless-stopped

@@ -12,6 +12,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
     "chess.js": "1.4.0",
     "react": "^19.2.5",
     "react-chessboard": "5.10.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@testing-library/react": "^16.3.2",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

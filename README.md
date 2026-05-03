@@ -52,7 +52,70 @@ Early development. See [features.md](./features.md) for full scope and [specs/](
 
 ## Getting Started
 
-TBD — populated when Phase 0a skeleton lands.
+Two ways to run tabiya. Pick one.
+
+### Option A — Local development (Node)
+
+Prerequisites: Node 20+ and npm.
+
+```sh
+npm install
+npm run dev          # starts Vite dev server, opens http://localhost:5173
+```
+
+Other scripts:
+
+| Command           | What it does                                                |
+| ----------------- | ----------------------------------------------------------- |
+| `npm run dev`     | Vite dev server with hot module reload                      |
+| `npm run build`   | Type-check (`tsc -b`) and produce a production bundle in `dist/` |
+| `npm run preview` | Serve the built `dist/` locally for sanity-check            |
+| `npm run test`    | Run the Vitest unit suite once                              |
+| `npm run test:watch` | Run Vitest in watch mode                                 |
+| `npm run lint`    | Run ESLint                                                  |
+
+### Option B — Containerized (Docker)
+
+Prerequisites: Docker + Docker Compose v2.
+
+```sh
+docker compose up    # builds the image if needed, serves on http://localhost:8080
+```
+
+The image is built from `docker/frontend.Dockerfile` (multi-stage `node:20-alpine` builder → `nginx:alpine` runtime). The final image is small (under 50 MB) and contains only the static bundle and nginx.
+
+To force a rebuild after pulling new code:
+
+```sh
+docker compose build --no-cache
+docker compose up
+```
+
+To stop:
+
+```sh
+docker compose down
+```
+
+## Project Layout
+
+```
+src/
+├── drill/        # state machine, move comparator, sample line
+├── sound/        # move sound (Lichess AGPL audio)
+├── theme/        # board theme presets + persistence
+└── ui/           # React components (DrillView, ChessBoardPanel, StatusBar, ThemePicker)
+
+scripts/          # offline catalog build (Phase 0b)
+public/sounds/    # bundled audio assets (AGPL-3.0, sourced from Lichess)
+docker/           # Dockerfile + nginx.conf
+specs/            # project principles + per-phase requirements/design/tasks
+tests/            # Vitest unit tests
+```
+
+## Asset Attribution
+
+- Move sound: [`Move.mp3`](public/sounds/Move.mp3) sourced from [lichess-org/lila](https://github.com/lichess-org/lila/tree/master/public/sound/standard) (AGPL-3.0).
 
 ## License
 
