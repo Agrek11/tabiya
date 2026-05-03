@@ -1,26 +1,26 @@
 /**
- * Render test for DrillView — confirms loading → ready transition with
- * a mock OpeningRepository injected via _setRepositoryForTesting.
+ * Render test for DrillPage — confirms loading → ready transition with a
+ * mock OpeningRepository injected via _setRepositoryForTesting.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
-// Mock canvas-confetti — jsdom has no canvas, and the lib's animation loop
-// crashes on `clearRect` when launched.
+// Mock canvas-confetti — jsdom has no canvas, animation crashes on clearRect.
 vi.mock('canvas-confetti', () => ({
   default: vi.fn(() => Promise.resolve()),
 }));
 
-import { DrillView } from '../src/ui/DrillView';
+import { DrillPage } from '../src/pages/DrillPage';
 import { _setRepositoryForTesting } from '../src/storage';
 import type { Line, Opening, OpeningRepository, SearchQuery } from '../src/storage/types';
+import { renderWithProviders } from './test-utils';
 
 const opening: Opening = {
   id: 'ruy-lopez',
   name: 'Ruy Lopez',
   eco: 'C60-C99',
-  color: 'black',
+  color: 'white',
   line_ids: ['ruy-lopez-main'],
 };
 
@@ -92,72 +92,42 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('DrillView', () => {
-  it('shows loading state, then transitions to ready with picker', async () => {
+describe('DrillPage', () => {
+  it('shows loading state, then transitions to ready with line title', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
-    render(<DrillView />);
+    renderWithProviders(<DrillPage />, { route: '/drill' });
 
-    // Loading state visible immediately
     expect(screen.getByText(/loading catalog/i)).toBeTruthy();
 
-    // Resolve the gate so the repo's promises complete
     repo.resolveLater();
 
-    // After resolution: picker appears with the opening name
     await waitFor(() => {
-      expect(screen.getByText(/Ruy Lopez \(C60-C99\)/)).toBeTruthy();
+      expect(screen.getByText(/Main Line/i)).toBeTruthy();
     });
   });
 
   it('shows error state when the repo rejects', async () => {
     _setRepositoryForTesting(new FailingRepo());
 
-    render(<DrillView />);
+    renderWithProviders(<DrillPage />, { route: '/drill' });
 
     await waitFor(() => {
       expect(screen.getByText(/boom from test/i)).toBeTruthy();
     });
   });
 
-  it('shows the Hint button + keyboard shortcut hint after load', async () => {
+  it('renders the Hint button and keyboard shortcut hint', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
-    render(<DrillView />);
+    renderWithProviders(<DrillPage />, { route: '/drill' });
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /hint/i })).toBeTruthy();
+      expect(screen.getAllByRole('button', { name: /hint/i }).length).toBeGreaterThan(0);
     });
-    // Looser match — just ensure the keyboard hint string is in the DOM.
-    // StrictMode may render twice in dev; tolerate either count.
     expect(screen.getAllByText(/H hint/i).length).toBeGreaterThan(0);
-  });
-
-  // TODO(phase-0d): StrictMode renders 3 selects in the test tree which breaks
-  // the role-based query. Revisit alongside the UI redesign — likely we'll
-  // wrap the picker in a Form region and query by accessible name.
-  it.skip('does NOT trigger keyboard nav when typing in the opening dropdown', async () => {
-    // This validates the input/select guard inside the keydown listener.
-    const repo = new MockRepo();
-    _setRepositoryForTesting(repo);
-
-    render(<DrillView />);
-    repo.resolveLater();
-
-    const select = await screen.findByRole('combobox', { name: /opening/i });
-    // Fire ArrowLeft on the select element directly. Our handler should bail
-    // because tag === 'SELECT'.
-    select.focus();
-    const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true });
-    Object.defineProperty(event, 'target', { value: select });
-    window.dispatchEvent(event);
-
-    // No assertion target on stepBack here (we don't have hooks into useDrill
-    // from this test); the guard is exercised — running without throwing is
-    // the assertion. Coverage-wise this proves the SELECT branch was taken.
-    expect(select).toBeTruthy();
   });
 });

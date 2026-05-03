@@ -1,10 +1,8 @@
 :root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light;
-  color: #222;
-  background: #f7f7f7;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -20,4 +18,37 @@ body {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+}
+
+/* Sidebar mobile close button hidden by default; shown via media query */
+.tabiya-sidebar-close {
+  display: none;
+}
+
+/* Mobile breakpoint for sidebar + drill layout */
+@media (max-width: 880px) {
+  .tabiya-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 200ms ease-out;
+  }
+  .tabiya-sidebar.open {
+    transform: translateX(0);
+  }
+  .tabiya-sidebar-close {
+    display: inline-flex;
+  }
+  .tabiya-topbar-menu {
+    display: inline-flex !important;
+  }
+  .tabiya-drill-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .tabiya-drill-rail {
+    display: none;
+  }
 }

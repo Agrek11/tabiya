@@ -1,18 +1,19 @@
 /**
  * ChessBoardPanel — wraps react-chessboard with our app's prop shape.
  *
- * - Adapts react-chessboard v5 onPieceDrop (targetSquare: string | null) to
- *   our hook's API.
- * - Uses `squareRenderer` to overlay a tick/cross icon at top-right of the
- *   destination square, sitting OVER the piece (not behind it).
- * - Orientation, theme, and unlock-audio handled.
+ * Theme-aware: light/dark square colors come from the active color scheme.
+ * Per-square overlays (last-move + hint highlights) are honored by the
+ * squareRenderer (react-chessboard skips its built-in squareStyles wiring
+ * whenever a squareRenderer is set, so we apply them ourselves).
+ *
+ * Width is determined by the parent — this component fills 100% width.
  */
 
 import type { CSSProperties } from 'react';
 import { Chessboard } from 'react-chessboard';
 import type { PieceDropHandlerArgs } from 'react-chessboard';
-import type { BoardTheme } from '../theme/themes';
 import { unlockAudio } from '../sound/sounds';
+import { useTheme } from '../theme/ThemeContext';
 
 type FlashOverlay = { square: string; kind: 'correct' | 'wrong' } | null;
 
@@ -20,18 +21,19 @@ type ChessBoardPanelProps = {
   fen: string;
   flashOverlay: FlashOverlay;
   boardOrientation: 'white' | 'black';
-  theme: BoardTheme;
+  /** Optional override; defaults derive from current scheme. */
+  lightSquare?: string;
+  darkSquare?: string;
   /** Per-square background overlays (last-move highlight, hint highlight). */
   squareStyles?: Record<string, CSSProperties>;
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
 };
 
 const wrapperStyle: CSSProperties = {
-  width: 'min(480px, 92vw)',
+  width: '100%',
   margin: '0 auto',
 };
 
-// SVG overlay icons — sized at 30% of square, positioned top-right corner.
 const TICK_SVG = (
   <svg
     viewBox="0 0 100 100"
@@ -87,18 +89,20 @@ export function ChessBoardPanel({
   fen,
   flashOverlay,
   boardOrientation,
-  theme,
+  lightSquare,
+  darkSquare,
   squareStyles,
   onPieceDrop,
 }: ChessBoardPanelProps) {
+  const { scheme } = useTheme();
+  const lightSq = lightSquare ?? (scheme === 'dark' ? '#D6CCAB' : '#EBECD0');
+  const darkSq = darkSquare ?? (scheme === 'dark' ? '#5C7345' : '#779556');
+
   const handleDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean => {
     if (targetSquare === null) return false;
     return onPieceDrop({ sourceSquare, targetSquare });
   };
 
-  // Custom square renderer — applies per-square highlights AND the tick/cross
-  // overlay. react-chessboard skips its built-in squareStyles wiring whenever
-  // squareRenderer is set, so we have to honor `squareStyles` ourselves.
   const squareRenderer = ({
     square,
     children,
@@ -132,10 +136,9 @@ export function ChessBoardPanel({
           boardOrientation,
           onPieceDrop: handleDrop,
           showAnimations: true,
-          lightSquareStyle: { backgroundColor: theme.light },
-          darkSquareStyle: { backgroundColor: theme.dark },
+          lightSquareStyle: { backgroundColor: lightSq },
+          darkSquareStyle: { backgroundColor: darkSq },
           squareStyles: squareStyles ?? {},
-          // squareRenderer wraps each square's contents (the piece) with our overlay layer
           squareRenderer,
         }}
       />

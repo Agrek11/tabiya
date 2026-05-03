@@ -12,11 +12,15 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource/jetbrains-mono": "^5.1.0",
+    "@fontsource/plus-jakarta-sans": "^5.1.0",
     "canvas-confetti": "^1.9.4",
     "chess.js": "1.4.0",
+    "lucide-react": "^0.460.0",
     "react": "^19.2.5",
     "react-chessboard": "5.10.0",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
