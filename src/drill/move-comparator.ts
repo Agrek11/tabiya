@@ -15,7 +15,7 @@
  *     (avoids allocation + lets caller hold the canonical board state).
  */
 
-import type { Chess } from 'chess.js';
+import type { Chess, Move } from 'chess.js';
 
 export type MoveAttempt = {
   from: string;
@@ -33,15 +33,18 @@ export function compareMove(
   expectedSan: string,
   attempt: MoveAttempt
 ): CompareResult {
-  // TODO (you): implement per design AD3.
-  //
-  // Hint sequence (think before typing):
-  //   1. Try the attempt on `chess` via chess.move(attempt). What does it return on illegal?
-  //   2. If it succeeded, what field on the returned Move object holds SAN?
-  //   3. After reading SAN, you MUST chess.undo() so the caller's board state is unchanged.
-  //   4. Compare the SAN string equality. Return the right discriminated-union variant.
-  //
-  // Cold question before you write a line: WHY do we undo() unconditionally
-  // even on a `correct` result? (Hint: think about who decides to re-apply.)
-  throw new Error('compareMove: not implemented');
+  let move: Move;
+  try {
+    move = chess.move(attempt);
+  } catch {
+    return { kind: 'illegal' };
+  }
+
+  const legalSan = move.san;
+  chess.undo();
+
+  if (legalSan === expectedSan) {
+    return { kind: 'correct' };
+  }
+  return { kind: 'wrong', legalSan };
 }
