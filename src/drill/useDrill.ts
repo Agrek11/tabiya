@@ -1,45 +1,48 @@
 /**
- * useDrill — custom hook driving the Phase 0a drill state machine.
+ * useDrill — custom hook driving the drill state machine + line navigation.
  *
  * Owns:
  *   - the canonical Chess instance (source of truth for the position)
  *   - drill progression (lineIndex into the SAN array)
- *   - feedback state (flash square + kind)
+ *   - feedback state (correct flash + persistent wrong overlay)
  *   - timer wiring (flash decay, auto-play delay, completion-reset)
- *   - sound effect dispatch on transitions
+ *   - sound effect dispatch
+ *   - back/forward/restart navigation through the line
+ *
+ * Behavior change vs Phase 0a:
+ *   - Wrong moves NOW APPLY to chess.js (the piece stays on the destination
+ *     square so the user sees what they played) and trigger a persistent
+ *     `wrong_pending` state with a red cross overlay. The user must click
+ *     Back to undo and retry. No automatic snap-back.
  *
  * Exposes to the view:
  *   - position (FEN string for react-chessboard)
- *   - flashSquare + flashKind (for corner-overlay tick/cross via squareRenderer)
- *   - statusText (human-readable status line)
- *   - playerColor ('white' | 'black') — for board orientation
- *   - onPieceDrop (callback for react-chessboard drag-drop)
- *
- * See specs/phase-0a-skeleton/design.md — state machine table + AD2, AD3, AD4, AD8.
- *
- * Constitution Article 9: SAN at module boundaries. Article 14: strict TS, no `any`.
+ *   - flashOverlay (for tick/cross overlay via squareRenderer)
+ *   - statusText, playerColor
+ *   - onPieceDrop (drag-drop callback)
+ *   - canStepBack, canStepForward, canRestart (button enablement)
+ *   - stepBack, stepForward, restart (button handlers)
  */
 
-import { useEffect, useReducer, useMemo } from 'react';
+import { useEffect, useReducer, useMemo, useState, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { compareMove, type MoveAttempt } from './move-comparator';
 import { SAMPLE_LINE_SAN } from './sample-line';
 import { playMove } from '../sound/sounds';
 
 // ---------------------------------------------------------------------------
-// State machine — discriminated union.
-// `lineIndex` always points to the NEXT move to be played from the line.
+// State machine
 // ---------------------------------------------------------------------------
 
 export type DrillState =
   | { kind: 'awaiting_player'; lineIndex: number }
   | { kind: 'flash_correct'; lineIndex: number; square: string }
-  | { kind: 'flash_wrong'; lineIndex: number; square: string }
+  | { kind: 'wrong_pending'; lineIndex: number; square: string }
   | { kind: 'auto_playing'; lineIndex: number }
   | { kind: 'complete' };
 
 // ---------------------------------------------------------------------------
-// Events
+// Actions
 // ---------------------------------------------------------------------------
 
 export type DrillAction =
@@ -51,7 +54,9 @@ export type DrillAction =
     }
   | { type: 'FLASH_TIMER_DONE' }
   | { type: 'AUTO_PLAY_TIMER_DONE' }
-  | { type: 'RESET' };
+  | { type: 'RESET' }
+  | { type: 'STEP_BACK_DONE'; newLineIndex: number; chessHistoryLen: number }
+  | { type: 'STEP_FORWARD_DONE'; newLineIndex: number };
 
 // ---------------------------------------------------------------------------
 // Tunables
@@ -59,22 +64,44 @@ export type DrillAction =
 
 const FLASH_MS = 500;
 const AUTO_PLAY_MS = 300;
-const RESET_AFTER_COMPLETE_MS = 2200; // long enough for confetti to land
+const RESET_AFTER_COMPLETE_MS = 2200;
 
 // ---------------------------------------------------------------------------
-// Reducer factory — closes over `line` for length checks.
-// Exported for unit testing without a React render harness.
+// Initial-state factory + reducer
 // ---------------------------------------------------------------------------
 
-function makeInitial(line: readonly string[]): DrillState {
+export function makeInitial(
+  line: readonly string[],
+  playerColor: 'white' | 'black' = 'black'
+): DrillState {
   if (line.length === 0) return { kind: 'complete' };
+  if (playerColor === 'white') {
+    return { kind: 'awaiting_player', lineIndex: 0 };
+  }
   return { kind: 'auto_playing', lineIndex: 0 };
 }
 
-export function createDrillReducer(line: readonly string[]) {
+export function createDrillReducer(
+  line: readonly string[],
+  playerColor: 'white' | 'black' = 'black'
+) {
   return function drillReducer(state: DrillState, action: DrillAction): DrillState {
     if (action.type === 'RESET') {
-      return makeInitial(line);
+      return makeInitial(line, playerColor);
+    }
+
+    if (action.type === 'STEP_BACK_DONE') {
+      if (action.newLineIndex >= line.length) {
+        return { kind: 'complete' };
+      }
+      return { kind: 'awaiting_player', lineIndex: action.newLineIndex };
+    }
+
+    if (action.type === 'STEP_FORWARD_DONE') {
+      if (action.newLineIndex >= line.length) {
+        return { kind: 'complete' };
+      }
+      return { kind: 'awaiting_player', lineIndex: action.newLineIndex };
     }
 
     if (state.kind === 'awaiting_player' && action.type === 'PLAYER_MOVE_ATTEMPTED') {
@@ -87,12 +114,12 @@ export function createDrillReducer(line: readonly string[]) {
       }
       if (action.result === 'wrong') {
         return {
-          kind: 'flash_wrong',
+          kind: 'wrong_pending',
           lineIndex: state.lineIndex,
           square: action.destSquare,
         };
       }
-      return state;
+      return state; // illegal — ignore
     }
 
     if (state.kind === 'flash_correct' && action.type === 'FLASH_TIMER_DONE') {
@@ -100,10 +127,6 @@ export function createDrillReducer(line: readonly string[]) {
         return { kind: 'complete' };
       }
       return { kind: 'auto_playing', lineIndex: state.lineIndex };
-    }
-
-    if (state.kind === 'flash_wrong' && action.type === 'FLASH_TIMER_DONE') {
-      return { kind: 'awaiting_player', lineIndex: state.lineIndex };
     }
 
     if (state.kind === 'auto_playing' && action.type === 'AUTO_PLAY_TIMER_DONE') {
@@ -119,7 +142,7 @@ export function createDrillReducer(line: readonly string[]) {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers (pure)
+// Pure helpers
 // ---------------------------------------------------------------------------
 
 export function statusText(state: DrillState): string {
@@ -128,8 +151,8 @@ export function statusText(state: DrillState): string {
       return 'Your move';
     case 'flash_correct':
       return 'Correct';
-    case 'flash_wrong':
-      return 'Wrong — try again';
+    case 'wrong_pending':
+      return 'Wrong move — click Back to retry';
     case 'auto_playing':
       return 'Opponent…';
     case 'complete':
@@ -137,23 +160,15 @@ export function statusText(state: DrillState): string {
   }
 }
 
-/**
- * Returns the square (e.g. 'e5') and kind ('correct' | 'wrong') of the current
- * flash, or null if no flash is active. Consumed by `squareRenderer` to render
- * an overlay icon on top of the destination square's piece.
- */
 export function flashOverlayFor(
   state: DrillState
 ): { square: string; kind: 'correct' | 'wrong' } | null {
   if (state.kind === 'flash_correct') return { square: state.square, kind: 'correct' };
-  if (state.kind === 'flash_wrong') return { square: state.square, kind: 'wrong' };
+  if (state.kind === 'wrong_pending') return { square: state.square, kind: 'wrong' };
   return null;
 }
 
-/**
- * Player color is derived from the line: assume the first move is White's
- * (system plays it), so the player drills as Black.
- */
+/** @deprecated — pass playerColor to useDrill directly. */
 export function playerColorFor(line: readonly string[]): 'white' | 'black' {
   return line.length > 0 ? 'black' : 'white';
 }
@@ -169,23 +184,50 @@ export type UseDrillReturn = {
   statusText: string;
   playerColor: 'white' | 'black';
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
+  /** {from, to} of the last move played on the board; null at line start. */
+  lastMove: { from: string; to: string } | null;
+  /** From-square the most recent showHint() request resolved to. Auto-clears
+   *  on next state change or after ~3s. Null when no hint is showing. */
+  hintSquare: string | null;
+  /** One-shot: highlight the from-square of the next expected move. */
+  showHint: () => void;
+  canStepBack: boolean;
+  canStepForward: boolean;
+  canRestart: boolean;
+  stepBack: () => void;
+  stepForward: () => void;
+  restart: () => void;
 };
 
-export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillReturn {
+export function useDrill(
+  line: readonly string[] = SAMPLE_LINE_SAN,
+  playerColor: 'white' | 'black' = 'black'
+): UseDrillReturn {
   const chess = useMemo(() => new Chess(), []);
-  const reducer = useMemo(() => createDrillReducer(line), [line]);
-  const [state, dispatch] = useReducer(reducer, line, makeInitial);
+  const reducer = useMemo(
+    () => createDrillReducer(line, playerColor),
+    [line, playerColor]
+  );
+  const [state, dispatch] = useReducer(reducer, undefined, () =>
+    makeInitial(line, playerColor)
+  );
 
-  // Flash timer.
+  // Reset chess + state when the active line OR player color changes.
   useEffect(() => {
-    if (state.kind !== 'flash_correct' && state.kind !== 'flash_wrong') return;
+    chess.reset();
+    dispatch({ type: 'RESET' });
+  }, [line, playerColor, chess]);
+
+  // Flash timer (only for flash_correct now — wrong_pending is persistent).
+  useEffect(() => {
+    if (state.kind !== 'flash_correct') return;
     const id = window.setTimeout(() => {
       dispatch({ type: 'FLASH_TIMER_DONE' });
     }, FLASH_MS);
     return () => window.clearTimeout(id);
   }, [state.kind]);
 
-  // Auto-play timer + chess.js mutation (StrictMode-safe via history-length guard).
+  // Auto-play timer + chess.js mutation.
   useEffect(() => {
     if (state.kind !== 'auto_playing') return;
     if (chess.history().length === state.lineIndex) {
@@ -201,8 +243,7 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     return () => window.clearTimeout(id);
   }, [state, chess, line]);
 
-  // Auto-reset on completion: revert chess.js to starting position and dispatch RESET
-  // after the confetti settles, so the player can re-drill the line.
+  // Auto-restart on completion.
   useEffect(() => {
     if (state.kind !== 'complete') return;
     const id = window.setTimeout(() => {
@@ -211,6 +252,10 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     }, RESET_AFTER_COMPLETE_MS);
     return () => window.clearTimeout(id);
   }, [state.kind, chess]);
+
+  // -------------------------------------------------------------------------
+  // Drag-drop handler
+  // -------------------------------------------------------------------------
 
   const onPieceDrop = ({
     sourceSquare,
@@ -244,14 +289,19 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
       return true;
     }
     if (result.kind === 'wrong') {
+      // NEW behavior: apply the wrong move on the board so the user can see it.
+      // They must click Back to retry.
+      chess.move(attempt);
+      playMove();
       dispatch({
         type: 'PLAYER_MOVE_ATTEMPTED',
         attempt,
         result: 'wrong',
         destSquare: targetSquare,
       });
-      return false;
+      return true; // accept the move visually
     }
+    // illegal
     dispatch({
       type: 'PLAYER_MOVE_ATTEMPTED',
       attempt,
@@ -261,12 +311,117 @@ export function useDrill(line: readonly string[] = SAMPLE_LINE_SAN): UseDrillRet
     return false;
   };
 
+  // -------------------------------------------------------------------------
+  // Navigation
+  // -------------------------------------------------------------------------
+
+  const navAllowed =
+    state.kind === 'awaiting_player' ||
+    state.kind === 'wrong_pending' ||
+    state.kind === 'complete';
+  const historyLen = chess.history().length;
+
+  const canStepBack = navAllowed && historyLen > 0;
+  const canStepForward =
+    navAllowed &&
+    state.kind !== 'wrong_pending' && // must back out wrong move first
+    state.kind !== 'complete' &&
+    state.kind === 'awaiting_player' &&
+    state.lineIndex < line.length;
+  const canRestart = navAllowed && historyLen > 0;
+
+  const stepBack = useCallback((): void => {
+    if (!canStepBack) return;
+    chess.undo();
+    let newLineIndex: number;
+    if (state.kind === 'wrong_pending') {
+      newLineIndex = state.lineIndex;
+    } else if (state.kind === 'awaiting_player') {
+      newLineIndex = Math.max(0, state.lineIndex - 1);
+    } else {
+      newLineIndex = Math.max(0, line.length - 1);
+    }
+    dispatch({
+      type: 'STEP_BACK_DONE',
+      newLineIndex,
+      chessHistoryLen: chess.history().length,
+    });
+  }, [canStepBack, chess, state, line.length]);
+
+  const stepForward = useCallback((): void => {
+    if (!canStepForward) return;
+    if (state.kind !== 'awaiting_player') return;
+    const san = line[state.lineIndex];
+    if (san === undefined) return;
+    chess.move(san);
+    playMove();
+    dispatch({ type: 'STEP_FORWARD_DONE', newLineIndex: state.lineIndex + 1 });
+  }, [canStepForward, chess, state, line]);
+
+  const restart = useCallback((): void => {
+    if (!canRestart) return;
+    chess.reset();
+    dispatch({ type: 'RESET' });
+  }, [canRestart, chess]);
+
+  // -------------------------------------------------------------------------
+  // Hint (one-shot)
+  // -------------------------------------------------------------------------
+
+  const [hintSquare, setHintSquare] = useState<string | null>(null);
+
+  const showHint = useCallback((): void => {
+    if (state.kind !== 'awaiting_player') return;
+    const san = line[state.lineIndex];
+    if (san === undefined) return;
+    try {
+      const m = chess.move(san);
+      chess.undo();
+      setHintSquare(m?.from ?? null);
+    } catch {
+      setHintSquare(null);
+    }
+  }, [state, line, chess]);
+
+  // Clear hint whenever drill state advances (move played, line changed, etc.).
+  useEffect(() => {
+    setHintSquare(null);
+  }, [state]);
+
+  // Also auto-fade hint after 3s even if state hasn't changed.
+  useEffect(() => {
+    if (hintSquare === null) return;
+    const id = window.setTimeout(() => setHintSquare(null), 3000);
+    return () => window.clearTimeout(id);
+  }, [hintSquare]);
+
+  // -------------------------------------------------------------------------
+  // Last-move highlight
+  // -------------------------------------------------------------------------
+
+  const lastMove: { from: string; to: string } | null = useMemo(() => {
+    const hist = chess.history({ verbose: true });
+    if (hist.length === 0) return null;
+    const last = hist[hist.length - 1]!;
+    return { from: last.from, to: last.to };
+    // recompute on state change (chess.js is mutable)
+  }, [state, chess]);
+
   return {
     state,
     fen: chess.fen(),
     flashOverlay: flashOverlayFor(state),
     statusText: statusText(state),
-    playerColor: playerColorFor(line),
+    playerColor,
     onPieceDrop,
+    lastMove,
+    hintSquare,
+    showHint,
+    canStepBack,
+    canStepForward,
+    canRestart,
+    stepBack,
+    stepForward,
+    restart,
   };
 }

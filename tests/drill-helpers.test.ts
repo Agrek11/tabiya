@@ -21,7 +21,7 @@ describe('statusText', () => {
     const cases: DrillState[] = [
       { kind: 'awaiting_player', lineIndex: 0 },
       { kind: 'flash_correct', lineIndex: 1, square: 'e5' },
-      { kind: 'flash_wrong', lineIndex: 0, square: 'd5' },
+      { kind: 'wrong_pending', lineIndex: 0, square: 'd5' },
       { kind: 'auto_playing', lineIndex: 0 },
       { kind: 'complete' },
     ];
@@ -34,6 +34,10 @@ describe('statusText', () => {
 
   it('mentions restart in the complete status (line auto-resets)', () => {
     expect(statusText({ kind: 'complete' })).toMatch(/restart/i);
+  });
+
+  it('wrong_pending text instructs the user to click Back', () => {
+    expect(statusText({ kind: 'wrong_pending', lineIndex: 1, square: 'd5' })).toMatch(/back/i);
   });
 });
 
@@ -51,21 +55,21 @@ describe('flashOverlayFor', () => {
     });
   });
 
-  it('flash_wrong → { square, kind: "wrong" }', () => {
-    expect(flashOverlayFor({ kind: 'flash_wrong', lineIndex: 0, square: 'd5' })).toEqual({
+  it('wrong_pending → { square, kind: "wrong" } (persistent overlay)', () => {
+    expect(flashOverlayFor({ kind: 'wrong_pending', lineIndex: 0, square: 'd5' })).toEqual({
       square: 'd5',
       kind: 'wrong',
     });
   });
 });
 
-describe('playerColorFor', () => {
-  it('returns "black" when the line has at least one move (player drills against system-opener)', () => {
+describe('playerColorFor (deprecated, kept for back-compat)', () => {
+  it('returns "black" when the line has at least one move', () => {
     expect(playerColorFor(['e4', 'e5'])).toBe('black');
     expect(playerColorFor(['e4'])).toBe('black');
   });
 
-  it('returns "white" for an empty line (degenerate / complete-on-init case)', () => {
+  it('returns "white" for an empty line', () => {
     expect(playerColorFor([])).toBe('white');
   });
 });

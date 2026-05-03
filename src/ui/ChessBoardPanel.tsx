@@ -21,6 +21,8 @@ type ChessBoardPanelProps = {
   flashOverlay: FlashOverlay;
   boardOrientation: 'white' | 'black';
   theme: BoardTheme;
+  /** Per-square background overlays (last-move highlight, hint highlight). */
+  squareStyles?: Record<string, CSSProperties>;
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
 };
 
@@ -86,6 +88,7 @@ export function ChessBoardPanel({
   flashOverlay,
   boardOrientation,
   theme,
+  squareStyles,
   onPieceDrop,
 }: ChessBoardPanelProps) {
   const handleDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean => {
@@ -93,9 +96,9 @@ export function ChessBoardPanel({
     return onPieceDrop({ sourceSquare, targetSquare });
   };
 
-  // Custom square renderer — adds an absolute-positioned overlay on the
-  // flashed square. Overlay sits ABOVE the piece (zIndex 5; pieces render
-  // around zIndex 1-2 in react-chessboard).
+  // Custom square renderer — applies per-square highlights AND the tick/cross
+  // overlay. react-chessboard skips its built-in squareStyles wiring whenever
+  // squareRenderer is set, so we have to honor `squareStyles` ourselves.
   const squareRenderer = ({
     square,
     children,
@@ -104,8 +107,16 @@ export function ChessBoardPanel({
     children?: React.ReactNode;
   }): React.JSX.Element => {
     const isFlash = flashOverlay !== null && flashOverlay.square === square;
+    const custom = squareStyles?.[square];
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          ...custom,
+        }}
+      >
         {children}
         {isFlash && flashOverlay.kind === 'correct' ? TICK_SVG : null}
         {isFlash && flashOverlay.kind === 'wrong' ? CROSS_SVG : null}
@@ -123,6 +134,7 @@ export function ChessBoardPanel({
           showAnimations: true,
           lightSquareStyle: { backgroundColor: theme.light },
           darkSquareStyle: { backgroundColor: theme.dark },
+          squareStyles: squareStyles ?? {},
           // squareRenderer wraps each square's contents (the piece) with our overlay layer
           squareRenderer,
         }}

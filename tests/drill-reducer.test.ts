@@ -41,9 +41,9 @@ describe('drillReducer — awaiting_player', () => {
     expect(next).toEqual({ kind: 'flash_correct', lineIndex: 2, square: 'e5' });
   });
 
-  it('wrong → flash_wrong, lineIndex unchanged', () => {
+  it('wrong → wrong_pending, lineIndex unchanged (persistent until user navs)', () => {
     const next = reducer(init, wrongAction('d5'));
-    expect(next).toEqual({ kind: 'flash_wrong', lineIndex: 1, square: 'd5' });
+    expect(next).toEqual({ kind: 'wrong_pending', lineIndex: 1, square: 'd5' });
   });
 
   it('illegal → no-op', () => {
@@ -66,10 +66,20 @@ describe('drillReducer — flash_correct + FLASH_TIMER_DONE', () => {
   });
 });
 
-describe('drillReducer — flash_wrong + FLASH_TIMER_DONE', () => {
-  it('→ awaiting_player at same lineIndex', () => {
-    const init: DrillState = { kind: 'flash_wrong', lineIndex: 1, square: 'd5' };
+describe('drillReducer — wrong_pending', () => {
+  it('does NOT auto-clear on FLASH_TIMER_DONE (no timer should fire)', () => {
+    const init: DrillState = { kind: 'wrong_pending', lineIndex: 1, square: 'd5' };
     const next = reducer(init, { type: 'FLASH_TIMER_DONE' });
+    expect(next).toEqual(init);
+  });
+
+  it('clears on STEP_BACK_DONE → awaiting_player at same lineIndex', () => {
+    const init: DrillState = { kind: 'wrong_pending', lineIndex: 1, square: 'd5' };
+    const next = reducer(init, {
+      type: 'STEP_BACK_DONE',
+      newLineIndex: 1,
+      chessHistoryLen: 1,
+    });
     expect(next).toEqual({ kind: 'awaiting_player', lineIndex: 1 });
   });
 });
@@ -106,6 +116,11 @@ describe('drillReducer — terminal + irrelevant transitions', () => {
     expect(reducer(init, { type: 'AUTO_PLAY_TIMER_DONE' })).toEqual(init);
   });
 
+  it('wrong_pending + AUTO_PLAY_TIMER_DONE → unchanged', () => {
+    const init: DrillState = { kind: 'wrong_pending', lineIndex: 1, square: 'd5' };
+    expect(reducer(init, { type: 'AUTO_PLAY_TIMER_DONE' })).toEqual(init);
+  });
+
   it('auto_playing + PLAYER_MOVE_ATTEMPTED → unchanged (player cannot move during opponent turn)', () => {
     const init: DrillState = { kind: 'auto_playing', lineIndex: 1 };
     expect(reducer(init, correctAction('e5'))).toEqual(init);
@@ -113,7 +128,7 @@ describe('drillReducer — terminal + irrelevant transitions', () => {
 });
 
 describe('drillReducer — RESET action', () => {
-  it('from complete + RESET → auto_playing(0) for a non-empty line', () => {
+  it('from complete + RESET → auto_playing(0) for a non-empty line (default black)', () => {
     const next = reducer({ kind: 'complete' }, { type: 'RESET' });
     expect(next).toEqual({ kind: 'auto_playing', lineIndex: 0 });
   });
@@ -135,6 +150,22 @@ describe('drillReducer — RESET action', () => {
     const r = createDrillReducer([]);
     expect(r({ kind: 'auto_playing', lineIndex: 0 }, { type: 'RESET' })).toEqual({
       kind: 'complete',
+    });
+  });
+
+  it('player=white + RESET → awaiting_player(0) (player makes the first move)', () => {
+    const r = createDrillReducer(LINE, 'white');
+    expect(r({ kind: 'complete' }, { type: 'RESET' })).toEqual({
+      kind: 'awaiting_player',
+      lineIndex: 0,
+    });
+  });
+
+  it('player=black + RESET → auto_playing(0) (system makes the first move)', () => {
+    const r = createDrillReducer(LINE, 'black');
+    expect(r({ kind: 'complete' }, { type: 'RESET' })).toEqual({
+      kind: 'auto_playing',
+      lineIndex: 0,
     });
   });
 });

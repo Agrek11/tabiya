@@ -5,7 +5,7 @@
       "id": "ruy-lopez",
       "name": "Ruy Lopez",
       "eco": "C60-C99",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "ruy-lopez-main"
       ]
@@ -14,7 +14,7 @@
       "id": "italian-game",
       "name": "Italian Game",
       "eco": "C50-C59",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "italian-game-main"
       ]
@@ -23,7 +23,7 @@
       "id": "vienna-game",
       "name": "Vienna Game",
       "eco": "C25-C29",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "vienna-game-main"
       ]
@@ -32,7 +32,7 @@
       "id": "sicilian-defense",
       "name": "Sicilian Defense",
       "eco": "B20-B99",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "sicilian-defense-main"
       ]
@@ -59,7 +59,7 @@
       "id": "french-defense",
       "name": "French Defense",
       "eco": "C00-C19",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "french-defense-main"
       ]
@@ -68,7 +68,7 @@
       "id": "caro-kann",
       "name": "Caro-Kann Defense",
       "eco": "B10-B19",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "caro-kann-main"
       ]
@@ -77,7 +77,7 @@
       "id": "scandinavian",
       "name": "Scandinavian Defense",
       "eco": "B01",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "scandinavian-main"
       ]
@@ -86,7 +86,7 @@
       "id": "alekhine-defense",
       "name": "Alekhine's Defense",
       "eco": "B02-B05",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "alekhine-defense-main"
       ]
@@ -95,7 +95,7 @@
       "id": "pirc-defense",
       "name": "Pirc Defense",
       "eco": "B07-B09",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "pirc-defense-main"
       ]
@@ -104,7 +104,7 @@
       "id": "queens-gambit",
       "name": "Queen's Gambit",
       "eco": "D06-D69",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "queens-gambit-main"
       ]
@@ -113,7 +113,7 @@
       "id": "slav-defense",
       "name": "Slav Defense",
       "eco": "D10-D19",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "slav-defense-main"
       ]
@@ -122,7 +122,7 @@
       "id": "kings-indian",
       "name": "King's Indian Defense",
       "eco": "E60-E99",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "kings-indian-main"
       ]
@@ -131,7 +131,7 @@
       "id": "nimzo-indian",
       "name": "Nimzo-Indian Defense",
       "eco": "E20-E59",
-      "color": "white",
+      "color": "black",
       "line_ids": [
         "nimzo-indian-main"
       ]
@@ -140,7 +140,7 @@
       "id": "london-system",
       "name": "London System",
       "eco": "D02",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "london-system-main"
       ]
@@ -149,7 +149,7 @@
       "id": "english-opening",
       "name": "English Opening",
       "eco": "A10-A39",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "english-opening-main",
         "english-opening-alt"
@@ -159,7 +159,7 @@
       "id": "birds-opening",
       "name": "Bird's Opening",
       "eco": "A02-A03",
-      "color": "black",
+      "color": "white",
       "line_ids": [
         "birds-opening-main"
       ]
