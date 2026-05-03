@@ -38,9 +38,12 @@ export function playMove(): void {
   } catch {
     // some browsers throw on currentTime if not loaded; ignore
   }
-  void a.play().catch(() => {
-    // autoplay blocked — first user gesture will unblock
-  });
+  const result = a.play();
+  if (result && typeof result.catch === 'function') {
+    void result.catch(() => {
+      // autoplay blocked — first user gesture will unblock
+    });
+  }
 }
 
 /**
@@ -52,14 +55,18 @@ export function unlockAudio(): void {
   if (!a) return;
   const prevVolume = a.volume;
   a.volume = 0;
-  void a
-    .play()
-    .then(() => {
-      a.pause();
-      a.currentTime = 0;
-      a.volume = prevVolume;
-    })
-    .catch(() => {
-      a.volume = prevVolume;
-    });
+  const result = a.play();
+  if (result && typeof result.then === 'function') {
+    void result
+      .then(() => {
+        a.pause();
+        a.currentTime = 0;
+        a.volume = prevVolume;
+      })
+      .catch(() => {
+        a.volume = prevVolume;
+      });
+  } else {
+    a.volume = prevVolume;
+  }
 }
