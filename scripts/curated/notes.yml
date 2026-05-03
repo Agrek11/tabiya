@@ -1,0 +1,21 @@
+# Hand-curated strategic notes + key squares per line.
+#
+# Schema:
+#   <line-id>:
+#     strategic_notes:
+#       - "Short sentence about the plan / structure / key idea"
+#     key_squares:
+#       - { square: d5, note: "central light-square fight", side: both }
+#       - { square: f5, note: "kingside lever for Black", side: black }
+#
+# Notes are merged into the catalog in `scripts/tabiya_build/notes.py`.
+# Missing line ids are skipped with a warning. Empty file is valid.
+#
+# Example (uncomment + adapt once you have stable line ids):
+#
+# ruy-lopez-main:
+#   strategic_notes:
+#     - "Black aims for the d5 break only after White overextends kingside."
+#   key_squares:
+#     - { square: d5, note: "central light-square fight", side: both }
+#     - { square: f5, note: "Black's kingside lever in the closed Spanish", side: black }

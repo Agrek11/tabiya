@@ -113,9 +113,48 @@ specs/            # project principles + per-phase requirements/design/tasks
 tests/            # Vitest unit tests
 ```
 
+## Catalog Build
+
+The opening catalog (`public/catalog.json`) is checked in. Regenerate only when extending or refreshing it.
+
+### Prerequisites
+
+- [`uv`](https://github.com/astral-sh/uv) — Python 3.12+ env manager. macOS: `brew install uv`
+- Lichess API token — required by `explorer.lichess.ovh`. Generate one at https://lichess.org/account/oauth/token (no scopes needed). Export as `LICHESS_API_TOKEN`.
+- (Corporate networks only, e.g. Zscaler) export your CA bundle so `uv` can fetch from PyPI:
+  ```sh
+  security find-certificate -a -p -c "Zscaler" /Library/Keychains/System.keychain > /tmp/zscaler.pem
+  security find-certificate -a -p /System/Library/Keychains/SystemRootCertificates.keychain >> /tmp/zscaler.pem
+  export SSL_CERT_FILE=/tmp/zscaler.pem
+  export UV_NATIVE_TLS=true
+  ```
+
+### Commands
+
+```sh
+export LICHESS_API_TOKEN=lip_xxxxxxxx         # required (one-time)
+uv sync --all-extras                          # install Python deps + dev tools (pytest, ruff)
+uv run python -m scripts.build_catalog        # build the catalog (full whitelist)
+uv run pytest                                 # run Python unit + smoke tests
+uv run ruff check .                           # lint
+```
+
+### Common flags
+
+| Flag                       | Purpose                                                  |
+| -------------------------- | -------------------------------------------------------- |
+| `--refresh`                | ignore caches; re-fetch TSVs and Explorer responses      |
+| `--openings ruy-lopez,...` | limit build to specific opening IDs                      |
+| `--out path`               | override output path (default: `public/catalog.json`)    |
+| `--max-depth N`            | override the global depth cap (testing)                  |
+| `--notes path`             | override hand-curated YAML notes file                    |
+
+Hand-curated strategic notes and key squares live at `scripts/curated/notes.yml`. May be empty.
+
 ## Asset Attribution
 
 - Move sound: [`Move.mp3`](public/sounds/Move.mp3) sourced from [lichess-org/lila](https://github.com/lichess-org/lila/tree/master/public/sound/standard) (AGPL-3.0).
+- Opening data: derived from [lichess-org/chess-openings](https://github.com/lichess-org/chess-openings) (CC0) and Lichess Masters Opening Explorer.
 
 ## License
 
