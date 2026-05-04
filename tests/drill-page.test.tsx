@@ -4,9 +4,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 
-// Mock canvas-confetti — jsdom has no canvas, animation crashes on clearRect.
+// Mock canvas-confetti — jsdom has no canvas so the celebration call would
+// crash on getContext. Tests don't need to assert the burst fires.
 vi.mock('canvas-confetti', () => ({
   default: vi.fn(() => Promise.resolve()),
 }));
@@ -85,11 +86,14 @@ beforeEach(() => {
   vi.spyOn(window.HTMLMediaElement.prototype, 'play').mockImplementation(() =>
     Promise.resolve()
   );
+  window.localStorage.clear();
 });
 
 afterEach(() => {
+  cleanup();
   _setRepositoryForTesting(null);
   vi.restoreAllMocks();
+  window.localStorage.clear();
 });
 
 describe('DrillPage', () => {
@@ -129,5 +133,81 @@ describe('DrillPage', () => {
       expect(screen.getAllByRole('button', { name: /hint/i }).length).toBeGreaterThan(0);
     });
     expect(screen.getAllByText(/H hint/i).length).toBeGreaterThan(0);
+  });
+
+  it('collapses the move history rail when collapse button clicked', async () => {
+    const repo = new MockRepo();
+    _setRepositoryForTesting(repo);
+
+    renderWithProviders(<DrillPage />, { route: '/drill' });
+    repo.resolveLater();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Move history/i)).toBeTruthy();
+    });
+
+    const collapseBtn = screen.getByRole('button', { name: /collapse move history/i });
+    fireEvent.click(collapseBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByText(/Move history/i)).toBeNull();
+    });
+
+    // Floating expand pill is rendered when collapsed.
+    expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
+    expect(window.localStorage.getItem('tabiya.moveRailCollapsed')).toBe('1');
+  });
+
+  it('restores collapsed rail on mount when localStorage flag set', async () => {
+    window.localStorage.setItem('tabiya.moveRailCollapsed', '1');
+    const repo = new MockRepo();
+    _setRepositoryForTesting(repo);
+
+    renderWithProviders(<DrillPage />, { route: '/drill' });
+    repo.resolveLater();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
+    });
+    expect(screen.queryByText(/Move history/i)).toBeNull();
+  });
+
+  it('expands rail again from floating pill', async () => {
+    window.localStorage.setItem('tabiya.moveRailCollapsed', '1');
+    const repo = new MockRepo();
+    _setRepositoryForTesting(repo);
+
+    renderWithProviders(<DrillPage />, { route: '/drill' });
+    repo.resolveLater();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /show move history/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Move history/i)).toBeTruthy();
+    });
+    expect(window.localStorage.getItem('tabiya.moveRailCollapsed')).toBe('0');
+  });
+
+  it('renders next-move accent on the expected ply during awaiting_player', async () => {
+    const repo = new MockRepo();
+    _setRepositoryForTesting(repo);
+
+    renderWithProviders(<DrillPage />, { route: '/drill' });
+    repo.resolveLater();
+
+    await waitFor(() => {
+      expect(screen.getByText(/Move history/i)).toBeTruthy();
+    });
+
+    // playerColor = 'white' (opening.color), so initial state is awaiting_player
+    // at lineIndex 0. Cell index 0 is the next-expected ply ('e4').
+    const cell0 = screen.getByTestId('move-cell-0');
+    expect(cell0.style.color).toMatch(/rgb/);  // accent color applied
+    // borderBottom should be styled (accent line) — read computed style.
+    expect(cell0.style.borderBottom).toContain('2px solid');
   });
 });

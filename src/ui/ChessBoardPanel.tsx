@@ -1,19 +1,25 @@
 /**
  * ChessBoardPanel — wraps react-chessboard with our app's prop shape.
  *
- * Theme-aware: light/dark square colors come from the active color scheme.
+ * Theme-aware: light/dark square colors come from BoardThemeContext (user
+ * preference) or fall back to the active app color scheme.
+ *
  * Per-square overlays (last-move + hint highlights) are honored by the
- * squareRenderer (react-chessboard skips its built-in squareStyles wiring
- * whenever a squareRenderer is set, so we apply them ourselves).
+ * squareRenderer. Phase 0d.2 polish:
+ *   - Last-move highlight uses subtler lichess-style green tint (no inset
+ *     shadow), so the position reads cleanly.
+ *   - Tick/cross icons sit in top-right at slightly smaller size and fade
+ *     in/out over 150ms.
+ *   - Board flip animation (300ms) when boardOrientation changes.
  *
  * Width is determined by the parent — this component fills 100% width.
  */
 
-import type { CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Chessboard } from 'react-chessboard';
 import type { PieceDropHandlerArgs } from 'react-chessboard';
-import { unlockAudio } from '../sound/sounds';
-import { useTheme } from '../theme/ThemeContext';
+import { useBoardTheme } from '../theme/BoardThemeContext';
+import { usePieceSet } from '../theme/PieceSetContext';
 
 type FlashOverlay = { square: string; kind: 'correct' | 'wrong' } | null;
 
@@ -21,7 +27,7 @@ type ChessBoardPanelProps = {
   fen: string;
   flashOverlay: FlashOverlay;
   boardOrientation: 'white' | 'black';
-  /** Optional override; defaults derive from current scheme. */
+  /** Optional override; defaults derive from BoardThemeContext. */
   lightSquare?: string;
   darkSquare?: string;
   /** Per-square background overlays (last-move highlight, hint highlight). */
@@ -39,13 +45,14 @@ const TICK_SVG = (
     viewBox="0 0 100 100"
     style={{
       position: 'absolute',
-      top: '4%',
-      right: '4%',
-      width: '32%',
-      height: '32%',
+      top: '6%',
+      right: '6%',
+      width: '26%',
+      height: '26%',
       pointerEvents: 'none',
-      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
+      filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.45))',
       zIndex: 5,
+      animation: 'tabiya-flash 180ms ease-out',
     }}
   >
     <circle cx="50" cy="50" r="46" fill="rgba(40,170,60,0.96)" />
@@ -65,13 +72,14 @@ const CROSS_SVG = (
     viewBox="0 0 100 100"
     style={{
       position: 'absolute',
-      top: '4%',
-      right: '4%',
-      width: '32%',
-      height: '32%',
+      top: '6%',
+      right: '6%',
+      width: '26%',
+      height: '26%',
       pointerEvents: 'none',
-      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))',
+      filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.45))',
       zIndex: 5,
+      animation: 'tabiya-flash 180ms ease-out',
     }}
   >
     <circle cx="50" cy="50" r="46" fill="rgba(220,55,55,0.96)" />
@@ -94,9 +102,18 @@ export function ChessBoardPanel({
   squareStyles,
   onPieceDrop,
 }: ChessBoardPanelProps) {
-  const { scheme } = useTheme();
-  const lightSq = lightSquare ?? (scheme === 'dark' ? '#D6CCAB' : '#EBECD0');
-  const darkSq = darkSquare ?? (scheme === 'dark' ? '#5C7345' : '#779556');
+  const { theme } = useBoardTheme();
+  const { pieces: pieceRenderObject } = usePieceSet();
+  const lightSq = lightSquare ?? theme.light;
+  const darkSq = darkSquare ?? theme.dark;
+
+  // Board flip animation: brief opacity dip on orientation change.
+  const [flipping, setFlipping] = useState(false);
+  useEffect(() => {
+    setFlipping(true);
+    const id = window.setTimeout(() => setFlipping(false), 300);
+    return () => window.clearTimeout(id);
+  }, [boardOrientation]);
 
   const handleDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean => {
     if (targetSquare === null) return false;
@@ -129,7 +146,14 @@ export function ChessBoardPanel({
   };
 
   return (
-    <div style={wrapperStyle} onPointerDown={unlockAudio}>
+    <div
+      style={{
+        ...wrapperStyle,
+        transition: 'opacity 300ms ease',
+        opacity: flipping ? 0.55 : 1,
+      }}
+      data-testid="board-wrapper"
+    >
       <Chessboard
         options={{
           position: fen,
@@ -140,6 +164,7 @@ export function ChessBoardPanel({
           darkSquareStyle: { backgroundColor: darkSq },
           squareStyles: squareStyles ?? {},
           squareRenderer,
+          ...(pieceRenderObject ? { pieces: pieceRenderObject } : {}),
         }}
       />
     </div>

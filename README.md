@@ -48,7 +48,27 @@ Leitner system, 5 boxes (daily → 3 days → 1 week → 2 weeks → 1 month). W
 
 ## Status
 
-Early development. See [features.md](./features.md) for full scope and [specs/](./specs/) for project principles + per-phase requirements.
+Active development. Phase 0d.2 (drill UX hardening) in flight.
+
+### Phase progress
+
+| Phase | Status | What shipped |
+| --- | --- | --- |
+| 0a — Skeleton | ✅ done | Vite/React/TS, drill state machine, sounds, themes, confetti, tick/cross overlays, Docker compose |
+| 0b — Catalog build | ✅ done | Python `build_catalog.py`, Pydantic schema, Lichess Explorer client, 18 openings × 19 lines |
+| 0c — Storage interface | ✅ done | `OpeningRepository` interface + `JsonOpeningRepository`, catalog-driven drill, keyboard nav (←/→/H/R), one-shot Hint, last-move highlights |
+| 0d.1 — v1 design system | ✅ done | Theme tokens (light/dark), `lucide-react` icons, `react-router-dom` v7, 5 routed pages, app shell (Sidebar + TopBar + AppShell), 4 primitives (Card/Button/PageHeader/StateMessage), v1 wireframe locked as design destination |
+| 0d.2 — UX hardening | 🚧 in flight | Sound module v2 (audio pool, persisted settings, global unlock), move-history rail collapse + next-move accent, status strip primitive, board theme picker (6 presets, drill quick-toggle + Settings), two-tier Hint UX, board-flip animation, lichess-style last-move highlight |
+| 0d.3 — Catalog v2 + Repertoire | 📝 specced | Family schema layer, gambits cross-cut, repertoire restructure |
+| 1 — SRS data layer | 📝 specced | IndexedDB schema, Leitner scheduler, mastery bars |
+| 1.5 — Session event log | planned | Heatmap, accuracy %, streak, suggested-for-you |
+| 2 — Pattern Viz + end-of-line plans | planned | KeySquareOverlay, hand-curated key squares, Stockfish + LLM pre-computed plans baked into catalog |
+| 3 — Lichess + Chess.com sync | planned | FastAPI backend, Postgres + pgvector, OAuth, "out of book by move N", auto-drills |
+| 4 — AI Coach v1 | planned | Q&A `/coach`, game review, dynamic plan AI (Stockfish + RAG + frontier LLM with prompt caching) |
+| 5 — Polish + Deploy + Blog | planned | Live URL, demo GIF, blog post, soft launch |
+| 6 — Stretch | optional | Engine-stress, CoCo confidential containers, multi-user |
+
+See [specs/](./specs/) for full per-phase requirements + design + tasks.
 
 ## Getting Started
 
@@ -101,16 +121,21 @@ docker compose down
 
 ```
 src/
-├── drill/        # state machine, move comparator, sample line
-├── sound/        # move sound (Lichess AGPL audio)
-├── theme/        # board theme presets + persistence
-└── ui/           # React components (DrillView, ChessBoardPanel, StatusBar, ThemePicker)
+├── drill/        # state machine, move comparator, sample line, useDrill hook, rail-collapsed hook
+├── pages/        # DashboardPage, RepertoirePage, DrillPage, ProgressPage, SettingsPage
+├── sound/        # move sound module v2 (audio pool, persisted settings, global unlock)
+├── storage/      # OpeningRepository interface + JsonOpeningRepository impl
+├── theme/        # ThemeContext (light/dark), BoardThemeContext (board presets), tokens
+├── ui/           # ChessBoardPanel + primitives (Card/Button/PageHeader/StateMessage/StatusStrip) + shell (AppShell/Sidebar/TopBar)
+└── App.tsx, main.tsx
 
-scripts/          # offline catalog build (Phase 0b)
+scripts/          # offline catalog build (Phase 0b) — Python + uv
 public/sounds/    # bundled audio assets (AGPL-3.0, sourced from Lichess)
+public/catalog.json   # checked-in opening catalog
 docker/           # Dockerfile + nginx.conf
 specs/            # project principles + per-phase requirements/design/tasks
-tests/            # Vitest unit tests
+tests/            # Vitest unit tests (TS) + Python pytest under tests/python/
+.github/workflows/ # CI: lint, test, build
 ```
 
 ## Catalog Build

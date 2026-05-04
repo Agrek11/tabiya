@@ -63,8 +63,8 @@ export type DrillAction =
 // ---------------------------------------------------------------------------
 
 const FLASH_MS = 500;
-const AUTO_PLAY_MS = 300;
-const RESET_AFTER_COMPLETE_MS = 2200;
+const AUTO_PLAY_MS = 0; // static lines — no fake "thinking" pause
+const HINT_TIER_RESET_MS = 5000; // 2nd-press tier window
 
 // ---------------------------------------------------------------------------
 // Initial-state factory + reducer
@@ -154,9 +154,9 @@ export function statusText(state: DrillState): string {
     case 'wrong_pending':
       return 'Wrong move — click Back to retry';
     case 'auto_playing':
-      return 'Opponent…';
+      return 'Opponent thinking…';
     case 'complete':
-      return 'Line complete — restarting…';
+      return 'Line complete — press Restart to retry';
   }
 }
 
@@ -189,7 +189,11 @@ export type UseDrillReturn = {
   /** From-square the most recent showHint() request resolved to. Auto-clears
    *  on next state change or after ~3s. Null when no hint is showing. */
   hintSquare: string | null;
-  /** One-shot: highlight the from-square of the next expected move. */
+  /** Tier 1 = pulse on piece (subtle). Tier 2 = full square highlight. Null
+   *  when no hint is showing. Two consecutive showHint() calls within
+   *  HINT_TIER_RESET_MS escalate from 1 → 2. */
+  hintTier: 1 | 2 | null;
+  /** One-shot: tier-1 hint on first call, tier-2 on second call within window. */
   showHint: () => void;
   canStepBack: boolean;
   canStepForward: boolean;
@@ -227,31 +231,24 @@ export function useDrill(
     return () => window.clearTimeout(id);
   }, [state.kind]);
 
-  // Auto-play timer + chess.js mutation.
+  // Auto-play timer + chess.js mutation. Mutation + sound deferred to the
+  // timer callback so the board re-render (driven by the AUTO_PLAY_TIMER_DONE
+  // dispatch) and the move sound land in the same tick — keeps opponent
+  // moves audio/visual synced, matching the player-move path.
   useEffect(() => {
     if (state.kind !== 'auto_playing') return;
-    if (chess.history().length === state.lineIndex) {
-      const san = line[state.lineIndex];
-      if (san !== undefined) {
-        chess.move(san);
-        playMove();
-      }
-    }
     const id = window.setTimeout(() => {
+      if (chess.history().length === state.lineIndex) {
+        const san = line[state.lineIndex];
+        if (san !== undefined) {
+          chess.move(san);
+          playMove();
+        }
+      }
       dispatch({ type: 'AUTO_PLAY_TIMER_DONE' });
     }, AUTO_PLAY_MS);
     return () => window.clearTimeout(id);
   }, [state, chess, line]);
-
-  // Auto-restart on completion.
-  useEffect(() => {
-    if (state.kind !== 'complete') return;
-    const id = window.setTimeout(() => {
-      chess.reset();
-      dispatch({ type: 'RESET' });
-    }, RESET_AFTER_COMPLETE_MS);
-    return () => window.clearTimeout(id);
-  }, [state.kind, chess]);
 
   // -------------------------------------------------------------------------
   // Drag-drop handler
@@ -369,6 +366,7 @@ export function useDrill(
   // -------------------------------------------------------------------------
 
   const [hintSquare, setHintSquare] = useState<string | null>(null);
+  const [hintTier, setHintTier] = useState<1 | 2 | null>(null);
 
   const showHint = useCallback((): void => {
     if (state.kind !== 'awaiting_player') return;
@@ -377,21 +375,29 @@ export function useDrill(
     try {
       const m = chess.move(san);
       chess.undo();
-      setHintSquare(m?.from ?? null);
+      const fromSq = m?.from ?? null;
+      setHintSquare(fromSq);
+      // Tier escalation: if same square already shown, bump to 2; else start at 1.
+      setHintTier((prev) => (prev === 1 && hintSquare === fromSq ? 2 : 1));
     } catch {
       setHintSquare(null);
+      setHintTier(null);
     }
-  }, [state, line, chess]);
+  }, [state, line, chess, hintSquare]);
 
   // Clear hint whenever drill state advances (move played, line changed, etc.).
   useEffect(() => {
     setHintSquare(null);
+    setHintTier(null);
   }, [state]);
 
-  // Also auto-fade hint after 3s even if state hasn't changed.
+  // Auto-fade hint after window even if state hasn't changed.
   useEffect(() => {
     if (hintSquare === null) return;
-    const id = window.setTimeout(() => setHintSquare(null), 3000);
+    const id = window.setTimeout(() => {
+      setHintSquare(null);
+      setHintTier(null);
+    }, HINT_TIER_RESET_MS);
     return () => window.clearTimeout(id);
   }, [hintSquare]);
 
@@ -416,6 +422,7 @@ export function useDrill(
     onPieceDrop,
     lastMove,
     hintSquare,
+    hintTier,
     showHint,
     canStepBack,
     canStepForward,
