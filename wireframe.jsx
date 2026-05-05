@@ -23,6 +23,7 @@ import {
   Bell,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
   Sun,
   Moon,
   ArrowLeft,
@@ -31,10 +32,13 @@ import {
   Settings,
   LogOut,
   Target,
+  BookOpen,
+  Eye,
+  Swords,
 } from "lucide-react";
 
 /* ===========================================================
-   MATEDRILL — themed, with profile menu and contextual drill
+   MATEDRILL — themed, profile menu, contextual drill, line switcher
    =========================================================== */
 
 const lightTheme = {
@@ -237,7 +241,7 @@ function ChessBoard({ position = NAJDORF, lastMove = ["a7", "a6"], dark }) {
 }
 
 /* ---------- Sidebar ---------- */
-function Sidebar({ active, setActive, goToProgress }) {
+function Sidebar({ active, setActive, goToProgress, collapsed, onToggleCollapsed }) {
   const t = useT();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useClickOutside(() => setMenuOpen(false));
@@ -248,57 +252,104 @@ function Sidebar({ active, setActive, goToProgress }) {
     { id: "games", label: "Games", icon: Plug },
   ];
 
+  const width = collapsed ? 64 : 240;
+
   return (
     <aside
       style={{
-        width: 240,
+        width,
         flexShrink: 0,
         background: t.surface,
         borderRight: `1px solid ${t.border}`,
-        padding: "20px 14px",
+        padding: collapsed ? "20px 8px" : "20px 14px",
         display: "flex",
         flexDirection: "column",
         gap: 20,
+        transition: "width 220ms ease, padding 220ms ease",
+        position: "relative",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "4px 8px" }}>
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            background: t.brand,
-            borderRadius: 8,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 19,
-            color: "#FFF",
-          }}
-        >
-          ♞
-        </div>
-        <div style={{ fontWeight: 700, fontSize: 17, letterSpacing: -0.3, color: t.ink }}>
-          matedrill
+      {/* logo + collapse handle */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: collapsed ? "4px 0" : "4px 8px",
+          justifyContent: collapsed ? "center" : "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              background: t.brand,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 19,
+              color: "#FFF",
+              flexShrink: 0,
+            }}
+          >
+            ♞
+          </div>
+          {!collapsed && (
+            <div style={{ fontWeight: 700, fontSize: 17, letterSpacing: -0.3, color: t.ink }}>
+              matedrill
+            </div>
+          )}
         </div>
       </div>
 
+      {/* collapse toggle pinned to the right edge of the sidebar */}
+      <button
+        onClick={onToggleCollapsed}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="sidebar-toggle"
+        style={{
+          position: "absolute",
+          top: 26,
+          right: -12,
+          width: 22,
+          height: 22,
+          borderRadius: 999,
+          background: t.surface,
+          border: `1px solid ${t.border}`,
+          color: t.inkDim,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 0,
+          zIndex: 10,
+          boxShadow: t.shadow,
+        }}
+      >
+        {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+      </button>
+
       <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 600,
-            color: t.inkSoft,
-            textTransform: "uppercase",
-            letterSpacing: 0.6,
-            padding: "0 10px",
-            marginBottom: 6,
-          }}
-        >
-          Workspace
-        </div>
+        {!collapsed && (
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: t.inkSoft,
+              textTransform: "uppercase",
+              letterSpacing: 0.6,
+              padding: "0 10px",
+              marginBottom: 6,
+            }}
+          >
+            Workspace
+          </div>
+        )}
         {items.map((it) => {
           const Icon = it.icon;
-          // Repertoire stays highlighted while drilling
           const isActive =
             active === it.id || (active === "drill" && it.id === "repertoire");
           return (
@@ -306,14 +357,16 @@ function Sidebar({ active, setActive, goToProgress }) {
               key={it.id}
               onClick={() => setActive(it.id)}
               className="nav-item"
+              title={collapsed ? it.label : undefined}
               style={{
                 background: isActive ? t.brandSoft : "transparent",
                 color: isActive ? t.brand : t.ink,
                 border: "none",
                 borderRadius: 8,
-                padding: "9px 10px",
+                padding: collapsed ? "10px" : "9px 10px",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: collapsed ? "center" : "flex-start",
                 gap: 10,
                 cursor: "pointer",
                 textAlign: "left",
@@ -323,7 +376,7 @@ function Sidebar({ active, setActive, goToProgress }) {
               }}
             >
               <Icon size={17} strokeWidth={isActive ? 2.4 : 2} />
-              <span style={{ flex: 1 }}>{it.label}</span>
+              {!collapsed && <span style={{ flex: 1 }}>{it.label}</span>}
             </button>
           );
         })}
@@ -331,35 +384,55 @@ function Sidebar({ active, setActive, goToProgress }) {
 
       <div style={{ flex: 1 }} />
 
-      <div
-        style={{
-          padding: "12px 12px",
-          background: t.surfaceAlt,
-          border: `1px solid ${t.border}`,
-          borderRadius: 10,
-        }}
-      >
+      {/* streak panel — collapsed becomes just the flame + number */}
+      {collapsed ? (
         <div
+          title="Current streak: 47 days"
           style={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: 6,
-            fontSize: 11,
-            color: t.inkDim,
-            fontWeight: 500,
-            marginBottom: 6,
+            gap: 2,
+            padding: "8px 4px",
+            background: t.surfaceAlt,
+            border: `1px solid ${t.border}`,
+            borderRadius: 10,
           }}
         >
-          <Flame size={12} color={t.amber} fill={t.amber} />
-          Current streak
+          <Flame size={14} color={t.amber} fill={t.amber} />
+          <span style={{ fontSize: 13, fontWeight: 700, color: t.ink }}>47</span>
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, color: t.ink, letterSpacing: -0.5 }}>47</span>
-          <span style={{ fontSize: 12, color: t.inkDim }}>days</span>
+      ) : (
+        <div
+          style={{
+            padding: "12px 12px",
+            background: t.surfaceAlt,
+            border: `1px solid ${t.border}`,
+            borderRadius: 10,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 11,
+              color: t.inkDim,
+              fontWeight: 500,
+              marginBottom: 6,
+            }}
+          >
+            <Flame size={12} color={t.amber} fill={t.amber} />
+            Current streak
+          </div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+            <span style={{ fontSize: 24, fontWeight: 700, color: t.ink, letterSpacing: -0.5 }}>47</span>
+            <span style={{ fontSize: 12, color: t.inkDim }}>days</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* avatar with dropdown menu */}
+      {/* avatar / profile menu */}
       <div ref={menuRef} style={{ position: "relative" }}>
         {menuOpen && (
           <div
@@ -367,7 +440,7 @@ function Sidebar({ active, setActive, goToProgress }) {
               position: "absolute",
               bottom: "calc(100% + 8px)",
               left: 0,
-              right: 0,
+              minWidth: 200,
               background: t.surface,
               border: `1px solid ${t.border}`,
               borderRadius: 10,
@@ -395,11 +468,12 @@ function Sidebar({ active, setActive, goToProgress }) {
         <button
           onClick={() => setMenuOpen((v) => !v)}
           className="nav-item"
+          title={collapsed ? "Arushi · Elo 1684" : undefined}
           style={{
             display: "flex",
             alignItems: "center",
             gap: 10,
-            padding: 8,
+            padding: collapsed ? 6 : 8,
             borderRadius: 8,
             cursor: "pointer",
             background: menuOpen ? t.surfaceAlt : "transparent",
@@ -407,6 +481,7 @@ function Sidebar({ active, setActive, goToProgress }) {
             width: "100%",
             fontFamily: sans,
             color: t.ink,
+            justifyContent: collapsed ? "center" : "flex-start",
           }}
         >
           <div
@@ -421,20 +496,26 @@ function Sidebar({ active, setActive, goToProgress }) {
               justifyContent: "center",
               fontWeight: 600,
               fontSize: 13,
+              flexShrink: 0,
             }}
           >
             A
           </div>
-          <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
-            <div style={{ fontWeight: 600, fontSize: 13, color: t.ink }}>Anand</div>
-            <div style={{ fontSize: 11, color: t.inkDim }}>Elo 1684</div>
-          </div>
-          {menuOpen ? <ChevronUp size={14} color={t.inkDim} /> : <ChevronDown size={14} color={t.inkDim} />}
+          {!collapsed && (
+            <>
+              <div style={{ flex: 1, minWidth: 0, textAlign: "left" }}>
+                <div style={{ fontWeight: 600, fontSize: 13, color: t.ink }}>Arushi</div>
+                <div style={{ fontSize: 11, color: t.inkDim }}>Elo 1684</div>
+              </div>
+              {menuOpen ? <ChevronUp size={14} color={t.inkDim} /> : <ChevronDown size={14} color={t.inkDim} />}
+            </>
+          )}
         </button>
       </div>
     </aside>
   );
 }
+
 
 function MenuItem({ icon: Icon, label, onClick, accent, danger }) {
   const t = useT();
@@ -545,7 +626,6 @@ function TopBar({ title, breadcrumb, onBack, isDark, setIsDark }) {
           ⌘K
         </span>
       </div>
-      {/* theme toggle */}
       <button
         onClick={() => setIsDark(!isDark)}
         className="icon-btn"
@@ -690,7 +770,7 @@ function Dashboard({ onStartDrill }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <PageHeader
-        title="Welcome back, Anand"
+        title="Welcome back, Arushi"
         subtitle="3 lines are due for review and 1 new opening is ready to onboard."
       />
 
@@ -1081,19 +1161,20 @@ function OpeningCard({ opening, onClick }) {
   );
 }
 
-/* ---------- Drill Mode (no nav, contextual screen) ---------- */
+/* ---------- Drill Mode (with line switcher) ---------- */
 function DrillMode({ opening }) {
   const t = useT();
-  const card = getCardStyle(t);
-  const primaryBtn = getPrimaryBtn(t);
-  const secondaryBtn = getSecondaryBtn(t);
   const isDark = t.bg === darkTheme.bg;
 
-  // Lines for this opening (mock — would come from backend per opening)
   const lines = SICILIAN_LINES;
   const [currentLineIdx, setCurrentLineIdx] = useState(0);
   const [lineMenuOpen, setLineMenuOpen] = useState(false);
+  const [lineSearch, setLineSearch] = useState("");
+  const [modeMenuOpen, setModeMenuOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [activeMode, setActiveMode] = useState("theory");
   const lineMenuRef = useClickOutside(() => setLineMenuOpen(false));
+  const modeMenuRef = useClickOutside(() => setModeMenuOpen(false));
   const currentLine = lines[currentLineIdx];
 
   const moves = [
@@ -1104,15 +1185,44 @@ function DrillMode({ opening }) {
     { n: 5, w: "Nc3", b: "a6", current: true },
   ];
 
+  const movesDone = 5;
+  const movesTotal = currentLine.moves;
+  const progressPct = (movesDone / movesTotal) * 100;
+
+  const modes = [
+    { id: "theory",     label: "Theory",      icon: BookOpen, available: true },
+    { id: "coach",      label: "AI Coach",    icon: Sparkles, available: false },
+    { id: "visualizer", label: "Visualizer",  icon: Eye,      available: false },
+    { id: "engine",     label: "Play it out", icon: Swords,   available: false },
+  ];
+  const currentMode = modes.find((m) => m.id === activeMode);
+  const ModeIcon = currentMode.icon;
+
+  const ghostBtn = {
+    background: "transparent",
+    border: `1px solid ${t.border}`,
+    borderRadius: 999,
+    padding: "8px 16px",
+    fontFamily: sans,
+    fontSize: 13,
+    fontWeight: 500,
+    color: t.ink,
+    cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-        <div style={{ minWidth: 0 }}>
+    <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
+      {/* HEADER ROW: line title left, mode dropdown right */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontSize: 12, color: t.inkDim, marginBottom: 4 }}>
             Repertoire / {opening?.name || "Sicilian Defense"}
           </div>
 
-          {/* Line switcher dropdown */}
+          {/* line switcher */}
           <div ref={lineMenuRef} style={{ position: "relative", display: "inline-block" }}>
             <button
               onClick={() => setLineMenuOpen((v) => !v)}
@@ -1129,14 +1239,13 @@ function DrillMode({ opening }) {
                 gap: 8,
                 fontFamily: sans,
                 color: t.ink,
-                textAlign: "left",
               }}
             >
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, letterSpacing: -0.4 }}>
+              <h1 style={{ margin: 0, fontSize: 17, fontWeight: 700, letterSpacing: -0.3 }}>
                 {currentLine.name}
               </h1>
               <ChevronDown
-                size={18}
+                size={15}
                 strokeWidth={2.4}
                 style={{
                   transition: "transform 150ms",
@@ -1153,7 +1262,7 @@ function DrillMode({ opening }) {
                   position: "absolute",
                   top: "calc(100% + 6px)",
                   left: 0,
-                  width: 400,
+                  width: 380,
                   maxHeight: 440,
                   overflowY: "auto",
                   background: t.surface,
@@ -1166,19 +1275,67 @@ function DrillMode({ opening }) {
               >
                 <div
                   style={{
-                    padding: "8px 10px 8px",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    color: t.inkSoft,
-                    letterSpacing: 0.6,
-                    textTransform: "uppercase",
+                    padding: "8px",
                     borderBottom: `1px solid ${t.border}`,
                     marginBottom: 4,
                   }}
                 >
-                  {lines.length} lines · {opening?.name || "Sicilian Defense"}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: t.surfaceAlt,
+                      border: `1px solid ${t.border}`,
+                      borderRadius: 8,
+                      padding: "6px 10px",
+                    }}
+                  >
+                    <Search size={13} color={t.inkDim} />
+                    <input
+                      autoFocus
+                      value={lineSearch}
+                      onChange={(e) => setLineSearch(e.target.value)}
+                      placeholder={`Search ${lines.length} lines…`}
+                      style={{
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        flex: 1,
+                        fontFamily: sans,
+                        fontSize: 13,
+                        color: t.ink,
+                        minWidth: 0,
+                      }}
+                    />
+                    {lineSearch && (
+                      <button
+                        onClick={() => setLineSearch("")}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
+                          display: "flex",
+                          color: t.inkSoft,
+                        }}
+                      >
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                {lines.map((line, i) => {
+                {lines
+                  .map((line, originalIdx) => ({ line, originalIdx }))
+                  .filter(({ line }) => {
+                    const q = lineSearch.trim().toLowerCase();
+                    if (!q) return true;
+                    return (
+                      line.name.toLowerCase().includes(q) ||
+                      line.eco.toLowerCase().includes(q)
+                    );
+                  })
+                  .map(({ line, originalIdx: i }) => {
                   const isCurrent = i === currentLineIdx;
                   const masteryColor = line.mastery >= 70 ? t.brand : line.mastery >= 40 ? t.amber : t.red;
                   const masteryBg = line.mastery >= 70 ? t.brandSoft : line.mastery >= 40 ? t.amberSoft : t.redSoft;
@@ -1188,13 +1345,14 @@ function DrillMode({ opening }) {
                       onClick={() => {
                         setCurrentLineIdx(i);
                         setLineMenuOpen(false);
+                        setLineSearch("");
                       }}
                       className="nav-item"
                       style={{
                         display: "flex",
                         alignItems: "center",
                         gap: 12,
-                        padding: "10px 10px",
+                        padding: "10px",
                         width: "100%",
                         background: isCurrent ? t.surfaceAlt : "transparent",
                         border: "none",
@@ -1206,13 +1364,11 @@ function DrillMode({ opening }) {
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <span style={{ fontSize: 13.5, fontWeight: 600, color: t.ink }}>
-                            {line.name}
-                          </span>
+                          <span style={{ fontSize: 13.5, fontWeight: 600, color: t.ink }}>{line.name}</span>
                           {isCurrent && <Check size={13} color={t.brand} strokeWidth={3} />}
                         </div>
                         <div style={{ fontSize: 11.5, color: t.inkDim, marginTop: 2, fontFamily: mono }}>
-                          {line.eco} · {line.moves} moves · last: {line.last}
+                          {line.eco} · {line.moves} moves
                         </div>
                       </div>
                       <span
@@ -1233,171 +1389,271 @@ function DrillMode({ opening }) {
                     </button>
                   );
                 })}
+                {lineSearch.trim() &&
+                  lines.filter((line) => {
+                    const q = lineSearch.trim().toLowerCase();
+                    return (
+                      line.name.toLowerCase().includes(q) ||
+                      line.eco.toLowerCase().includes(q)
+                    );
+                  }).length === 0 && (
+                    <div
+                      style={{
+                        padding: "20px 12px",
+                        textAlign: "center",
+                        fontSize: 13,
+                        color: t.inkDim,
+                      }}
+                    >
+                      No lines match "{lineSearch}"
+                    </div>
+                  )}
               </div>
             )}
           </div>
-
-          <div style={{ fontSize: 13, color: t.inkDim, marginTop: 4 }}>
-            {currentLine.eco} · As White · {currentLine.moves} moves
-          </div>
         </div>
-        <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
-          <Counter label="Move" value="5" total="12" />
-          <Counter label="Time" value="02:14" />
-          <Counter label="Accuracy" value="80%" color={t.brand} />
+
+        {/* MODE DROPDOWN — top right */}
+        <div ref={modeMenuRef} style={{ position: "relative", flexShrink: 0 }}>
+          <button
+            onClick={() => setModeMenuOpen((v) => !v)}
+            className="ghost-btn"
+            style={{
+              background: t.surface,
+              border: `1px solid ${t.border}`,
+              borderRadius: 8,
+              padding: "8px 12px",
+              fontFamily: sans,
+              fontSize: 13,
+              fontWeight: 500,
+              color: t.ink,
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            <ModeIcon size={14} color={t.brand} strokeWidth={2.2} />
+            {currentMode.label}
+            <ChevronDown
+              size={14}
+              style={{
+                transition: "transform 150ms",
+                transform: modeMenuOpen ? "rotate(180deg)" : "rotate(0)",
+                color: t.inkDim,
+              }}
+            />
+          </button>
+
+          {modeMenuOpen && (
+            <div
+              style={{
+                position: "absolute",
+                top: "calc(100% + 6px)",
+                right: 0,
+                width: 240,
+                background: t.surface,
+                border: `1px solid ${t.border}`,
+                borderRadius: 12,
+                boxShadow: t.shadowMd,
+                padding: 6,
+                zIndex: 50,
+              }}
+            >
+              {modes.map((m) => {
+                const Icon = m.icon;
+                const isActive = m.id === activeMode;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => {
+                      if (m.available) {
+                        setActiveMode(m.id);
+                        setModeMenuOpen(false);
+                      }
+                    }}
+                    disabled={!m.available}
+                    className="nav-item"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "10px 10px",
+                      width: "100%",
+                      background: isActive ? t.brandSoft : "transparent",
+                      border: "none",
+                      borderRadius: 8,
+                      cursor: m.available ? "pointer" : "not-allowed",
+                      textAlign: "left",
+                      fontFamily: sans,
+                      fontSize: 13.5,
+                      fontWeight: isActive ? 600 : 500,
+                      color: isActive ? t.brand : m.available ? t.ink : t.inkSoft,
+                      opacity: m.available ? 1 : 0.7,
+                    }}
+                  >
+                    <Icon size={15} strokeWidth={isActive ? 2.4 : 2} />
+                    <span style={{ flex: 1 }}>{m.label}</span>
+                    {!m.available && (
+                      <span
+                        style={{
+                          fontSize: 9.5,
+                          fontWeight: 600,
+                          background: t.surfaceAlt,
+                          color: t.inkSoft,
+                          padding: "1px 6px",
+                          borderRadius: 999,
+                          letterSpacing: 0.4,
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Soon
+                      </span>
+                    )}
+                    {isActive && <Check size={13} color={t.brand} strokeWidth={3} />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 20 }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ ...card, padding: 18 }}>
-            <ChessBoard dark={isDark} />
-          </div>
-
+      {/* CONTINUOUS PROGRESS BAR — top, no boxes */}
+      <div>
+        <div
+          style={{
+            height: 5,
+            background: t.surfaceAlt,
+            borderRadius: 999,
+            overflow: "hidden",
+          }}
+        >
           <div
             style={{
-              ...card,
-              padding: 18,
-              borderColor: t.brand,
-              background: isDark
-                ? `linear-gradient(135deg, ${t.brandSoft} 0%, ${t.surface} 60%)`
-                : `linear-gradient(135deg, ${t.brandSoft} 0%, ${t.surface} 60%)`,
+              width: `${progressPct}%`,
+              height: "100%",
+              background: t.brand,
+              borderRadius: 999,
+              transition: "width 300ms ease-out",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* BIG BOARD — no card wrapper, full content width */}
+      <ChessBoard dark={isDark} />
+
+      {/* COACH LINE — single inline line, no card */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          padding: "4px 12px",
+        }}
+      >
+        <div
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 999,
+            background: t.brandSoft,
+            color: t.brand,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            fontSize: 15,
+          }}
+          aria-label="Coach"
+        >
+          ♞
+        </div>
+        <div style={{ fontSize: 14, color: t.ink, fontWeight: 500 }}>
+          Theory wants the e-file dark-square knight here.
+        </div>
+      </div>
+
+      {/* ACTION CHIPS — 3 buttons, centered */}
+      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+        <button style={ghostBtn} className="ghost-btn">
+          <RotateCcw size={14} /> Restart
+        </button>
+        <button style={ghostBtn} className="ghost-btn">
+          <SkipForward size={14} /> Skip
+        </button>
+        <button style={ghostBtn} className="ghost-btn">
+          <Lightbulb size={14} /> Hint
+        </button>
+      </div>
+
+      {/* COLLAPSIBLE MOVE HISTORY — at the bottom, closed by default */}
+      <div
+        style={{
+          borderTop: `1px solid ${t.border}`,
+          paddingTop: 4,
+          marginTop: 8,
+        }}
+      >
+        <button
+          onClick={() => setHistoryOpen((v) => !v)}
+          className="nav-item"
+          style={{
+            background: "transparent",
+            border: "none",
+            width: "100%",
+            padding: "10px 4px",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontFamily: sans,
+            fontSize: 13,
+            fontWeight: 500,
+            color: t.inkDim,
+            textAlign: "left",
+            borderRadius: 6,
+          }}
+        >
+          <ChevronDown
+            size={14}
+            style={{
+              transition: "transform 150ms",
+              transform: historyOpen ? "rotate(0)" : "rotate(-90deg)",
+            }}
+          />
+          Move history
+          <span style={{ color: t.inkSoft, fontFamily: mono }}>({moves.length})</span>
+        </button>
+        {historyOpen && (
+          <div
+            style={{
+              padding: "8px 4px 12px",
+              fontFamily: mono,
+              fontSize: 13,
+              color: t.ink,
+              lineHeight: 2,
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 14 }}>
-              <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    color: t.brand,
-                    fontWeight: 700,
-                    letterSpacing: 0.6,
-                    textTransform: "uppercase",
-                    marginBottom: 4,
-                  }}
-                >
-                  Your move · White
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 600, color: t.ink }}>
-                  Continue the English Attack.
-                </div>
-                <div style={{ fontSize: 13, color: t.inkDim, marginTop: 3 }}>
-                  Theory says one square forward, two diagonals to spare.
-                </div>
-              </div>
-              <button
-                style={{
-                  ...secondaryBtn,
-                  borderColor: t.brand,
-                  color: t.brand,
-                }}
-              >
-                <Lightbulb size={14} /> Hint
-              </button>
-            </div>
+            {moves.flatMap((m) => [m.w, m.b]).filter(Boolean).map((mv, i) => (
+              <span key={i}>
+                {i % 2 === 0 && (
+                  <span style={{ color: t.inkSoft, marginLeft: i > 0 ? 8 : 0 }}>
+                    {Math.floor(i / 2) + 1}.
+                  </span>
+                )}
+                <span style={{ marginLeft: 4, fontWeight: 500 }}>{mv}</span>
+              </span>
+            ))}
           </div>
-
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={secondaryBtn}>
-              <RotateCcw size={13} /> Restart
-            </button>
-            <button style={secondaryBtn}>
-              <SkipForward size={13} /> Skip
-            </button>
-            <button style={{ ...secondaryBtn, color: t.red }}>
-              <X size={13} /> Give up
-            </button>
-            <div style={{ flex: 1 }} />
-            <button style={primaryBtn}>
-              <Check size={13} /> Submit move
-            </button>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={card}>
-            <div style={{ padding: "12px 16px", borderBottom: `1px solid ${t.border}` }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: t.ink }}>Move history</div>
-            </div>
-            <div style={{ padding: "10px 16px" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  fontFamily: mono,
-                  fontSize: 13,
-                }}
-              >
-                <tbody>
-                  {moves.map((m) => (
-                    <tr key={m.n}>
-                      <td style={{ color: t.inkSoft, fontWeight: 500, padding: "5px 0", width: 28 }}>{m.n}.</td>
-                      <td style={{ fontWeight: 600, padding: "5px 8px", color: t.ink }}>{m.w}</td>
-                      <td
-                        style={{
-                          fontWeight: 600,
-                          padding: "5px 8px",
-                          color: t.ink,
-                          background: m.current ? t.brandSoft : "transparent",
-                          borderRadius: 4,
-                        }}
-                      >
-                        {m.b}
-                      </td>
-                    </tr>
-                  ))}
-                  <tr>
-                    <td style={{ color: t.inkSoft, padding: "5px 0" }}>6.</td>
-                    <td colSpan={2} style={{ color: t.inkSoft, padding: "5px 8px", fontStyle: "italic" }}>
-                      waiting for your move…
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div style={{ ...card, padding: 16 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: t.ink }}>Line progress</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: t.brand }}>42%</span>
-            </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: 3 }}>
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    aspectRatio: "1 / 1.5",
-                    background: i < 5 ? t.brand : i === 5 ? t.amber : t.surfaceAlt,
-                    border: i < 6 ? "none" : `1px solid ${t.border}`,
-                    borderRadius: 2,
-                  }}
-                />
-              ))}
-            </div>
-            <div style={{ fontSize: 12, color: t.inkDim, marginTop: 10 }}>
-              5 moves correct · 1 in progress · 6 remaining
-            </div>
-          </div>
-
-          <div style={{ ...card, padding: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: t.ink, marginBottom: 14 }}>This session</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: t.ink, letterSpacing: -0.5 }}>4 / 5</div>
-                <div style={{ fontSize: 12, color: t.inkDim, marginTop: 2 }}>moves correct</div>
-              </div>
-              <div>
-                <div style={{ fontSize: 22, fontWeight: 700, color: t.brand, letterSpacing: -0.5 }}>80%</div>
-                <div style={{ fontSize: 12, color: t.inkDim, marginTop: 2 }}>accuracy</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
 
 function Counter({ label, value, total, color }) {
   const t = useT();
@@ -1422,11 +1678,7 @@ function Counter({ label, value, total, color }) {
   );
 }
 
-/* ============================================================
-   PROGRESS — period-filtered analytics (under Profile menu)
-   ============================================================ */
-
-// Mock data per period — flow stats vary, current state stays current
+/* ---------- Progress (period-filtered, accessed from profile menu) ---------- */
 const PERIOD_DATA = {
   "7d": {
     label: "last 7 days",
@@ -1492,7 +1744,6 @@ function Progress() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 16, flexWrap: "wrap" }}>
         <PageHeader title="Progress" subtitle={`Activity over the ${data.label}`} />
 
-        {/* period filter pills */}
         <div
           style={{
             display: "inline-flex",
@@ -1527,7 +1778,6 @@ function Progress() {
         </div>
       </div>
 
-      {/* period-filtered stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
         <Stat
           icon={Target}
@@ -1568,7 +1818,6 @@ function Progress() {
         />
       </div>
 
-      {/* accuracy chart with period */}
       <div style={{ ...card, padding: 22 }}>
         <div
           style={{
@@ -1602,7 +1851,6 @@ function Progress() {
         <AccuracyChart points={data.chartPoints} labels={data.chartLabels} />
       </div>
 
-      {/* rankings — current state, NOT period-filtered */}
       <div>
         <div
           style={{
@@ -1753,9 +2001,7 @@ function RankRow({ rank, name, detail, pct, last }) {
   );
 }
 
-/* ============================================================
-   GAMES (renamed from Game Import)
-   ============================================================ */
+/* ---------- Games ---------- */
 function Games() {
   const t = useT();
   const card = getCardStyle(t);
@@ -2043,13 +2289,14 @@ export default function ChessDrillApp() {
   const [active, setActive] = useState("dashboard");
   const [isDark, setIsDark] = useState(false);
   const [drillContext, setDrillContext] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const t = isDark ? darkTheme : lightTheme;
 
   const titles = {
     dashboard: { title: "Dashboard", breadcrumb: "Sunday, May 3" },
     repertoire: { title: "Repertoire", breadcrumb: "Library" },
-    drill: { title: drillContext?.name || "Drill", breadcrumb: "Practicing" },
+    drill: { title: "", breadcrumb: "" },
     progress: { title: "Progress", breadcrumb: "Profile · Analytics" },
     games: { title: "Games", breadcrumb: "Real game review" },
   };
@@ -2075,6 +2322,8 @@ export default function ChessDrillApp() {
           .icon-btn:hover { border-color: ${t.borderStrong}; }
           .ghost-btn:hover { background: ${t.surfaceAlt}; }
           .line-switcher:hover { background: ${t.surfaceAlt} !important; border-color: ${t.border} !important; }
+          .line-row:hover { background: ${t.surfaceAlt}; }
+          .ghost-btn-text:hover { color: ${t.ink} !important; }
           input::placeholder { color: ${t.inkSoft}; }
         `}</style>
 
@@ -2083,6 +2332,8 @@ export default function ChessDrillApp() {
             active={active}
             setActive={setActive}
             goToProgress={() => setActive("progress")}
+            collapsed={sidebarCollapsed}
+            onToggleCollapsed={() => setSidebarCollapsed((v) => !v)}
           />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
             <TopBar

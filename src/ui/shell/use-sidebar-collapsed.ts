@@ -1,15 +1,15 @@
 /**
- * useMoveRailCollapsed — persisted boolean toggle for the drill move-history rail.
+ * useSidebarCollapsed — persisted boolean for desktop sidebar collapse state.
  *
- * Backed by localStorage key `tabiya.moveRailCollapsed`. Default expanded.
+ * Backed by localStorage key `tabiya.sidebarCollapsed`. Default expanded.
  * SSR-safe (returns false when window undefined).
  */
 
 import { useState, useCallback } from 'react';
 
-const KEY = 'tabiya.moveRailCollapsed';
+const KEY = 'tabiya.sidebarCollapsed';
 
-export function useMoveRailCollapsed(): [boolean, (v: boolean) => void] {
+export function useSidebarCollapsed(): [boolean, (v: boolean) => void] {
   const [collapsed, setCollapsedState] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     try {

@@ -33,6 +33,15 @@ type ChessBoardPanelProps = {
   /** Per-square background overlays (last-move highlight, hint highlight). */
   squareStyles?: Record<string, CSSProperties>;
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
+  /** Click-to-move: square the user clicked first; null if no piece selected. */
+  selectedSquare?: string | null;
+  /** Squares the selected piece can legally land on; rendered as green dots. */
+  legalDestSquares?: readonly string[];
+  /** Click handler for any square (incl. piece-occupied). Args mirror
+   *  react-chessboard's onSquareClick: `{ piece, square }`. */
+  onSquareClick?: (args: { piece: unknown; square: string }) => void;
+  /** Click handler for piece. Args mirror react-chessboard's onPieceClick. */
+  onPieceClick?: (args: { piece: unknown; square: string | null }) => void;
 };
 
 const wrapperStyle: CSSProperties = {
@@ -101,6 +110,10 @@ export function ChessBoardPanel({
   darkSquare,
   squareStyles,
   onPieceDrop,
+  selectedSquare,
+  legalDestSquares,
+  onSquareClick,
+  onPieceClick,
 }: ChessBoardPanelProps) {
   const { theme } = useBoardTheme();
   const { pieces: pieceRenderObject } = usePieceSet();
@@ -120,25 +133,69 @@ export function ChessBoardPanel({
     return onPieceDrop({ sourceSquare, targetSquare });
   };
 
+  const legalDestSet = legalDestSquares ? new Set(legalDestSquares) : null;
+
   const squareRenderer = ({
     square,
+    piece,
     children,
   }: {
     square: string;
+    piece?: unknown;
     children?: React.ReactNode;
   }): React.JSX.Element => {
     const isFlash = flashOverlay !== null && flashOverlay.square === square;
     const custom = squareStyles?.[square];
+    const isSelected = selectedSquare === square;
+    const isLegalDest = legalDestSet?.has(square) ?? false;
+    const occupied = piece !== null && piece !== undefined;
     return (
       <div
         style={{
           position: 'relative',
           width: '100%',
           height: '100%',
+          ...(isSelected ? { backgroundColor: 'rgba(155, 199, 0, 0.55)' } : null),
           ...custom,
         }}
       >
         {children}
+        {isLegalDest && (
+          // Lichess-style hint: small dot on empty squares, ring on captures.
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'none',
+              zIndex: 4,
+            }}
+          >
+            {occupied ? (
+              <div
+                style={{
+                  width: '88%',
+                  height: '88%',
+                  borderRadius: '50%',
+                  border: '4px solid rgba(40, 40, 40, 0.32)',
+                  boxSizing: 'border-box',
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: '28%',
+                  height: '28%',
+                  borderRadius: '50%',
+                  background: 'rgba(40, 40, 40, 0.32)',
+                }}
+              />
+            )}
+          </div>
+        )}
         {isFlash && flashOverlay.kind === 'correct' ? TICK_SVG : null}
         {isFlash && flashOverlay.kind === 'wrong' ? CROSS_SVG : null}
       </div>
@@ -164,6 +221,8 @@ export function ChessBoardPanel({
           darkSquareStyle: { backgroundColor: darkSq },
           squareStyles: squareStyles ?? {},
           squareRenderer,
+          ...(onSquareClick ? { onSquareClick } : {}),
+          ...(onPieceClick ? { onPieceClick } : {}),
           ...(pieceRenderObject ? { pieces: pieceRenderObject } : {}),
         }}
       />

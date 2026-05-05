@@ -25,8 +25,8 @@ export function DashboardPage() {
         title="Coming soon"
         body="Lines mastered, accuracy trends, practice rhythm, and your suggested next drill all appear here once the SRS scheduler ships."
         action={
-          <Link to="/drill" style={{ textDecoration: 'none' }}>
-            <Button variant="primary">Start drilling →</Button>
+          <Link to="/repertoire" style={{ textDecoration: 'none' }}>
+            <Button variant="primary">Browse repertoire →</Button>
           </Link>
         }
       />

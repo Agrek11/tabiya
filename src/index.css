@@ -72,7 +72,4 @@ body {
   .tabiya-drill-layout {
     grid-template-columns: 1fr !important;
   }
-  .tabiya-drill-rail {
-    display: none;
-  }
 }

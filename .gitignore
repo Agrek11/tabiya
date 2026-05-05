@@ -30,6 +30,11 @@ htmlcov/
 # Catalog build cache
 scripts/.cache/
 
+# Design screenshots — kept locally for reference, not in repo
+Screenshot*.png
+Screenshot*.jpg
+Screenshot*.jpeg
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

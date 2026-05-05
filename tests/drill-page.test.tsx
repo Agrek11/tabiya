@@ -1,6 +1,8 @@
 /**
- * Render test for DrillPage — confirms loading → ready transition with a
- * mock OpeningRepository injected via _setRepositoryForTesting.
+ * Render tests for DrillPage — wireframe v1.1 layout.
+ *
+ * Confirms loading → ready transition, error state, hint button presence,
+ * collapsible move-history disclosure (default closed), and next-move accent.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -122,7 +124,7 @@ describe('DrillPage', () => {
     });
   });
 
-  it('renders the Hint button and keyboard shortcut hint', async () => {
+  it('renders Restart, Skip, and Hint action chips', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
@@ -130,12 +132,13 @@ describe('DrillPage', () => {
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getAllByRole('button', { name: /hint/i }).length).toBeGreaterThan(0);
+      expect(screen.getByRole('button', { name: /^restart$/i })).toBeTruthy();
     });
-    expect(screen.getAllByText(/H hint/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /^skip$/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^hint$/i })).toBeTruthy();
   });
 
-  it('collapses the move history rail when collapse button clicked', async () => {
+  it('renders the mode dropdown defaulting to Theory', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
@@ -143,37 +146,33 @@ describe('DrillPage', () => {
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getByText(/Move history/i)).toBeTruthy();
+      expect(screen.getByRole('button', { name: /switch mode/i })).toBeTruthy();
     });
-
-    const collapseBtn = screen.getByRole('button', { name: /collapse move history/i });
-    fireEvent.click(collapseBtn);
-
-    await waitFor(() => {
-      expect(screen.queryByText(/Move history/i)).toBeNull();
-    });
-
-    // Floating expand pill is rendered when collapsed.
-    expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
-    expect(window.localStorage.getItem('tabiya.moveRailCollapsed')).toBe('1');
+    expect(screen.getAllByText(/Theory/i).length).toBeGreaterThan(0);
   });
 
-  it('restores collapsed rail on mount when localStorage flag set', async () => {
-    window.localStorage.setItem('tabiya.moveRailCollapsed', '1');
+  it('move history is open by default and toggles closed on click', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
     renderWithProviders(<DrillPage />, { route: '/drill' });
     repo.resolveLater();
 
+    const toggle = await screen.findByRole('button', { name: /toggle move history/i });
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByTestId('move-cell-0')).toBeTruthy();
+
+    fireEvent.click(toggle);
+
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
+      expect(toggle.getAttribute('aria-expanded')).toBe('false');
     });
-    expect(screen.queryByText(/Move history/i)).toBeNull();
+    expect(screen.queryByTestId('move-cell-0')).toBeNull();
+    expect(window.localStorage.getItem('tabiya.drillHistoryOpen')).toBe('0');
   });
 
-  it('expands rail again from floating pill', async () => {
-    window.localStorage.setItem('tabiya.moveRailCollapsed', '1');
+  it('restores history closed on mount when localStorage flag set to 0', async () => {
+    window.localStorage.setItem('tabiya.drillHistoryOpen', '0');
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
@@ -181,15 +180,11 @@ describe('DrillPage', () => {
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /show move history/i })).toBeTruthy();
+      expect(screen.getByRole('button', { name: /toggle move history/i })).toBeTruthy();
     });
-
-    fireEvent.click(screen.getByRole('button', { name: /show move history/i }));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Move history/i)).toBeTruthy();
-    });
-    expect(window.localStorage.getItem('tabiya.moveRailCollapsed')).toBe('0');
+    const toggle = screen.getByRole('button', { name: /toggle move history/i });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByTestId('move-cell-0')).toBeNull();
   });
 
   it('renders next-move accent on the expected ply during awaiting_player', async () => {
@@ -200,14 +195,25 @@ describe('DrillPage', () => {
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getByText(/Move history/i)).toBeTruthy();
+      expect(screen.getByTestId('move-cell-0')).toBeTruthy();
     });
 
-    // playerColor = 'white' (opening.color), so initial state is awaiting_player
+    // playerColor = 'white' (opening.color), initial state = awaiting_player
     // at lineIndex 0. Cell index 0 is the next-expected ply ('e4').
     const cell0 = screen.getByTestId('move-cell-0');
     expect(cell0.style.color).toMatch(/rgb/);  // accent color applied
-    // borderBottom should be styled (accent line) — read computed style.
     expect(cell0.style.borderBottom).toContain('2px solid');
+  });
+
+  it('renders the progress bar', async () => {
+    const repo = new MockRepo();
+    _setRepositoryForTesting(repo);
+
+    renderWithProviders(<DrillPage />, { route: '/drill' });
+    repo.resolveLater();
+
+    await waitFor(() => {
+      expect(screen.getByRole('progressbar')).toBeTruthy();
+    });
   });
 });

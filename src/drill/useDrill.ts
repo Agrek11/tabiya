@@ -201,6 +201,10 @@ export type UseDrillReturn = {
   stepBack: () => void;
   stepForward: () => void;
   restart: () => void;
+  /** Legal destination squares for a piece on `square`. Empty if it's not the
+   *  player's turn to move that piece. Used by click-to-move UI to render
+   *  green dots on legal squares after the user clicks one of their pieces. */
+  legalMovesFrom: (square: string) => string[];
 };
 
 export function useDrill(
@@ -413,6 +417,27 @@ export function useDrill(
     // recompute on state change (chess.js is mutable)
   }, [state, chess]);
 
+  const legalMovesFrom = useCallback(
+    (square: string): string[] => {
+      if (state.kind !== 'awaiting_player') return [];
+      // chess.js verbose moves include `from`/`to`/`piece`/`color`. Filter to
+      // pieces of the player's color so clicks on opponent pieces (or empty
+      // squares passed in by mistake) yield no destinations.
+      try {
+        const moves = chess.moves({ square, verbose: true }) as Array<{
+          from: string;
+          to: string;
+          color: 'w' | 'b';
+        }>;
+        const playerCode = playerColor === 'white' ? 'w' : 'b';
+        return moves.filter((m) => m.color === playerCode).map((m) => m.to);
+      } catch {
+        return [];
+      }
+    },
+    [state, chess, playerColor]
+  );
+
   return {
     state,
     fen: chess.fen(),
@@ -430,5 +455,6 @@ export function useDrill(
     stepBack,
     stepForward,
     restart,
+    legalMovesFrom,
   };
 }
