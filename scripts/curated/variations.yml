@@ -1,0 +1,214 @@
+# Curated variations — middle layer between Family and Line.
+#
+# 8 Tier 1 families × ~3 variations each = ~24 variations production v1.
+# Tier 2/3 families seed with fewer variations or stub entries.
+
+variations:
+  # ═══════════════════════════════════════════════════════════
+  # Spanish (Ruy Lopez)
+  # ═══════════════════════════════════════════════════════════
+  - id: spanish-closed
+    family_id: spanish
+    name: Closed Spanish
+    eco: C84
+    color: white
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3"
+
+  - id: spanish-berlin
+    family_id: spanish
+    name: Berlin Defense
+    eco: C67
+    color: black
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6"
+
+  - id: spanish-marshall
+    family_id: spanish
+    name: Marshall Attack
+    eco: C89
+    color: black
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. c3 d5"
+
+  # ═══════════════════════════════════════════════════════════
+  # Italian
+  # ═══════════════════════════════════════════════════════════
+  - id: italian-giuoco-piano
+    family_id: italian
+    name: Giuoco Pianissimo
+    eco: C50
+    color: white
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d3"
+
+  - id: italian-two-knights
+    family_id: italian
+    name: Two Knights Defense
+    eco: C57
+    color: black
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6"
+
+  - id: italian-evans-gambit
+    family_id: italian
+    name: Evans Gambit
+    eco: C51
+    color: white
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4"
+
+  # ═══════════════════════════════════════════════════════════
+  # Sicilian
+  # ═══════════════════════════════════════════════════════════
+  - id: sicilian-najdorf
+    family_id: sicilian
+    name: Najdorf
+    eco: B90
+    color: black
+    trunk_pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6"
+
+  - id: sicilian-dragon
+    family_id: sicilian
+    name: Dragon
+    eco: B70
+    color: black
+    trunk_pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6"
+
+  - id: sicilian-sveshnikov
+    family_id: sicilian
+    name: Sveshnikov
+    eco: B33
+    color: black
+    trunk_pgn: "1. e4 c5 2. Nf3 Nc6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 e5"
+
+  - id: sicilian-alapin
+    family_id: sicilian
+    name: Alapin (Anti-Sicilian)
+    eco: B22
+    color: white
+    trunk_pgn: "1. e4 c5 2. c3"
+
+  # ═══════════════════════════════════════════════════════════
+  # French
+  # ═══════════════════════════════════════════════════════════
+  - id: french-winawer
+    family_id: french
+    name: Winawer
+    eco: C18
+    color: black
+    trunk_pgn: "1. e4 e6 2. d4 d5 3. Nc3 Bb4"
+
+  - id: french-classical
+    family_id: french
+    name: Classical French
+    eco: C11
+    color: black
+    trunk_pgn: "1. e4 e6 2. d4 d5 3. Nc3 Nf6"
+
+  - id: french-advance
+    family_id: french
+    name: Advance Variation
+    eco: C02
+    color: white
+    trunk_pgn: "1. e4 e6 2. d4 d5 3. e5"
+
+  # ═══════════════════════════════════════════════════════════
+  # Caro-Kann
+  # ═══════════════════════════════════════════════════════════
+  - id: caro-kann-classical
+    family_id: caro-kann
+    name: Classical Caro-Kann
+    eco: B18
+    color: black
+    trunk_pgn: "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Bf5"
+
+  - id: caro-kann-advance
+    family_id: caro-kann
+    name: Advance Caro-Kann
+    eco: B12
+    color: white
+    trunk_pgn: "1. e4 c6 2. d4 d5 3. e5"
+
+  - id: caro-kann-exchange
+    family_id: caro-kann
+    name: Exchange Caro-Kann
+    eco: B13
+    color: white
+    trunk_pgn: "1. e4 c6 2. d4 d5 3. exd5 cxd5"
+
+  # ═══════════════════════════════════════════════════════════
+  # Queen's Gambit Declined
+  # ═══════════════════════════════════════════════════════════
+  - id: qgd-orthodox
+    family_id: queens-gambit-declined
+    name: Orthodox Defense
+    eco: D63
+    color: black
+    trunk_pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7"
+
+  - id: qgd-tartakower
+    family_id: queens-gambit-declined
+    name: Tartakower Defense
+    eco: D58
+    color: black
+    trunk_pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 h6 7. Bh4 b6"
+
+  - id: qgd-exchange
+    family_id: queens-gambit-declined
+    name: Exchange Variation
+    eco: D35
+    color: white
+    trunk_pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5"
+
+  # ═══════════════════════════════════════════════════════════
+  # King's Indian Defense
+  # ═══════════════════════════════════════════════════════════
+  - id: kid-mar-del-plata
+    family_id: kings-indian
+    name: Mar del Plata
+    eco: E97
+    color: black
+    trunk_pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7"
+
+  - id: kid-saemisch
+    family_id: kings-indian
+    name: Sämisch System
+    eco: E80
+    color: white
+    trunk_pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. f3"
+
+  - id: kid-fianchetto
+    family_id: kings-indian
+    name: Fianchetto Variation
+    eco: E62
+    color: white
+    trunk_pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. g3"
+
+  # ═══════════════════════════════════════════════════════════
+  # London System
+  # ═══════════════════════════════════════════════════════════
+  - id: london-modern
+    family_id: london
+    name: Modern London
+    eco: D02
+    color: white
+    trunk_pgn: "1. d4 d5 2. Nf3 Nf6 3. Bf4"
+
+  - id: london-anti-kid
+    family_id: london
+    name: London vs King's Indian
+    eco: A48
+    color: white
+    trunk_pgn: "1. d4 Nf6 2. Bf4 g6"
+
+  - id: london-jobava
+    family_id: london
+    name: Jobava London
+    eco: D00
+    color: white
+    trunk_pgn: "1. d4 d5 2. Nc3 Nf6 3. Bf4"
+
+  # ═══════════════════════════════════════════════════════════
+  # Tier 2 sample variation (Scotch)
+  # ═══════════════════════════════════════════════════════════
+  - id: scotch-classical
+    family_id: scotch
+    name: Scotch Classical
+    eco: C45
+    color: white
+    trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Bc5"

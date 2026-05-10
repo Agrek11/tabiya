@@ -10,27 +10,70 @@ import type { Catalog } from '../src/storage/types';
 
 const SAMPLE: Catalog = {
   version: '2026-05-03',
+  families: [
+    {
+      id: 'open-games',
+      name: 'Open Games',
+      category: 'open',
+      eco_range: 'C20-C99',
+      tier: 1,
+      opening_ids: ['ruy-lopez', 'italian-game'],
+    },
+    {
+      id: 'closed-games',
+      name: 'Closed Games',
+      category: 'closed',
+      eco_range: 'D00-D69',
+      tier: 1,
+      opening_ids: ['queens-gambit'],
+    },
+    {
+      id: 'gambits',
+      name: 'Gambits',
+      category: 'gambit',
+      eco_range: '',
+      tier: 3,
+      opening_ids: ['italian-game'],
+    },
+  ],
+  variations: [
+    {
+      id: 'spanish-closed',
+      family_id: 'open-games',
+      name: 'Closed Spanish',
+      eco: 'C84',
+      color: 'white',
+      trunk_moves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'],
+      line_ids: ['ruy-lopez-main'],
+    },
+  ],
   openings: [
     {
       id: 'ruy-lopez',
+      family_id: 'open-games',
       name: 'Ruy Lopez',
       eco: 'C60-C99',
       color: 'black',
       line_ids: ['ruy-lopez-main'],
+      is_gambit: false,
     },
     {
       id: 'italian-game',
+      family_id: 'open-games',
       name: 'Italian Game',
       eco: 'C50-C59',
       color: 'black',
       line_ids: ['italian-game-main'],
+      is_gambit: true,
     },
     {
       id: 'queens-gambit',
+      family_id: 'closed-games',
       name: "Queen's Gambit",
       eco: 'D06-D69',
       color: 'white',
       line_ids: ['queens-gambit-main'],
+      is_gambit: false,
     },
   ],
   lines: [
@@ -177,6 +220,85 @@ describe('JsonOpeningRepository', () => {
     it('returns all lines when query is empty', async () => {
       mockFetchSuccess(SAMPLE);
       expect(await repo.searchLines({})).toHaveLength(3);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Family layer (Phase 0d.3)
+  // -------------------------------------------------------------------------
+
+  describe('families', () => {
+    it('listFamilies returns all families', async () => {
+      mockFetchSuccess(SAMPLE);
+      const result = await repo.listFamilies();
+      expect(result).toHaveLength(3);
+      expect(result.map((f) => f.id)).toEqual(['open-games', 'closed-games', 'gambits']);
+    });
+
+    it('getFamily returns the matching family', async () => {
+      mockFetchSuccess(SAMPLE);
+      const fam = await repo.getFamily('open-games');
+      expect(fam?.name).toBe('Open Games');
+      expect(fam?.opening_ids).toEqual(['ruy-lopez', 'italian-game']);
+    });
+
+    it('getFamily returns null for unknown id', async () => {
+      mockFetchSuccess(SAMPLE);
+      expect(await repo.getFamily('nope')).toBeNull();
+    });
+
+    it('listOpeningsByFamily filters by family_id', async () => {
+      mockFetchSuccess(SAMPLE);
+      const ops = await repo.listOpeningsByFamily('open-games');
+      expect(ops.map((o) => o.id).sort()).toEqual(['italian-game', 'ruy-lopez']);
+    });
+
+    it('listOpeningsByFamily returns empty for unknown family', async () => {
+      mockFetchSuccess(SAMPLE);
+      expect(await repo.listOpeningsByFamily('nope')).toEqual([]);
+    });
+
+    it('listGambits returns only openings flagged is_gambit', async () => {
+      mockFetchSuccess(SAMPLE);
+      const gambits = await repo.listGambits();
+      expect(gambits).toHaveLength(1);
+      expect(gambits[0]!.id).toBe('italian-game');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Variations (curated v2)
+  // -------------------------------------------------------------------------
+
+  describe('variations', () => {
+    it('listVariations returns all variations', async () => {
+      mockFetchSuccess(SAMPLE);
+      const result = await repo.listVariations();
+      expect(result).toHaveLength(1);
+      expect(result[0]!.id).toBe('spanish-closed');
+    });
+
+    it('getVariation returns the matching variation', async () => {
+      mockFetchSuccess(SAMPLE);
+      const v = await repo.getVariation('spanish-closed');
+      expect(v?.name).toBe('Closed Spanish');
+    });
+
+    it('getVariation returns null for unknown id', async () => {
+      mockFetchSuccess(SAMPLE);
+      expect(await repo.getVariation('nope')).toBeNull();
+    });
+
+    it('listVariationsByFamily filters by family_id', async () => {
+      mockFetchSuccess(SAMPLE);
+      const list = await repo.listVariationsByFamily('open-games');
+      expect(list).toHaveLength(1);
+      expect(list[0]!.id).toBe('spanish-closed');
+    });
+
+    it('listVariationsByFamily returns empty for unknown family', async () => {
+      mockFetchSuccess(SAMPLE);
+      expect(await repo.listVariationsByFamily('nope')).toEqual([]);
     });
   });
 

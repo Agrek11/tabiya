@@ -6,9 +6,12 @@ import chess
 
 from scripts.tabiya_build.whitelist import (
     DEFAULT_DEPTH,
+    TARGET_FAMILIES,
     TARGET_OPENINGS,
+    FamilySpec,
     OpeningSpec,
     filter_openings,
+    get_family,
     get_opening,
 )
 
@@ -126,3 +129,49 @@ def test_all_openings_typed_correctly() -> None:
         assert spec.display_name
         assert spec.eco_range
         assert spec.seed_pgn
+
+
+# ---------------------------------------------------------------------------
+# Phase 0d.3 — Family layer
+# ---------------------------------------------------------------------------
+
+
+class TestFamilyLayer:
+    def test_families_seeded(self) -> None:
+        ids = {f.id for f in TARGET_FAMILIES}
+        assert {"open-games", "semi-open", "closed-games", "indian-defenses", "flank", "gambits"} <= ids
+
+    def test_family_spec_typed_correctly(self) -> None:
+        for fam in TARGET_FAMILIES:
+            assert isinstance(fam, FamilySpec)
+            assert fam.id
+            assert fam.display_name
+            assert fam.category in (
+                "open",
+                "semi-open",
+                "closed",
+                "indian",
+                "flank",
+                "gambit",
+                "uncategorized",
+            )
+
+    def test_every_opening_has_known_family_id(self) -> None:
+        family_ids = {f.id for f in TARGET_FAMILIES}
+        for spec in TARGET_OPENINGS:
+            assert spec.family_id, f"opening {spec.id!r} has empty family_id"
+            assert spec.family_id in family_ids, (
+                f"opening {spec.id!r} references unknown family {spec.family_id!r}"
+            )
+
+    def test_get_family(self) -> None:
+        assert get_family("open-games") is not None
+        assert get_family("does-not-exist") is None
+
+    def test_queens_gambit_classified_as_closed_not_gambit(self) -> None:
+        """Queen's Gambit is named 'gambit' but the c4 pawn returns; chess
+        convention places it under closed games. Gambits flag must be False."""
+        spec = get_opening("queens-gambit")
+        assert spec is not None
+        assert spec.family_id == "closed-games"
+        assert spec.is_gambit is False

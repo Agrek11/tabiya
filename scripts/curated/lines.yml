@@ -1,0 +1,416 @@
+# Curated lines — concrete drillable sequences.
+#
+# Each line belongs to a Variation (variation_id). Lines are 12-20 ply,
+# chosen to cover the most common continuations after the variation trunk.
+#
+# Fork annotations capture decision points without spawning new line nodes.
+# Each fork: ply_index (0-based into moves array) + alternatives + label.
+#
+# Tier 1 family coverage: 24 lines across 8 families. Tier 2/3 stubs added
+# below for Tier 2 and Tier 3 families that have variations.
+#
+# Format note: pgn is the FULL line including trunk + extension; the build
+# script parses it via python-chess and validates depth ≤ 20 ply.
+
+lines:
+  # ═══════════════════════════════════════════════════════════
+  # Spanish lines
+  # ═══════════════════════════════════════════════════════════
+  - id: spanish-closed-main
+    variation_id: spanish-closed
+    name: Breyer Variation (9...Nb8)
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Nb8 10. d4"
+    forks:
+      - ply_index: 17
+        alternatives: ["Na5", "Nd7", "Bb7"]
+        label: "9...Nb8 Breyer / 9...Na5 Chigorin / 9...Bb7 Zaitsev"
+        rationale: "Three mainline retreats; choice shapes the middlegame plan."
+    strategic_notes:
+      - "White builds slow kingside with d4 + Nbd2 + Nf1-g3."
+      - "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
+
+  - id: spanish-closed-chigorin
+    variation_id: spanish-closed
+    name: Chigorin Variation (9...Na5)
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2"
+    strategic_notes:
+      - "Black exiles the bishop with ...Na5 + ...c5 to challenge the center."
+      - "Classical mainline; popular in mid-20th-century Soviet schools."
+    forks:
+      - ply_index: 17  # 9th move; 0-indexed white move 9
+        alternatives: ["Na5", "Nd7", "Bb7"]
+        label: "Black's 9th: Breyer (Nb8), Chigorin (Na5), Zaitsev (Bb7)"
+        rationale: "Three mainline retreats; choice shapes the middlegame plan."
+    strategic_notes:
+      - "White builds slow kingside with d4 + Nbd2 + Nf1-g3."
+      - "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
+
+  - id: spanish-berlin-main
+    variation_id: spanish-berlin
+    name: Berlin Defense Endgame
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. O-O Nxe4 5. d4 Nd6 6. Bxc6 dxc6 7. dxe5 Nf5 8. Qxd8+ Kxd8 9. Nc3 h6 10. Rd1+ Ke8"
+    strategic_notes:
+      - "Black trades queens early; defensive setup but Black's bishop pair compensates."
+      - "Endgame technique decides: Black aims for ...Bd7, ...c5, activate king."
+
+  - id: spanish-berlin-anti
+    variation_id: spanish-berlin
+    name: Anti-Berlin (4.d3)
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 Nf6 4. d3 Bc5 5. c3 O-O 6. O-O d6 7. Re1 a6 8. Ba4 Ba7 9. Nbd2"
+    strategic_notes:
+      - "White avoids the Berlin endgame by keeping the queens on with d3."
+      - "Closer to Italian-style maneuvering than classical Berlin theory."
+
+  - id: spanish-marshall-main
+    variation_id: spanish-marshall
+    name: Marshall Attack Main Line
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. c3 d5 9. exd5 Nxd5 10. Nxe5 Nxe5"
+    forks:
+      - ply_index: 13
+        alternatives: ["a4", "h3", "d3"]
+        label: "Anti-Marshall (8.a4 / 8.h3 / 8.d3)"
+        rationale: "Avoiding Marshall is now mainstream at GM level; 8.c3 invites it."
+    strategic_notes:
+      - "Black sacrifices a pawn for kingside attack."
+      - "White must defend precisely; long-term Black's piece activity is critical."
+
+  - id: spanish-marshall-anti-a4
+    variation_id: spanish-marshall
+    name: Anti-Marshall 8.a4
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. a4 Bb7 9. d3 d6 10. Nbd2"
+    strategic_notes:
+      - "White sidesteps Marshall by undermining b5 with a4."
+      - "Quiet positional fight; Black gives up Marshall counterplay for solid setup."
+
+  # ═══════════════════════════════════════════════════════════
+  # Italian lines
+  # ═══════════════════════════════════════════════════════════
+  - id: italian-giuoco-pianissimo-main
+    variation_id: italian-giuoco-piano
+    name: Pianissimo Mainline
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d3 d6 6. O-O O-O 7. h3 a6 8. Re1 Ba7 9. Nbd2 h6 10. Nf1"
+
+  - id: italian-modern-d4
+    variation_id: italian-giuoco-piano
+    name: Modern Italian (4.d4)
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. d4 exd4 5. O-O Nf6 6. e5 d5 7. Bb5 Ne4 8. Nxd4 Bd7"
+    strategic_notes:
+      - "White breaks immediately for an open game and IQP-style play."
+      - "Sharper than the slow Pianissimo; popular in modern engine prep."
+    forks:
+      - ply_index: 7  # white move 4: c3
+        alternatives: ["d4", "Nc3"]
+        label: "Italian mainline 4.c3 vs Two Knights / Italian Four Knights"
+        rationale: "Modern Italian preference; slow build."
+    strategic_notes:
+      - "Both sides develop quietly toward h3 / h6 with Nbd2-f1-g3 / Nbd7-f8-g6."
+      - "White looks for kingside expansion; Black plays ...Re8 + central break."
+
+  - id: italian-two-knights-main
+    variation_id: italian-two-knights
+    name: Two Knights Mainline
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Na5 6. Bb5+ c6 7. dxc6 bxc6 8. Be2 h6 9. Nf3 e4 10. Ne5 Bd6"
+
+  - id: italian-fried-liver
+    variation_id: italian-two-knights
+    name: Fried Liver Attack
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Nf6 4. Ng5 d5 5. exd5 Nxd5 6. Nxf7 Kxf7 7. Qf3+ Ke6 8. Nc3 Ncb4"
+    strategic_notes:
+      - "White sacs a knight for direct king-hunt; Black's king walks to e6."
+      - "Trappy at club level; essential to know defenses (...Ncb4 main)."
+    forks:
+      - ply_index: 7  # white 4.Ng5
+        alternatives: ["d4", "d3", "Nc3"]
+        label: "4.Ng5 (sharp) vs 4.d4 (Modern Italian) vs 4.d3 (slow)"
+    strategic_notes:
+      - "Black sacrifices a pawn for piece activity and lead in development."
+      - "Critical position: White must consolidate while Black hunts the king."
+
+  - id: italian-evans-gambit-main
+    variation_id: italian-evans-gambit
+    name: Evans Gambit Main Line
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bxb4 5. c3 Ba5 6. d4 exd4 7. O-O d6 8. cxd4 Bb6 9. Nc3 Bg4 10. Bb2"
+    forks:
+      - ply_index: 9  # 5...Ba5
+        alternatives: ["Bc5", "Be7", "Bd6"]
+        label: "Black's 5th retreat: Ba5 main / Bc5 Lasker / Be7 Schlechter"
+    strategic_notes:
+      - "White sacs a pawn to gain time + central control."
+      - "Practical sharp line; lower-rated opponents often crumble under pressure."
+
+  # ═══════════════════════════════════════════════════════════
+  # Sicilian lines
+  # ═══════════════════════════════════════════════════════════
+  - id: sicilian-najdorf-english-attack
+    variation_id: sicilian-najdorf
+    name: English Attack
+    pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3 Be7 9. Qd2 O-O 10. O-O-O"
+    strategic_notes:
+      - "Both sides castle opposite; race begins."
+      - "White attacks with g4-g5 + h4-h5; Black with ...b5-b4 + ...a5-a4."
+
+  - id: sicilian-najdorf-classical
+    variation_id: sicilian-najdorf
+    name: Classical (6.Be2)
+    pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be2 e5 7. Nb3 Be7 8. O-O O-O 9. Re1 Nbd7"
+    strategic_notes:
+      - "White plays positionally — kingside castle, slow buildup."
+      - "Less theory than English Attack; suits classical-style players."
+
+  - id: sicilian-najdorf-poisoned-pawn
+    variation_id: sicilian-najdorf
+    name: Poisoned Pawn (6.Bg5)
+    pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Bg5 e6 7. f4 Qb6 8. Qd2 Qxb2 9. Rb1 Qa3"
+    strategic_notes:
+      - "Black grabs the b2 pawn; sharpest line in chess theory."
+      - "Both sides need deep memorization; Fischer's signature."
+
+  - id: sicilian-dragon-yugoslav
+    variation_id: sicilian-dragon
+    name: Yugoslav Attack
+    pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 6. Be3 Bg7 7. f3 O-O 8. Qd2 Nc6 9. Bc4 Bd7 10. O-O-O"
+    strategic_notes:
+      - "Sharp opposite-side castling. 'Open the h-file and mate' — Fischer."
+      - "Black's main idea: ...Rc8, ...Ne5, ...a6, ...b5 with Nxc3 sac options."
+
+  - id: sicilian-dragon-classical
+    variation_id: sicilian-dragon
+    name: Classical (6.Be2)
+    pgn: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 6. Be2 Bg7 7. O-O O-O 8. Be3 Nc6 9. Nb3 Be6"
+    strategic_notes:
+      - "White castles short; calmer than the Yugoslav."
+      - "Black plays ...Be6 + ...d5 break; positional Sicilian."
+
+  - id: sicilian-sveshnikov-main
+    variation_id: sicilian-sveshnikov
+    name: Sveshnikov Main Line
+    pgn: "1. e4 c5 2. Nf3 Nc6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 e5 6. Ndb5 d6 7. Bg5 a6 8. Na3 b5 9. Nd5 Be7 10. Bxf6 Bxf6"
+    forks:
+      - ply_index: 13  # white 7.Bg5
+        alternatives: ["Nd5"]
+        label: "7.Bg5 Main / 7.Nd5 Direct"
+    strategic_notes:
+      - "Black accepts a positional weakness on d5 in exchange for activity."
+      - "Modern theory considers it fully equal; very popular at top level (Magnus uses it)."
+
+  - id: sicilian-alapin-main
+    variation_id: sicilian-alapin
+    name: Alapin Main Line
+    pgn: "1. e4 c5 2. c3 Nf6 3. e5 Nd5 4. d4 cxd4 5. Nf3 Nc6 6. cxd4 d6 7. Bc4 Nb6 8. Bb5 dxe5 9. Nxe5 Bd7 10. Nxd7 Qxd7"
+    forks:
+      - ply_index: 3  # black 2nd
+        alternatives: ["d5", "e6"]
+        label: "2...Nf6 / 2...d5 / 2...e6 — three black tries vs Alapin"
+    strategic_notes:
+      - "White avoids open Sicilian theory; aims for IQP play."
+      - "Solid practical choice for white below master level."
+
+  # ═══════════════════════════════════════════════════════════
+  # French lines
+  # ═══════════════════════════════════════════════════════════
+  - id: french-winawer-main
+    variation_id: french-winawer
+    name: Winawer Poisoned (7.Qg4)
+    pgn: "1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Qg4 Qc7 8. Qxg7 Rg8 9. Qxh7 cxd4"
+    strategic_notes:
+      - "White grabs g7 / h7 pawns; Black gets central breaks + open lines."
+      - "Sharpest French line; both sides accept structural damage for activity."
+
+  - id: french-winawer-positional
+    variation_id: french-winawer
+    name: Winawer Positional (7.Nf3)
+    pgn: "1. e4 e6 2. d4 d5 3. Nc3 Bb4 4. e5 c5 5. a3 Bxc3+ 6. bxc3 Ne7 7. Nf3 Nbc6 8. Bd3 Qa5 9. Bd2"
+    strategic_notes:
+      - "Quieter alternative to 7.Qg4; White consolidates instead of grabbing pawns."
+      - "Black plays ...Qa5 + ...Nbc6 to pressure c3."
+
+  - id: french-classical-main
+    variation_id: french-classical
+    name: Classical French Steinitz
+    pgn: "1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bg5 Be7 5. e5 Nfd7 6. Bxe7 Qxe7 7. f4 O-O 8. Nf3 c5 9. Bd3"
+    forks:
+      - ply_index: 7  # white 4.Bg5
+        alternatives: ["e5"]
+        label: "4.Bg5 Classical / 4.e5 Steinitz Variation"
+    strategic_notes:
+      - "Locked center; flank operations decide."
+      - "Black's main plan: ...c5 + ...f6 to challenge White's e5 chain."
+
+  - id: french-advance-main
+    variation_id: french-advance
+    name: Advance French Main Line
+    pgn: "1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3 Qb6 6. a3 Nh6 7. b4 cxd4 8. cxd4 Nf5 9. Bb2 Bd7"
+    forks:
+      - ply_index: 9  # black 5...Qb6
+        alternatives: ["Bd7", "Nge7"]
+        label: "5...Qb6 mainline / 5...Bd7 / 5...Nge7"
+    strategic_notes:
+      - "Pawn chain c3-d4-e5 vs c5-d5-e6; closed center."
+      - "Black undermines with ...c5 + ...f6; White holds with the Bd3-Nf3-O-O setup."
+
+  # ═══════════════════════════════════════════════════════════
+  # Caro-Kann lines
+  # ═══════════════════════════════════════════════════════════
+  - id: caro-kann-classical-main
+    variation_id: caro-kann-classical
+    name: Classical Caro-Kann Main Line
+    pgn: "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Bf5 5. Ng3 Bg6 6. h4 h6 7. Nf3 Nd7 8. h5 Bh7 9. Bd3 Bxd3"
+    strategic_notes:
+      - "Black trades the bishop and accepts slightly cramped position for solidity."
+      - "Long-term plan: ...c5, ...Nf6, ...Be7, equalize the structure."
+
+  - id: caro-kann-karpov
+    variation_id: caro-kann-classical
+    name: Karpov Variation (4...Nd7)
+    pgn: "1. e4 c6 2. d4 d5 3. Nc3 dxe4 4. Nxe4 Nd7 5. Ng5 Ngf6 6. Bd3 e6 7. N1f3 Bd6 8. Qe2 h6 9. Ne4"
+    strategic_notes:
+      - "Karpov's signature: ...Nd7 instead of ...Bf5."
+      - "Cramped but rock-solid; black aims for ...c5 + ...b6 break later."
+
+  - id: caro-kann-advance-main
+    variation_id: caro-kann-advance
+    name: Advance Caro-Kann Short Variation
+    pgn: "1. e4 c6 2. d4 d5 3. e5 Bf5 4. Nf3 e6 5. Be2 Nd7 6. O-O Bg6 7. Nbd2 Ne7 8. Nb3 Nb6 9. a4"
+    forks:
+      - ply_index: 5  # white 4.Nf3
+        alternatives: ["c4", "Nc3", "h4"]
+        label: "4.Nf3 Short / 4.c4 Modern / 4.Nc3 Tal / 4.h4 Wedge"
+    strategic_notes:
+      - "White seizes space; Black plays for ...c5 break."
+      - "Black bishop on g6 is fine outside the pawn chain."
+
+  - id: caro-kann-exchange-main
+    variation_id: caro-kann-exchange
+    name: Exchange Caro-Kann
+    pgn: "1. e4 c6 2. d4 d5 3. exd5 cxd5 4. Bd3 Nf6 5. c3 Nc6 6. Bf4 Bg4 7. Qb3 Qd7 8. Nd2 e6"
+    strategic_notes:
+      - "Symmetric pawn structure; small white edge from extra tempo."
+      - "Black aims for full equality with quick development + ...Bg4 / ...Qd7."
+
+  # ═══════════════════════════════════════════════════════════
+  # Queen's Gambit Declined lines
+  # ═══════════════════════════════════════════════════════════
+  - id: qgd-orthodox-main
+    variation_id: qgd-orthodox
+    name: Orthodox Capablanca (7.Rc1)
+    pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4 9. Bxc4 Nd5"
+    strategic_notes:
+      - "Black equalizes via the Capablanca freeing maneuver ...Nd5."
+      - "Solid 100-year-old line; still mainline at top level."
+
+  - id: qgd-orthodox-modern
+    variation_id: qgd-orthodox
+    name: Orthodox Modern (7.Qc2)
+    pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Qc2 c5 8. cxd5 Nxd5 9. Bxe7"
+    strategic_notes:
+      - "Modern engine-prep alternative — White presses with queen on c2."
+      - "More dynamic than Capablanca; often transposes to IQP positions."
+
+  - id: qgd-tartakower-main
+    variation_id: qgd-tartakower
+    name: Tartakower Defense Main Line
+    pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 h6 7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5"
+    strategic_notes:
+      - "Black solves the QGD bishop problem by fianchetto on b7."
+      - "Hanging-pawn structure (c+d) common; central activity vs flexibility tradeoff."
+
+  - id: qgd-exchange-main
+    variation_id: qgd-exchange
+    name: QGD Exchange Variation
+    pgn: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. cxd5 exd5 5. Bg5 Be7 6. e3 O-O 7. Bd3 Nbd7 8. Qc2 Re8 9. Nge2"
+    forks:
+      - ply_index: 11  # white 6.e3
+        alternatives: ["Nf3"]
+        label: "6.e3 (with Nge2 minority attack) / 6.Nf3 (more flexible)"
+    strategic_notes:
+      - "White launches minority attack b4-b5 to weaken Black's queenside."
+      - "Black counters with kingside play and active piece coordination."
+
+  # ═══════════════════════════════════════════════════════════
+  # King's Indian lines
+  # ═══════════════════════════════════════════════════════════
+  - id: kid-mar-del-plata-main
+    variation_id: kid-mar-del-plata
+    name: Mar del Plata Classical (9.Ne1)
+    pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7 9. Ne1 Nd7 10. Nd3 f5"
+    strategic_notes:
+      - "Closed center; opposite-flank attacks. Pure 'race' — kingside vs queenside."
+      - "Black plays ...f5-f4-g5; White plays b4-c5 + breaking on the queenside."
+
+  - id: kid-bayonet
+    variation_id: kid-mar-del-plata
+    name: Bayonet Attack (9.b4)
+    pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7 9. b4 Nh5 10. Re1 Nf4"
+    strategic_notes:
+      - "Aggressive queenside lever — White hits a5 + c5 break early."
+      - "Faster than Classical 9.Ne1; popularized by Kramnik."
+
+  - id: kid-saemisch-main
+    variation_id: kid-saemisch
+    name: Sämisch Main Line
+    pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. f3 O-O 6. Be3 e5 7. d5 Nh5 8. Qd2 f5 9. O-O-O"
+    forks:
+      - ply_index: 11  # black 6...e5
+        alternatives: ["c5", "Nc6"]
+        label: "6...e5 mainline / 6...c5 Panno / 6...Nc6"
+    strategic_notes:
+      - "White plays for a slow kingside attack with g4 + h4-h5 after castling long."
+      - "Black hits center with ...e5/...c5 and exploits the f3 weakness."
+
+  - id: kid-fianchetto-main
+    variation_id: kid-fianchetto
+    name: Fianchetto Variation Main Line
+    pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. g3 O-O 5. Bg2 d6 6. Nf3 Nbd7 7. O-O e5 8. e4 c6 9. h3"
+    forks:
+      - ply_index: 11  # black 6...Nbd7
+        alternatives: ["Nc6", "c5"]
+        label: "6...Nbd7 Classical / 6...Nc6 Panno / 6...c5 Yugoslav"
+    strategic_notes:
+      - "White's bishop on g2 controls the long diagonal; calmer than the Sämisch."
+      - "Quiet positional struggle; both sides build slowly."
+
+  # ═══════════════════════════════════════════════════════════
+  # London lines
+  # ═══════════════════════════════════════════════════════════
+  - id: london-modern-main
+    variation_id: london-modern
+    name: Modern London Main Line
+    pgn: "1. d4 d5 2. Nf3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nbd2 e6 6. c3 Bd6 7. Bg3 O-O 8. Bd3 b6 9. O-O Bb7"
+    forks:
+      - ply_index: 5  # black 3...c5
+        alternatives: ["Bf5", "e6", "c6"]
+        label: "3...c5 Direct / 3...Bf5 Symmetric / 3...e6 Classical"
+    strategic_notes:
+      - "White builds a bishop battery on b1-h7 for the kingside attack."
+      - "Black challenges the d4-pawn with c5; play around the central tension."
+
+  - id: london-anti-kid-main
+    variation_id: london-anti-kid
+    name: London vs King's Indian Main Line
+    pgn: "1. d4 Nf6 2. Bf4 g6 3. Nc3 Bg7 4. Qd2 d6 5. O-O-O O-O 6. e4 c5 7. d5"
+    strategic_notes:
+      - "White avoids classical KID theory by skipping c4."
+      - "Long-side castling gives White attacking chances; Black plays for ...b5 break."
+
+  - id: london-jobava-main
+    variation_id: london-jobava
+    name: Jobava London Main Line
+    pgn: "1. d4 d5 2. Nc3 Nf6 3. Bf4 c5 4. e3 Nc6 5. Nb5 Rb8 6. dxc5 a6 7. Nd6+ exd6 8. cxd6 Bxd6 9. Bxd6 Qxd6"
+    forks:
+      - ply_index: 9  # white 5.Nb5
+        alternatives: ["e3", "dxc5"]
+        label: "5.Nb5 Aggressive / 5.e3 Standard / 5.dxc5 Simple"
+    strategic_notes:
+      - "Sharp anti-classical setup popularized by GM Baadur Jobava."
+      - "Surprise weapon at club level; theory is light, ideas matter more than memorization."
+
+  # ═══════════════════════════════════════════════════════════
+  # Tier 2 placeholder line — Scotch (one example to validate Tier 2 path)
+  # ═══════════════════════════════════════════════════════════
+  - id: scotch-classical-main
+    variation_id: scotch-classical
+    name: Scotch Classical Main Line
+    pgn: "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Bc5 5. Be3 Qf6 6. c3 Nge7 7. Bc4 Ne5"
+    strategic_notes:
+      - "White trades center for piece play and open lines."
+      - "Practical alternative to Spanish/Italian; Magnus championed it 2010s."

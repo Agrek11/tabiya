@@ -18,6 +18,7 @@ import { useSidebarCollapsed } from './use-sidebar-collapsed';
 const PATH_TITLES: Record<string, { title: string; breadcrumb?: string }> = {
   '/': { title: 'Dashboard' },
   '/repertoire': { title: 'Repertoire' },
+  '/repertoire/gambits': { title: 'Gambits', breadcrumb: 'Repertoire' },
   '/drill': { title: '', breadcrumb: '' },
   '/progress': { title: 'Progress' },
   '/settings': { title: 'Settings' },

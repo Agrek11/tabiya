@@ -24,11 +24,12 @@
  *   - stepBack, stepForward, restart (button handlers)
  */
 
-import { useEffect, useReducer, useMemo, useState, useCallback } from 'react';
+import { useEffect, useReducer, useMemo, useRef, useState, useCallback } from 'react';
 import { Chess } from 'chess.js';
 import { compareMove, type MoveAttempt } from './move-comparator';
 import { SAMPLE_LINE_SAN } from './sample-line';
 import { playMove } from '../sound/sounds';
+import type { DrillResult } from '../storage/types';
 
 // ---------------------------------------------------------------------------
 // State machine
@@ -205,6 +206,10 @@ export type UseDrillReturn = {
    *  player's turn to move that piece. Used by click-to-move UI to render
    *  green dots on legal squares after the user clicks one of their pieces. */
   legalMovesFrom: (square: string) => string[];
+  /** Phase 1 — Per-drill counters & emitted result on completion.
+   *  `drillResult` is non-null only while `state.kind === 'complete'` and
+   *  reflects the just-finished drill's wrong/hint counters + duration. */
+  drillResult: DrillResult | null;
 };
 
 export function useDrill(
@@ -220,11 +225,46 @@ export function useDrill(
     makeInitial(line, playerColor)
   );
 
+  // -------------------------------------------------------------------------
+  // Phase 1 — Per-drill counters
+  //
+  // wrong_attempts increments on every wrong move (not on illegal — illegal
+  // moves are filtered out before they hit the reducer). hint_uses increments
+  // on every showHint() call that resolves to a real square. started_at is
+  // the wall-clock timestamp of the drill's first move OR mount, whichever
+  // first — used to compute duration_ms on completion.
+  // -------------------------------------------------------------------------
+  const wrongAttemptsRef = useRef(0);
+  const hintUsesRef = useRef(0);
+  const startedAtRef = useRef<number>(Date.now());
+  const [drillResult, setDrillResult] = useState<DrillResult | null>(null);
+
+  const resetCounters = useCallback((): void => {
+    wrongAttemptsRef.current = 0;
+    hintUsesRef.current = 0;
+    startedAtRef.current = Date.now();
+    setDrillResult(null);
+  }, []);
+
   // Reset chess + state when the active line OR player color changes.
   useEffect(() => {
     chess.reset();
     dispatch({ type: 'RESET' });
-  }, [line, playerColor, chess]);
+    resetCounters();
+  }, [line, playerColor, chess, resetCounters]);
+
+  // Emit DrillResult once on completion. Guarded by the result being null so
+  // re-renders don't fire it twice.
+  useEffect(() => {
+    if (state.kind !== 'complete') return;
+    if (drillResult !== null) return;
+    setDrillResult({
+      wrong_attempts: wrongAttemptsRef.current,
+      hint_uses: hintUsesRef.current,
+      duration_ms: Date.now() - startedAtRef.current,
+      completed_at: new Date().toISOString(),
+    });
+  }, [state, drillResult]);
 
   // Flash timer (only for flash_correct now — wrong_pending is persistent).
   useEffect(() => {
@@ -294,6 +334,7 @@ export function useDrill(
       // They must click Back to retry.
       chess.move(attempt);
       playMove();
+      wrongAttemptsRef.current += 1;
       dispatch({
         type: 'PLAYER_MOVE_ATTEMPTED',
         attempt,
@@ -363,7 +404,8 @@ export function useDrill(
     if (!canRestart) return;
     chess.reset();
     dispatch({ type: 'RESET' });
-  }, [canRestart, chess]);
+    resetCounters();
+  }, [canRestart, chess, resetCounters]);
 
   // -------------------------------------------------------------------------
   // Hint (one-shot)
@@ -380,6 +422,7 @@ export function useDrill(
       const m = chess.move(san);
       chess.undo();
       const fromSq = m?.from ?? null;
+      if (fromSq !== null) hintUsesRef.current += 1;
       setHintSquare(fromSq);
       // Tier escalation: if same square already shown, bump to 2; else start at 1.
       setHintTier((prev) => (prev === 1 && hintSquare === fromSq ? 2 : 1));
@@ -456,5 +499,6 @@ export function useDrill(
     stepForward,
     restart,
     legalMovesFrom,
+    drillResult,
   };
 }

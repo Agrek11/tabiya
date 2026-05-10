@@ -28,11 +28,15 @@ def write_catalog(catalog: Catalog, out_path: Path) -> int:
 
 def print_summary(catalog: Catalog, file_size_bytes: int) -> None:
     """Print a one-block summary to stdout."""
+    n_families = len(catalog.families)
+    n_variations = len(catalog.variations)
     n_openings = len(catalog.openings)
     n_lines = len(catalog.lines)
     print("─" * 60)
     print("tabiya catalog build")
     print(f"  version:    {catalog.version}")
+    print(f"  families:   {n_families}")
+    print(f"  variations: {n_variations}")
     print(f"  openings:   {n_openings}")
     print(f"  lines:      {n_lines}")
     print(f"  file size:  {file_size_bytes:,} bytes")

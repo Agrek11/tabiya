@@ -27,6 +27,7 @@ import {
 import { NavLink } from 'react-router-dom';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts, radius, sp } from '../../theme/tokens';
+import { useSRS } from '../../hooks/useSRS';
 
 type SidebarProps = {
   mobileOpen: boolean;
@@ -51,6 +52,8 @@ export function Sidebar({
   onToggleDesktop,
 }: SidebarProps) {
   const t = useTokens();
+  const { dueLineIds } = useSRS();
+  const dueCount = dueLineIds.length;
 
   return (
     <>
@@ -191,6 +194,7 @@ export function Sidebar({
               icon={it.icon}
               onClick={onCloseMobile}
               collapsed={desktopCollapsed}
+              badge={it.to === '/repertoire' && dueCount > 0 ? dueCount : undefined}
             />
           ))}
         </nav>
@@ -215,12 +219,14 @@ function NavItem({
   icon: Icon,
   onClick,
   collapsed,
+  badge,
 }: {
   to: string;
   label: string;
   icon: typeof Menu;
   onClick: () => void;
   collapsed: boolean;
+  badge?: number;
 }) {
   const t = useTokens();
   return (
@@ -242,12 +248,37 @@ function NavItem({
         fontFamily: fonts.sans,
         fontSize: 14,
         fontWeight: 500,
+        position: 'relative',
       })}
     >
       {({ isActive }) => (
         <>
           <Icon size={17} strokeWidth={isActive ? 2.4 : 2} />
           {!collapsed && <span style={{ flex: 1 }}>{label}</span>}
+          {badge !== undefined && badge > 0 && (
+            <span
+              data-testid={`sidebar-badge-${to}`}
+              style={{
+                background: t.brand,
+                color: '#FFF',
+                fontSize: 10.5,
+                fontWeight: 700,
+                padding: collapsed ? '0' : '1px 6px',
+                borderRadius: radius.full,
+                fontFamily: fonts.sans,
+                minWidth: collapsed ? 14 : 18,
+                height: collapsed ? 14 : 18,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: collapsed ? 'absolute' : 'static',
+                top: collapsed ? 4 : undefined,
+                right: collapsed ? 4 : undefined,
+              }}
+            >
+              {badge}
+            </span>
+          )}
         </>
       )}
     </NavLink>

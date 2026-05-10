@@ -47,12 +47,12 @@ import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts, radius } from '../theme/tokens';
 import { StateMessage } from '../ui/primitives/StateMessage';
-import { getRepository } from '../storage';
-import type { Line, Opening } from '../storage/types';
+import { getRepository, getSrsRepository } from '../storage';
+import type { Family, Line, Opening } from '../storage/types';
 
 type CatalogState =
   | { kind: 'loading' }
-  | { kind: 'ready'; openings: Opening[]; lines: Line[] }
+  | { kind: 'ready'; openings: Opening[]; lines: Line[]; families: Family[] }
   | { kind: 'error'; message: string };
 
 type ModeId = 'theory' | 'coach' | 'visualizer' | 'engine';
@@ -122,10 +122,16 @@ function fireGrandConfetti(): void {
 export function DrillPage() {
   const t = useTokens();
   const [searchParams] = useSearchParams();
+  // Two URL conventions accepted:
+  //   ?line=<line-id>     — direct line deep link (preferred from Repertoire)
+  //   ?opening=<id>       — legacy: id of an Opening (synthesized 1:1 from a
+  //                         Variation today). Resolves to that Opening's first
+  //                         line.
+  const requestedLine = searchParams.get('line');
   const requestedOpening = searchParams.get('opening');
 
   const [catalog, setCatalog] = useState<CatalogState>({ kind: 'loading' });
-  const [selectedOpeningId, setSelectedOpeningId] = useState<string>('');
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
   const [selectedLineId, setSelectedLineId] = useState<string>('');
   const [openingMenuOpen, setOpeningMenuOpen] = useState(false);
   const [openingSearch, setOpeningSearch] = useState('');
@@ -155,23 +161,46 @@ export function DrillPage() {
     let cancelled = false;
     void (async () => {
       try {
-        const openings = await repo.listOpenings();
+        const [openings, families] = await Promise.all([
+          repo.listOpenings(),
+          repo.listFamilies(),
+        ]);
         if (cancelled) return;
         if (openings.length === 0) {
           setCatalog({ kind: 'error', message: 'Catalog is empty.' });
           return;
         }
-        const startOpening =
-          (requestedOpening && openings.find((o) => o.id === requestedOpening)) ?? openings[0]!;
-        const lines = await repo.listLines(startOpening.id);
+        // Load lines for ALL openings up-front. Catalog is small (≤300 lines)
+        // and JsonOpeningRepository caches the parsed catalog, so this is a
+        // few in-memory filters, not N fetches.
+        const allLineLists = await Promise.all(openings.map((o) => repo.listLines(o.id)));
+        const lines = allLineLists.flat();
         if (cancelled) return;
-        if (lines.length === 0) {
-          setCatalog({ kind: 'error', message: 'Selected opening has no lines.' });
+
+        // Resolve URL → starting line. Priority:
+        //   1. ?line=<line-id>            (preferred)
+        //   2. ?opening=<opening-id>      (legacy: first line of that opening)
+        //   3. first line of first family with content
+        let startLine: Line | null = null;
+        if (requestedLine) {
+          startLine = lines.find((l) => l.id === requestedLine) ?? null;
+        }
+        if (startLine === null && requestedOpening) {
+          startLine = lines.find((l) => l.opening_id === requestedOpening) ?? null;
+        }
+        if (startLine === null) {
+          startLine = lines[0] ?? null;
+        }
+        if (startLine === null) {
+          setCatalog({ kind: 'error', message: 'Catalog has no lines.' });
           return;
         }
-        setCatalog({ kind: 'ready', openings, lines });
-        setSelectedOpeningId(startOpening.id);
-        setSelectedLineId(lines[0]!.id);
+        const startOpening = openings.find((o) => o.id === startLine!.opening_id);
+        const startFamilyId = startOpening?.family_id ?? '';
+
+        setCatalog({ kind: 'ready', openings, lines, families });
+        setSelectedFamilyId(startFamilyId);
+        setSelectedLineId(startLine.id);
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : 'Failed to load catalog.';
@@ -181,34 +210,39 @@ export function DrillPage() {
     return () => {
       cancelled = true;
     };
-  }, [requestedOpening]);
+  }, [requestedLine, requestedOpening]);
 
-  // Load lines when opening changes.
+  // When the selected family changes, point the line picker at that family's
+  // first line. No fetch needed — all lines already loaded above.
   useEffect(() => {
-    if (catalog.kind !== 'ready' || selectedOpeningId === '') return;
-    if (catalog.lines.length > 0 && catalog.lines[0]!.opening_id === selectedOpeningId) return;
-    const repo = getRepository();
-    let cancelled = false;
-    void (async () => {
-      const lines = await repo.listLines(selectedOpeningId);
-      if (cancelled) return;
-      setCatalog((prev) => (prev.kind === 'ready' ? { ...prev, lines } : prev));
-      setSelectedLineId(lines.length > 0 ? lines[0]!.id : '');
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedOpeningId, catalog.kind]);
-
-  const activeOpening: Opening | null = useMemo(() => {
-    if (catalog.kind !== 'ready') return null;
-    return catalog.openings.find((o) => o.id === selectedOpeningId) ?? null;
-  }, [catalog, selectedOpeningId]);
+    if (catalog.kind !== 'ready' || selectedFamilyId === '') return;
+    const familyOpeningIds = new Set(
+      catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
+    );
+    const linesForFam = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
+    if (linesForFam.length === 0) {
+      setSelectedLineId('');
+      return;
+    }
+    if (!linesForFam.some((l) => l.id === selectedLineId)) {
+      setSelectedLineId(linesForFam[0]!.id);
+    }
+  }, [selectedFamilyId, catalog, selectedLineId]);
 
   const activeLine: Line | null = useMemo(() => {
     if (catalog.kind !== 'ready') return null;
     return catalog.lines.find((l) => l.id === selectedLineId) ?? null;
   }, [catalog, selectedLineId]);
+
+  const activeOpening: Opening | null = useMemo(() => {
+    if (catalog.kind !== 'ready' || activeLine === null) return null;
+    return catalog.openings.find((o) => o.id === activeLine.opening_id) ?? null;
+  }, [catalog, activeLine]);
+
+  const activeFamily: Family | null = useMemo(() => {
+    if (catalog.kind !== 'ready' || activeOpening === null) return null;
+    return catalog.families.find((f) => f.id === activeOpening.family_id) ?? null;
+  }, [catalog, activeOpening]);
 
   const drillMoves: readonly string[] = useMemo(
     () => (activeLine ? activeLine.moves : []),
@@ -232,7 +266,27 @@ export function DrillPage() {
     stepForward,
     restart,
     legalMovesFrom,
+    drillResult,
   } = drill;
+
+  // Phase 1 — SRS write on drill completion.
+  // Fire-and-forget. Guarded by a ref so a re-render after the effect doesn't
+  // double-write. Cleared whenever the active line changes.
+  const srsRecordedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (activeLine === null) return;
+    if (srsRecordedForRef.current === activeLine.id) return;
+    if (drillResult === null) return;
+    if (state.kind !== 'complete') return;
+    srsRecordedForRef.current = activeLine.id;
+    getSrsRepository()
+      .recordDrillResult(activeLine.id, drillResult)
+      .catch((err) => console.error('SRS write failed:', err));
+  }, [drillResult, state, activeLine]);
+
+  useEffect(() => {
+    srsRecordedForRef.current = null;
+  }, [activeLine]);
 
   // Click-to-move state.
   const legalDestSquares = useMemo<string[]>(() => {
@@ -363,9 +417,18 @@ export function DrillPage() {
   const totalPly = drillMoves.length;
   const progressPct = totalPly === 0 ? 0 : (currentPly / totalPly) * 100;
 
-  const linesForOpening = catalog.lines.filter((l) => l.opening_id === selectedOpeningId);
-  const filteredLines = filterLines(linesForOpening, lineSearch);
-  const filteredOpenings = filterOpenings(catalog.openings, openingSearch);
+  const familyOpeningIds = new Set(
+    catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
+  );
+  const linesForFamily = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
+  const filteredLines = filterLines(linesForFamily, lineSearch);
+  const familiesWithLines = catalog.families.filter((f) =>
+    catalog.lines.some((l) => {
+      const op = catalog.openings.find((o) => o.id === l.opening_id);
+      return op?.family_id === f.id;
+    })
+  );
+  const filteredFamilies = filterFamilies(familiesWithLines, openingSearch);
 
   const currentMode = MODES.find((m) => m.id === activeMode) ?? MODES[0]!;
   const ModeIcon = currentMode.icon;
@@ -439,10 +502,10 @@ export function DrillPage() {
                 flexWrap: 'wrap',
               }}
             >
-              {/* Opening pill */}
+              {/* Opening (= Family) pill */}
               <div ref={openingMenuRef} style={{ position: 'relative' }}>
                 <PillTrigger
-                  label={activeOpening?.name ?? '—'}
+                  label={activeFamily?.name ?? '—'}
                   open={openingMenuOpen}
                   onClick={() => setOpeningMenuOpen((v) => !v)}
                   ariaLabel="Switch opening"
@@ -450,15 +513,16 @@ export function DrillPage() {
                 />
                 {openingMenuOpen && (
                   <SlickMenu
-                    placeholder={`Search ${catalog.openings.length} opening${catalog.openings.length === 1 ? '' : 's'}…`}
+                    placeholder={`Search ${familiesWithLines.length} opening${familiesWithLines.length === 1 ? '' : 's'}…`}
                     searchValue={openingSearch}
                     onSearch={setOpeningSearch}
-                    items={filteredOpenings.map((o) => ({
-                      key: o.id,
-                      label: o.name,
-                      isCurrent: o.id === selectedOpeningId,
+                    items={filteredFamilies.map((f) => ({
+                      kind: 'item' as const,
+                      key: f.id,
+                      label: f.name,
+                      isCurrent: f.id === selectedFamilyId,
                       onPick: () => {
-                        setSelectedOpeningId(o.id);
+                        setSelectedFamilyId(f.id);
                         closeOpeningMenu();
                       },
                     }))}
@@ -471,7 +535,7 @@ export function DrillPage() {
                 )}
               </div>
 
-              {/* Line pill */}
+              {/* Line pill — grouped by Variation under the active family */}
               <div ref={lineMenuRef} style={{ position: 'relative' }}>
                 <PillTrigger
                   label={activeLine?.name ?? '—'}
@@ -481,18 +545,18 @@ export function DrillPage() {
                 />
                 {lineMenuOpen && (
                   <SlickMenu
-                    placeholder={`Search ${linesForOpening.length} line${linesForOpening.length === 1 ? '' : 's'}…`}
+                    placeholder={`Search ${linesForFamily.length} line${linesForFamily.length === 1 ? '' : 's'}…`}
                     searchValue={lineSearch}
                     onSearch={setLineSearch}
-                    items={filteredLines.map((line) => ({
-                      key: line.id,
-                      label: line.name,
-                      isCurrent: line.id === selectedLineId,
-                      onPick: () => {
-                        setSelectedLineId(line.id);
+                    items={buildGroupedLineItems({
+                      lines: filteredLines,
+                      openings: catalog.openings,
+                      selectedLineId,
+                      onPick: (id) => {
+                        setSelectedLineId(id);
                         closeLineMenu();
                       },
-                    }))}
+                    })}
                     emptyHint={
                       lineSearch.trim() ? `No lines match "${lineSearch}"` : 'No lines yet.'
                     }
@@ -868,6 +932,10 @@ function PillTrigger({
 // SlickMenu — search input + radio-circle items, current = brand
 // ---------------------------------------------------------------------------
 
+type SlickMenuItem =
+  | { kind: 'item'; key: string; label: string; isCurrent: boolean; onPick: () => void }
+  | { kind: 'header'; key: string; label: string };
+
 function SlickMenu({
   placeholder,
   searchValue,
@@ -878,7 +946,7 @@ function SlickMenu({
   placeholder: string;
   searchValue: string;
   onSearch: (v: string) => void;
-  items: ReadonlyArray<{ key: string; label: string; isCurrent: boolean; onPick: () => void }>;
+  items: ReadonlyArray<SlickMenuItem>;
   emptyHint: string;
 }) {
   const t = useTokens();
@@ -960,46 +1028,63 @@ function SlickMenu({
           {emptyHint}
         </div>
       ) : (
-        items.map((it) => (
-          <button
-            key={it.key}
-            onClick={it.onPick}
-            className="tabiya-popover-item"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              padding: '11px 12px',
-              width: '100%',
-              background: 'transparent',
-              border: 'none',
-              borderRadius: 10,
-              cursor: 'pointer',
-              textAlign: 'left',
-              fontFamily: fonts.sans,
-              color: it.isCurrent ? t.brand : t.ink,
-              fontWeight: it.isCurrent ? 700 : 500,
-              fontSize: 14.5,
-            }}
-          >
-            <span
-              aria-hidden
+        items.map((it) =>
+          it.kind === 'header' ? (
+            <div
+              key={it.key}
               style={{
-                width: 14,
-                height: 14,
-                borderRadius: '50%',
-                border: `2px solid ${it.isCurrent ? t.brand : t.border}`,
-                background: it.isCurrent ? t.brand : 'transparent',
-                flexShrink: 0,
-                position: 'relative',
-                boxShadow: it.isCurrent ? `inset 0 0 0 2px ${t.surface}` : 'none',
+                fontSize: 11,
+                fontWeight: 700,
+                color: t.inkSoft,
+                textTransform: 'uppercase',
+                letterSpacing: 0.7,
+                padding: '10px 12px 4px',
+                fontFamily: fonts.sans,
               }}
-            />
-            <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            >
               {it.label}
-            </span>
-          </button>
-        ))
+            </div>
+          ) : (
+            <button
+              key={it.key}
+              onClick={it.onPick}
+              className="tabiya-popover-item"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '10px 12px 10px 18px',
+                width: '100%',
+                background: 'transparent',
+                border: 'none',
+                borderRadius: 10,
+                cursor: 'pointer',
+                textAlign: 'left',
+                fontFamily: fonts.sans,
+                color: it.isCurrent ? t.brand : t.ink,
+                fontWeight: it.isCurrent ? 700 : 500,
+                fontSize: 14.5,
+              }}
+            >
+              <span
+                aria-hidden
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  border: `2px solid ${it.isCurrent ? t.brand : t.border}`,
+                  background: it.isCurrent ? t.brand : 'transparent',
+                  flexShrink: 0,
+                  position: 'relative',
+                  boxShadow: it.isCurrent ? `inset 0 0 0 2px ${t.surface}` : 'none',
+                }}
+              />
+              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {it.label}
+              </span>
+            </button>
+          )
+        )
       )}
     </div>
   );
@@ -1009,14 +1094,13 @@ function SlickMenu({
 // Helpers
 // ---------------------------------------------------------------------------
 
-function filterOpenings(openings: readonly Opening[], q: string): Opening[] {
+function filterFamilies(families: readonly Family[], q: string): Family[] {
   const needle = q.trim().toLowerCase();
-  if (!needle) return [...openings];
-  return openings.filter(
-    (o) =>
-      o.name.toLowerCase().includes(needle) ||
-      o.eco.toLowerCase().includes(needle) ||
-      o.color.toLowerCase().includes(needle)
+  if (!needle) return [...families];
+  return families.filter((f) =>
+    f.name.toLowerCase().includes(needle) ||
+    f.eco_range.toLowerCase().includes(needle) ||
+    f.category.toLowerCase().includes(needle)
   );
 }
 
@@ -1024,6 +1108,73 @@ function filterLines(lines: readonly Line[], q: string): Line[] {
   const needle = q.trim().toLowerCase();
   if (!needle) return [...lines];
   return lines.filter((l) => l.name.toLowerCase().includes(needle));
+}
+
+/**
+ * Group line picker items by parent Opening (= Variation), with section
+ * headers between groups. Opening order follows the openings array order.
+ */
+function buildGroupedLineItems({
+  lines,
+  openings,
+  selectedLineId,
+  onPick,
+}: {
+  lines: readonly Line[];
+  openings: readonly Opening[];
+  selectedLineId: string;
+  onPick: (id: string) => void;
+}): SlickMenuItem[] {
+  const openingOrder = new Map<string, number>();
+  openings.forEach((o, idx) => openingOrder.set(o.id, idx));
+  const openingName = new Map<string, string>();
+  openings.forEach((o) => openingName.set(o.id, o.name));
+
+  const byOpening = new Map<string, Line[]>();
+  for (const line of lines) {
+    const list = byOpening.get(line.opening_id) ?? [];
+    list.push(line);
+    byOpening.set(line.opening_id, list);
+  }
+
+  const sortedKeys = Array.from(byOpening.keys()).sort(
+    (a, b) => (openingOrder.get(a) ?? 0) - (openingOrder.get(b) ?? 0)
+  );
+
+  const out: SlickMenuItem[] = [];
+  for (const openingId of sortedKeys) {
+    const groupLines = byOpening.get(openingId) ?? [];
+    if (groupLines.length === 0) continue;
+    if (groupLines.length === 1) {
+      // Single line under this Variation — header would just duplicate the
+      // line name. Show the variation name as the (only) item label.
+      const line = groupLines[0]!;
+      out.push({
+        kind: 'item',
+        key: line.id,
+        label: openingName.get(openingId) ?? line.name,
+        isCurrent: line.id === selectedLineId,
+        onPick: () => onPick(line.id),
+      });
+    } else {
+      // Multiple lines — emit Variation header + each line.
+      out.push({
+        kind: 'header',
+        key: `h-${openingId}`,
+        label: openingName.get(openingId) ?? openingId,
+      });
+      for (const line of groupLines) {
+        out.push({
+          kind: 'item',
+          key: line.id,
+          label: line.name,
+          isCurrent: line.id === selectedLineId,
+          onPick: () => onPick(line.id),
+        });
+      }
+    }
+  }
+  return out;
 }
 
 function MoveHistoryGrid({

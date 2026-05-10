@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from scripts.tabiya_build.schema import Catalog, KeySquare, Line, Opening
+from scripts.tabiya_build.schema import Catalog, Family, KeySquare, Line, Opening
 
 
 def make_line(**overrides: object) -> Line:
@@ -49,17 +49,36 @@ class TestLine:
 
 class TestOpening:
     def test_color_must_be_white_or_black(self) -> None:
-        Opening(id="x", name="X", eco="A00", color="white", line_ids=[])
-        Opening(id="x", name="X", eco="A00", color="black", line_ids=[])
+        Opening(id="x", family_id="f", name="X", eco="A00", color="white", line_ids=[])
+        Opening(id="x", family_id="f", name="X", eco="A00", color="black", line_ids=[])
         with pytest.raises(ValidationError):
-            Opening(id="x", name="X", eco="A00", color="purple", line_ids=[])  # type: ignore[arg-type]
+            Opening(id="x", family_id="f", name="X", eco="A00", color="purple", line_ids=[])  # type: ignore[arg-type]
+
+    def test_is_gambit_defaults_false(self) -> None:
+        op = Opening(id="x", family_id="f", name="X", eco="A00", color="white", line_ids=[])
+        assert op.is_gambit is False
+
+    def test_family_id_required(self) -> None:
+        with pytest.raises(ValidationError):
+            Opening(id="x", name="X", eco="A00", color="white", line_ids=[])  # type: ignore[call-arg]
+
+
+class TestFamily:
+    def test_minimal_valid(self) -> None:
+        fam = Family(id="open-games", name="Open Games", category="open", eco_range="C20-C99")
+        assert fam.opening_ids == []
+
+    def test_category_must_be_in_enum(self) -> None:
+        with pytest.raises(ValidationError):
+            Family(id="x", name="X", category="bogus", eco_range="A00")  # type: ignore[arg-type]
 
 
 class TestCatalog:
     def test_roundtrip_json(self) -> None:
         cat = Catalog(
             version="2026-05-10",
-            openings=[Opening(id="x", name="X", eco="A00", color="white", line_ids=[])],
+            families=[Family(id="f", name="F", category="open", eco_range="A00")],
+            openings=[Opening(id="x", family_id="f", name="X", eco="A00", color="white", line_ids=[])],
             lines=[],
         )
         body = cat.model_dump_json()

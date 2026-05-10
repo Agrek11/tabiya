@@ -28,6 +28,27 @@ afterEach(() => {
 const RUY_LOPEZ: readonly string[] = ['e4', 'e5', 'Nf3', 'Nc6', 'Bb5'];
 const SHORT: readonly string[] = ['e4', 'e5'];
 
+describe('useDrill — drillResult emission (Phase 1)', () => {
+  it('drillResult is null while line is in progress', () => {
+    const { result } = renderHook(() => useDrill(SHORT, 'white'));
+    expect(result.current.drillResult).toBeNull();
+  });
+
+  it('drillResult emits with wrong_attempts=0 after flawless completion', async () => {
+    const { waitFor } = await import('@testing-library/react');
+    const { result } = renderHook(() => useDrill(SHORT, 'white'));
+    act(() => {
+      result.current.onPieceDrop({ sourceSquare: 'e2', targetSquare: 'e4' });
+    });
+    await waitFor(() => {
+      expect(result.current.state.kind).toBe('complete');
+    });
+    expect(result.current.drillResult).not.toBeNull();
+    expect(result.current.drillResult?.wrong_attempts).toBe(0);
+    expect(result.current.drillResult?.hint_uses).toBe(0);
+  });
+});
+
 describe('useDrill — lastMove', () => {
   it('is null at the start of the line', () => {
     const { result } = renderHook(() => useDrill(SHORT, 'white'));

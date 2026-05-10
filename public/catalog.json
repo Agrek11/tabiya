@@ -1,175 +1,1128 @@
 {
-  "version": "2026-05-03",
-  "openings": [
+  "version": "2026-05-10",
+  "families": [
     {
-      "id": "ruy-lopez",
-      "name": "Ruy Lopez",
-      "eco": "C60-C99",
-      "color": "white",
-      "line_ids": [
-        "ruy-lopez-main"
+      "id": "spanish",
+      "name": "Spanish (Ruy Lopez)",
+      "category": "open",
+      "eco_range": "C60-C99",
+      "tier": 1,
+      "opening_ids": [
+        "spanish-closed",
+        "spanish-berlin",
+        "spanish-marshall"
       ]
     },
     {
-      "id": "italian-game",
+      "id": "italian",
       "name": "Italian Game",
-      "eco": "C50-C59",
-      "color": "white",
-      "line_ids": [
-        "italian-game-main"
+      "category": "open",
+      "eco_range": "C50-C59",
+      "tier": 1,
+      "opening_ids": [
+        "italian-giuoco-piano",
+        "italian-two-knights",
+        "italian-evans-gambit"
       ]
     },
     {
-      "id": "vienna-game",
-      "name": "Vienna Game",
-      "eco": "C25-C29",
-      "color": "white",
-      "line_ids": [
-        "vienna-game-main"
-      ]
-    },
-    {
-      "id": "sicilian-defense",
+      "id": "sicilian",
       "name": "Sicilian Defense",
-      "eco": "B20-B99",
-      "color": "black",
-      "line_ids": [
-        "sicilian-defense-main"
+      "category": "semi-open",
+      "eco_range": "B20-B99",
+      "tier": 1,
+      "opening_ids": [
+        "sicilian-najdorf",
+        "sicilian-dragon",
+        "sicilian-sveshnikov",
+        "sicilian-alapin"
       ]
     },
     {
-      "id": "sicilian-najdorf",
-      "name": "Sicilian Najdorf",
-      "eco": "B90-B99",
-      "color": "black",
-      "line_ids": [
-        "sicilian-najdorf-main"
-      ]
-    },
-    {
-      "id": "sicilian-dragon",
-      "name": "Sicilian Dragon",
-      "eco": "B70-B79",
-      "color": "black",
-      "line_ids": [
-        "sicilian-dragon-main"
-      ]
-    },
-    {
-      "id": "french-defense",
+      "id": "french",
       "name": "French Defense",
-      "eco": "C00-C19",
-      "color": "black",
-      "line_ids": [
-        "french-defense-main"
+      "category": "semi-open",
+      "eco_range": "C00-C19",
+      "tier": 1,
+      "opening_ids": [
+        "french-winawer",
+        "french-classical",
+        "french-advance"
       ]
     },
     {
       "id": "caro-kann",
       "name": "Caro-Kann Defense",
-      "eco": "B10-B19",
-      "color": "black",
-      "line_ids": [
-        "caro-kann-main"
+      "category": "semi-open",
+      "eco_range": "B10-B19",
+      "tier": 1,
+      "opening_ids": [
+        "caro-kann-classical",
+        "caro-kann-advance",
+        "caro-kann-exchange"
       ]
     },
     {
-      "id": "scandinavian",
-      "name": "Scandinavian Defense",
-      "eco": "B01",
-      "color": "black",
-      "line_ids": [
-        "scandinavian-main"
-      ]
-    },
-    {
-      "id": "alekhine-defense",
-      "name": "Alekhine's Defense",
-      "eco": "B02-B05",
-      "color": "black",
-      "line_ids": [
-        "alekhine-defense-main"
-      ]
-    },
-    {
-      "id": "pirc-defense",
-      "name": "Pirc Defense",
-      "eco": "B07-B09",
-      "color": "black",
-      "line_ids": [
-        "pirc-defense-main"
-      ]
-    },
-    {
-      "id": "queens-gambit",
-      "name": "Queen's Gambit",
-      "eco": "D06-D69",
-      "color": "white",
-      "line_ids": [
-        "queens-gambit-main"
-      ]
-    },
-    {
-      "id": "slav-defense",
-      "name": "Slav Defense",
-      "eco": "D10-D19",
-      "color": "black",
-      "line_ids": [
-        "slav-defense-main"
+      "id": "queens-gambit-declined",
+      "name": "Queen's Gambit Declined",
+      "category": "closed",
+      "eco_range": "D30-D69",
+      "tier": 1,
+      "opening_ids": [
+        "qgd-orthodox",
+        "qgd-tartakower",
+        "qgd-exchange"
       ]
     },
     {
       "id": "kings-indian",
       "name": "King's Indian Defense",
-      "eco": "E60-E99",
-      "color": "black",
-      "line_ids": [
-        "kings-indian-main"
+      "category": "indian",
+      "eco_range": "E60-E99",
+      "tier": 1,
+      "opening_ids": [
+        "kid-mar-del-plata",
+        "kid-saemisch",
+        "kid-fianchetto"
       ]
+    },
+    {
+      "id": "london",
+      "name": "London System",
+      "category": "closed",
+      "eco_range": "D02",
+      "tier": 1,
+      "opening_ids": [
+        "london-modern",
+        "london-anti-kid",
+        "london-jobava"
+      ]
+    },
+    {
+      "id": "vienna",
+      "name": "Vienna Game",
+      "category": "open",
+      "eco_range": "C25-C29",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "scotch",
+      "name": "Scotch Game",
+      "category": "open",
+      "eco_range": "C44-C45",
+      "tier": 2,
+      "opening_ids": [
+        "scotch-classical"
+      ]
+    },
+    {
+      "id": "scandinavian",
+      "name": "Scandinavian Defense",
+      "category": "semi-open",
+      "eco_range": "B01",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "pirc",
+      "name": "Pirc Defense",
+      "category": "semi-open",
+      "eco_range": "B07-B09",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "alekhine",
+      "name": "Alekhine's Defense",
+      "category": "semi-open",
+      "eco_range": "B02-B05",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "slav",
+      "name": "Slav Defense",
+      "category": "closed",
+      "eco_range": "D10-D19",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "semi-slav",
+      "name": "Semi-Slav Defense",
+      "category": "closed",
+      "eco_range": "D43-D49",
+      "tier": 2,
+      "opening_ids": []
     },
     {
       "id": "nimzo-indian",
       "name": "Nimzo-Indian Defense",
-      "eco": "E20-E59",
-      "color": "black",
+      "category": "indian",
+      "eco_range": "E20-E59",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "queens-indian",
+      "name": "Queen's Indian Defense",
+      "category": "indian",
+      "eco_range": "E12-E19",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "grunfeld",
+      "name": "Grünfeld Defense",
+      "category": "indian",
+      "eco_range": "D70-D99",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "catalan",
+      "name": "Catalan Opening",
+      "category": "closed",
+      "eco_range": "E00-E09",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "english",
+      "name": "English Opening",
+      "category": "flank",
+      "eco_range": "A10-A39",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "kings-indian-attack",
+      "name": "King's Indian Attack",
+      "category": "flank",
+      "eco_range": "A07-A08",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "dutch",
+      "name": "Dutch Defense",
+      "category": "indian",
+      "eco_range": "A80-A99",
+      "tier": 2,
+      "opening_ids": []
+    },
+    {
+      "id": "kings-gambit",
+      "name": "King's Gambit",
+      "category": "gambit",
+      "eco_range": "C30-C39",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "birds",
+      "name": "Bird's Opening",
+      "category": "flank",
+      "eco_range": "A02-A03",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "trompowsky",
+      "name": "Trompowsky Attack",
+      "category": "closed",
+      "eco_range": "A45",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "bdg",
+      "name": "Blackmar-Diemer Gambit",
+      "category": "gambit",
+      "eco_range": "D00",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "budapest",
+      "name": "Budapest Gambit",
+      "category": "gambit",
+      "eco_range": "A51-A52",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "benko",
+      "name": "Benko Gambit",
+      "category": "gambit",
+      "eco_range": "A57-A59",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "latvian",
+      "name": "Latvian Gambit",
+      "category": "gambit",
+      "eco_range": "C40",
+      "tier": 3,
+      "opening_ids": []
+    },
+    {
+      "id": "polish",
+      "name": "Polish Opening",
+      "category": "flank",
+      "eco_range": "A00",
+      "tier": 3,
+      "opening_ids": []
+    }
+  ],
+  "variations": [
+    {
+      "id": "spanish-closed",
+      "family_id": "spanish",
+      "name": "Closed Spanish",
+      "eco": "C84",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "a6",
+        "Ba4",
+        "Nf6",
+        "O-O",
+        "Be7",
+        "Re1",
+        "b5",
+        "Bb3"
+      ],
       "line_ids": [
-        "nimzo-indian-main"
+        "spanish-closed-main",
+        "spanish-closed-chigorin"
       ]
     },
     {
-      "id": "london-system",
-      "name": "London System",
+      "id": "spanish-berlin",
+      "family_id": "spanish",
+      "name": "Berlin Defense",
+      "eco": "C67",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "Nf6"
+      ],
+      "line_ids": [
+        "spanish-berlin-main",
+        "spanish-berlin-anti"
+      ]
+    },
+    {
+      "id": "spanish-marshall",
+      "family_id": "spanish",
+      "name": "Marshall Attack",
+      "eco": "C89",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "a6",
+        "Ba4",
+        "Nf6",
+        "O-O",
+        "Be7",
+        "Re1",
+        "b5",
+        "Bb3",
+        "O-O",
+        "c3",
+        "d5"
+      ],
+      "line_ids": [
+        "spanish-marshall-main",
+        "spanish-marshall-anti-a4"
+      ]
+    },
+    {
+      "id": "italian-giuoco-piano",
+      "family_id": "italian",
+      "name": "Giuoco Pianissimo",
+      "eco": "C50",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Bc5",
+        "c3",
+        "Nf6",
+        "d3"
+      ],
+      "line_ids": [
+        "italian-giuoco-pianissimo-main",
+        "italian-modern-d4"
+      ]
+    },
+    {
+      "id": "italian-two-knights",
+      "family_id": "italian",
+      "name": "Two Knights Defense",
+      "eco": "C57",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Nf6"
+      ],
+      "line_ids": [
+        "italian-two-knights-main",
+        "italian-fried-liver"
+      ]
+    },
+    {
+      "id": "italian-evans-gambit",
+      "family_id": "italian",
+      "name": "Evans Gambit",
+      "eco": "C51",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Bc5",
+        "b4"
+      ],
+      "line_ids": [
+        "italian-evans-gambit-main"
+      ]
+    },
+    {
+      "id": "sicilian-najdorf",
+      "family_id": "sicilian",
+      "name": "Najdorf",
+      "eco": "B90",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "d6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "a6"
+      ],
+      "line_ids": [
+        "sicilian-najdorf-english-attack",
+        "sicilian-najdorf-classical",
+        "sicilian-najdorf-poisoned-pawn"
+      ]
+    },
+    {
+      "id": "sicilian-dragon",
+      "family_id": "sicilian",
+      "name": "Dragon",
+      "eco": "B70",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "d6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "g6"
+      ],
+      "line_ids": [
+        "sicilian-dragon-yugoslav",
+        "sicilian-dragon-classical"
+      ]
+    },
+    {
+      "id": "sicilian-sveshnikov",
+      "family_id": "sicilian",
+      "name": "Sveshnikov",
+      "eco": "B33",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "Nc6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "e5"
+      ],
+      "line_ids": [
+        "sicilian-sveshnikov-main"
+      ]
+    },
+    {
+      "id": "sicilian-alapin",
+      "family_id": "sicilian",
+      "name": "Alapin (Anti-Sicilian)",
+      "eco": "B22",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "c5",
+        "c3"
+      ],
+      "line_ids": [
+        "sicilian-alapin-main"
+      ]
+    },
+    {
+      "id": "french-winawer",
+      "family_id": "french",
+      "name": "Winawer",
+      "eco": "C18",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "Nc3",
+        "Bb4"
+      ],
+      "line_ids": [
+        "french-winawer-main",
+        "french-winawer-positional"
+      ]
+    },
+    {
+      "id": "french-classical",
+      "family_id": "french",
+      "name": "Classical French",
+      "eco": "C11",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "Nc3",
+        "Nf6"
+      ],
+      "line_ids": [
+        "french-classical-main"
+      ]
+    },
+    {
+      "id": "french-advance",
+      "family_id": "french",
+      "name": "Advance Variation",
+      "eco": "C02",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "e5"
+      ],
+      "line_ids": [
+        "french-advance-main"
+      ]
+    },
+    {
+      "id": "caro-kann-classical",
+      "family_id": "caro-kann",
+      "name": "Classical Caro-Kann",
+      "eco": "B18",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "c6",
+        "d4",
+        "d5",
+        "Nc3",
+        "dxe4",
+        "Nxe4",
+        "Bf5"
+      ],
+      "line_ids": [
+        "caro-kann-classical-main",
+        "caro-kann-karpov"
+      ]
+    },
+    {
+      "id": "caro-kann-advance",
+      "family_id": "caro-kann",
+      "name": "Advance Caro-Kann",
+      "eco": "B12",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "c6",
+        "d4",
+        "d5",
+        "e5"
+      ],
+      "line_ids": [
+        "caro-kann-advance-main"
+      ]
+    },
+    {
+      "id": "caro-kann-exchange",
+      "family_id": "caro-kann",
+      "name": "Exchange Caro-Kann",
+      "eco": "B13",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "c6",
+        "d4",
+        "d5",
+        "exd5",
+        "cxd5"
+      ],
+      "line_ids": [
+        "caro-kann-exchange-main"
+      ]
+    },
+    {
+      "id": "qgd-orthodox",
+      "family_id": "queens-gambit-declined",
+      "name": "Orthodox Defense",
+      "eco": "D63",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e3",
+        "O-O",
+        "Nf3",
+        "Nbd7"
+      ],
+      "line_ids": [
+        "qgd-orthodox-main",
+        "qgd-orthodox-modern"
+      ]
+    },
+    {
+      "id": "qgd-tartakower",
+      "family_id": "queens-gambit-declined",
+      "name": "Tartakower Defense",
+      "eco": "D58",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e3",
+        "O-O",
+        "Nf3",
+        "h6",
+        "Bh4",
+        "b6"
+      ],
+      "line_ids": [
+        "qgd-tartakower-main"
+      ]
+    },
+    {
+      "id": "qgd-exchange",
+      "family_id": "queens-gambit-declined",
+      "name": "Exchange Variation",
+      "eco": "D35",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "cxd5",
+        "exd5"
+      ],
+      "line_ids": [
+        "qgd-exchange-main"
+      ]
+    },
+    {
+      "id": "kid-mar-del-plata",
+      "family_id": "kings-indian",
+      "name": "Mar del Plata",
+      "eco": "E97",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "e4",
+        "d6",
+        "Nf3",
+        "O-O",
+        "Be2",
+        "e5",
+        "O-O",
+        "Nc6",
+        "d5",
+        "Ne7"
+      ],
+      "line_ids": [
+        "kid-mar-del-plata-main",
+        "kid-bayonet"
+      ]
+    },
+    {
+      "id": "kid-saemisch",
+      "family_id": "kings-indian",
+      "name": "Sämisch System",
+      "eco": "E80",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "e4",
+        "d6",
+        "f3"
+      ],
+      "line_ids": [
+        "kid-saemisch-main"
+      ]
+    },
+    {
+      "id": "kid-fianchetto",
+      "family_id": "kings-indian",
+      "name": "Fianchetto Variation",
+      "eco": "E62",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "g3"
+      ],
+      "line_ids": [
+        "kid-fianchetto-main"
+      ]
+    },
+    {
+      "id": "london-modern",
+      "family_id": "london",
+      "name": "Modern London",
+      "eco": "D02",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "Nf3",
+        "Nf6",
+        "Bf4"
+      ],
+      "line_ids": [
+        "london-modern-main"
+      ]
+    },
+    {
+      "id": "london-anti-kid",
+      "family_id": "london",
+      "name": "London vs King's Indian",
+      "eco": "A48",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "Bf4",
+        "g6"
+      ],
+      "line_ids": [
+        "london-anti-kid-main"
+      ]
+    },
+    {
+      "id": "london-jobava",
+      "family_id": "london",
+      "name": "Jobava London",
+      "eco": "D00",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "Nc3",
+        "Nf6",
+        "Bf4"
+      ],
+      "line_ids": [
+        "london-jobava-main"
+      ]
+    },
+    {
+      "id": "scotch-classical",
+      "family_id": "scotch",
+      "name": "Scotch Classical",
+      "eco": "C45",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "d4",
+        "exd4",
+        "Nxd4",
+        "Bc5"
+      ],
+      "line_ids": [
+        "scotch-classical-main"
+      ]
+    }
+  ],
+  "openings": [
+    {
+      "id": "spanish-closed",
+      "family_id": "spanish",
+      "name": "Closed Spanish",
+      "eco": "C84",
+      "color": "white",
+      "line_ids": [
+        "spanish-closed-main",
+        "spanish-closed-chigorin"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "spanish-berlin",
+      "family_id": "spanish",
+      "name": "Berlin Defense",
+      "eco": "C67",
+      "color": "black",
+      "line_ids": [
+        "spanish-berlin-main",
+        "spanish-berlin-anti"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "spanish-marshall",
+      "family_id": "spanish",
+      "name": "Marshall Attack",
+      "eco": "C89",
+      "color": "black",
+      "line_ids": [
+        "spanish-marshall-main",
+        "spanish-marshall-anti-a4"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "italian-giuoco-piano",
+      "family_id": "italian",
+      "name": "Giuoco Pianissimo",
+      "eco": "C50",
+      "color": "white",
+      "line_ids": [
+        "italian-giuoco-pianissimo-main",
+        "italian-modern-d4"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "italian-two-knights",
+      "family_id": "italian",
+      "name": "Two Knights Defense",
+      "eco": "C57",
+      "color": "black",
+      "line_ids": [
+        "italian-two-knights-main",
+        "italian-fried-liver"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "italian-evans-gambit",
+      "family_id": "italian",
+      "name": "Evans Gambit",
+      "eco": "C51",
+      "color": "white",
+      "line_ids": [
+        "italian-evans-gambit-main"
+      ],
+      "is_gambit": true
+    },
+    {
+      "id": "sicilian-najdorf",
+      "family_id": "sicilian",
+      "name": "Najdorf",
+      "eco": "B90",
+      "color": "black",
+      "line_ids": [
+        "sicilian-najdorf-english-attack",
+        "sicilian-najdorf-classical",
+        "sicilian-najdorf-poisoned-pawn"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "sicilian-dragon",
+      "family_id": "sicilian",
+      "name": "Dragon",
+      "eco": "B70",
+      "color": "black",
+      "line_ids": [
+        "sicilian-dragon-yugoslav",
+        "sicilian-dragon-classical"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "sicilian-sveshnikov",
+      "family_id": "sicilian",
+      "name": "Sveshnikov",
+      "eco": "B33",
+      "color": "black",
+      "line_ids": [
+        "sicilian-sveshnikov-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "sicilian-alapin",
+      "family_id": "sicilian",
+      "name": "Alapin (Anti-Sicilian)",
+      "eco": "B22",
+      "color": "white",
+      "line_ids": [
+        "sicilian-alapin-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "french-winawer",
+      "family_id": "french",
+      "name": "Winawer",
+      "eco": "C18",
+      "color": "black",
+      "line_ids": [
+        "french-winawer-main",
+        "french-winawer-positional"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "french-classical",
+      "family_id": "french",
+      "name": "Classical French",
+      "eco": "C11",
+      "color": "black",
+      "line_ids": [
+        "french-classical-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "french-advance",
+      "family_id": "french",
+      "name": "Advance Variation",
+      "eco": "C02",
+      "color": "white",
+      "line_ids": [
+        "french-advance-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "caro-kann-classical",
+      "family_id": "caro-kann",
+      "name": "Classical Caro-Kann",
+      "eco": "B18",
+      "color": "black",
+      "line_ids": [
+        "caro-kann-classical-main",
+        "caro-kann-karpov"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "caro-kann-advance",
+      "family_id": "caro-kann",
+      "name": "Advance Caro-Kann",
+      "eco": "B12",
+      "color": "white",
+      "line_ids": [
+        "caro-kann-advance-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "caro-kann-exchange",
+      "family_id": "caro-kann",
+      "name": "Exchange Caro-Kann",
+      "eco": "B13",
+      "color": "white",
+      "line_ids": [
+        "caro-kann-exchange-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "qgd-orthodox",
+      "family_id": "queens-gambit-declined",
+      "name": "Orthodox Defense",
+      "eco": "D63",
+      "color": "black",
+      "line_ids": [
+        "qgd-orthodox-main",
+        "qgd-orthodox-modern"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "qgd-tartakower",
+      "family_id": "queens-gambit-declined",
+      "name": "Tartakower Defense",
+      "eco": "D58",
+      "color": "black",
+      "line_ids": [
+        "qgd-tartakower-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "qgd-exchange",
+      "family_id": "queens-gambit-declined",
+      "name": "Exchange Variation",
+      "eco": "D35",
+      "color": "white",
+      "line_ids": [
+        "qgd-exchange-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "kid-mar-del-plata",
+      "family_id": "kings-indian",
+      "name": "Mar del Plata",
+      "eco": "E97",
+      "color": "black",
+      "line_ids": [
+        "kid-mar-del-plata-main",
+        "kid-bayonet"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "kid-saemisch",
+      "family_id": "kings-indian",
+      "name": "Sämisch System",
+      "eco": "E80",
+      "color": "white",
+      "line_ids": [
+        "kid-saemisch-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "kid-fianchetto",
+      "family_id": "kings-indian",
+      "name": "Fianchetto Variation",
+      "eco": "E62",
+      "color": "white",
+      "line_ids": [
+        "kid-fianchetto-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "london-modern",
+      "family_id": "london",
+      "name": "Modern London",
       "eco": "D02",
       "color": "white",
       "line_ids": [
-        "london-system-main"
-      ]
+        "london-modern-main"
+      ],
+      "is_gambit": false
     },
     {
-      "id": "english-opening",
-      "name": "English Opening",
-      "eco": "A10-A39",
+      "id": "london-anti-kid",
+      "family_id": "london",
+      "name": "London vs King's Indian",
+      "eco": "A48",
       "color": "white",
       "line_ids": [
-        "english-opening-main",
-        "english-opening-alt"
-      ]
+        "london-anti-kid-main"
+      ],
+      "is_gambit": false
     },
     {
-      "id": "birds-opening",
-      "name": "Bird's Opening",
-      "eco": "A02-A03",
+      "id": "london-jobava",
+      "family_id": "london",
+      "name": "Jobava London",
+      "eco": "D00",
       "color": "white",
       "line_ids": [
-        "birds-opening-main"
-      ]
+        "london-jobava-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "scotch-classical",
+      "family_id": "scotch",
+      "name": "Scotch Classical",
+      "eco": "C45",
+      "color": "white",
+      "line_ids": [
+        "scotch-classical-main"
+      ],
+      "is_gambit": false
     }
   ],
   "lines": [
     {
-      "id": "ruy-lopez-main",
-      "opening_id": "ruy-lopez",
-      "name": "Main Line",
+      "id": "spanish-closed-main",
+      "opening_id": "spanish-closed",
+      "variation_id": "spanish-closed",
+      "name": "Breyer Variation (9...Nb8)",
       "moves": [
         "e4",
         "e5",
@@ -188,22 +1141,243 @@
         "c3",
         "O-O",
         "h3",
-        "Na5"
+        "Nb8",
+        "d4"
       ],
-      "depth": 18,
-      "end_fen": "r1bq1rk1/2p1bppp/p2p1n2/np2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1 w - - 1 10",
-      "popularity": 0.3461,
-      "tags": [
-        "classical",
-        "main-line"
+      "depth": 19,
+      "end_fen": "rnbq1rk1/2p1bppp/p2p1n2/1p2p3/3PP3/1BP2N1P/PP3PP1/RNBQR1K1 b - - 0 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White builds slow kingside with d4 + Nbd2 + Nf1-g3.",
+        "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 17,
+          "alternatives": [
+            "Na5",
+            "Nd7",
+            "Bb7"
+          ],
+          "label": "9...Nb8 Breyer / 9...Na5 Chigorin / 9...Bb7 Zaitsev",
+          "rationale": "Three mainline retreats; choice shapes the middlegame plan."
+        }
+      ]
     },
     {
-      "id": "italian-game-main",
-      "opening_id": "italian-game",
-      "name": "Main Line",
+      "id": "spanish-closed-chigorin",
+      "opening_id": "spanish-closed",
+      "variation_id": "spanish-closed",
+      "name": "Chigorin Variation (9...Na5)",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "a6",
+        "Ba4",
+        "Nf6",
+        "O-O",
+        "Be7",
+        "Re1",
+        "b5",
+        "Bb3",
+        "d6",
+        "c3",
+        "O-O",
+        "h3",
+        "Na5",
+        "Bc2"
+      ],
+      "depth": 19,
+      "end_fen": "r1bq1rk1/2p1bppp/p2p1n2/np2p3/4P3/2P2N1P/PPBP1PP1/RNBQR1K1 b - - 2 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White builds slow kingside with d4 + Nbd2 + Nf1-g3.",
+        "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 17,
+          "alternatives": [
+            "Na5",
+            "Nd7",
+            "Bb7"
+          ],
+          "label": "Black's 9th: Breyer (Nb8), Chigorin (Na5), Zaitsev (Bb7)",
+          "rationale": "Three mainline retreats; choice shapes the middlegame plan."
+        }
+      ]
+    },
+    {
+      "id": "spanish-berlin-main",
+      "opening_id": "spanish-berlin",
+      "variation_id": "spanish-berlin",
+      "name": "Berlin Defense Endgame",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "Nf6",
+        "O-O",
+        "Nxe4",
+        "d4",
+        "Nd6",
+        "Bxc6",
+        "dxc6",
+        "dxe5",
+        "Nf5",
+        "Qxd8+",
+        "Kxd8",
+        "Nc3",
+        "h6",
+        "Rd1+",
+        "Ke8"
+      ],
+      "depth": 20,
+      "end_fen": "r1b1kb1r/ppp2pp1/2p4p/4Pn2/8/2N2N2/PPP2PPP/R1BR2K1 w - - 2 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black trades queens early; defensive setup but Black's bishop pair compensates.",
+        "Endgame technique decides: Black aims for ...Bd7, ...c5, activate king."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "spanish-berlin-anti",
+      "opening_id": "spanish-berlin",
+      "variation_id": "spanish-berlin",
+      "name": "Anti-Berlin (4.d3)",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "Nf6",
+        "d3",
+        "Bc5",
+        "c3",
+        "O-O",
+        "O-O",
+        "d6",
+        "Re1",
+        "a6",
+        "Ba4",
+        "Ba7",
+        "Nbd2"
+      ],
+      "depth": 17,
+      "end_fen": "r1bq1rk1/bpp2ppp/p1np1n2/4p3/B3P3/2PP1N2/PP1N1PPP/R1BQR1K1 b - - 3 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White avoids the Berlin endgame by keeping the queens on with d3.",
+        "Closer to Italian-style maneuvering than classical Berlin theory."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "spanish-marshall-main",
+      "opening_id": "spanish-marshall",
+      "variation_id": "spanish-marshall",
+      "name": "Marshall Attack Main Line",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "a6",
+        "Ba4",
+        "Nf6",
+        "O-O",
+        "Be7",
+        "Re1",
+        "b5",
+        "Bb3",
+        "O-O",
+        "c3",
+        "d5",
+        "exd5",
+        "Nxd5",
+        "Nxe5",
+        "Nxe5"
+      ],
+      "depth": 20,
+      "end_fen": "r1bq1rk1/2p1bppp/p7/1p1nn3/8/1BP5/PP1P1PPP/RNBQR1K1 w - - 0 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black sacrifices a pawn for kingside attack.",
+        "White must defend precisely; long-term Black's piece activity is critical."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 13,
+          "alternatives": [
+            "a4",
+            "h3",
+            "d3"
+          ],
+          "label": "Anti-Marshall (8.a4 / 8.h3 / 8.d3)",
+          "rationale": "Avoiding Marshall is now mainstream at GM level; 8.c3 invites it."
+        }
+      ]
+    },
+    {
+      "id": "spanish-marshall-anti-a4",
+      "opening_id": "spanish-marshall",
+      "variation_id": "spanish-marshall",
+      "name": "Anti-Marshall 8.a4",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bb5",
+        "a6",
+        "Ba4",
+        "Nf6",
+        "O-O",
+        "Be7",
+        "Re1",
+        "b5",
+        "Bb3",
+        "O-O",
+        "a4",
+        "Bb7",
+        "d3",
+        "d6",
+        "Nbd2"
+      ],
+      "depth": 19,
+      "end_fen": "r2q1rk1/1bp1bppp/p1np1n2/1p2p3/P3P3/1B1P1N2/1PPN1PPP/R1BQR1K1 b - - 1 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White sidesteps Marshall by undermining b5 with a4.",
+        "Quiet positional fight; Black gives up Marshall counterplay for solid setup."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "italian-giuoco-pianissimo-main",
+      "opening_id": "italian-giuoco-piano",
+      "variation_id": "italian-giuoco-piano",
+      "name": "Pianissimo Mainline",
       "moves": [
         "e4",
         "e5",
@@ -217,93 +1391,199 @@
         "d6",
         "O-O",
         "O-O",
-        "Re1",
-        "a5",
         "h3",
-        "h6",
+        "a6",
+        "Re1",
+        "Ba7",
         "Nbd2",
-        "Be6"
+        "h6",
+        "Nf1"
       ],
-      "depth": 18,
-      "end_fen": "r2q1rk1/1pp2pp1/2npbn1p/p1b1p3/2B1P3/2PP1N1P/PP1N1PP1/R1BQR1K1 w - - 2 10",
-      "popularity": 0.8038,
-      "tags": [
-        "classical"
-      ],
+      "depth": 19,
+      "end_fen": "r1bq1rk1/bpp2pp1/p1np1n1p/4p3/2B1P3/2PP1N1P/PP3PP1/R1BQRNK1 b - - 1 10",
+      "popularity": 0.0,
+      "tags": [],
       "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "vienna-game-main",
-      "opening_id": "vienna-game",
-      "name": "Main Line",
+      "id": "italian-modern-d4",
+      "opening_id": "italian-giuoco-piano",
+      "variation_id": "italian-giuoco-piano",
+      "name": "Modern Italian (4.d4)",
       "moves": [
         "e4",
         "e5",
-        "Nc3",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Bc5",
+        "d4",
+        "exd4",
+        "O-O",
         "Nf6",
-        "g3",
+        "e5",
+        "d5",
+        "Bb5",
+        "Ne4",
+        "Nxd4",
+        "Bd7"
+      ],
+      "depth": 16,
+      "end_fen": "r2qk2r/pppb1ppp/2n5/1BbpP3/3Nn3/8/PPP2PPP/RNBQ1RK1 w kq - 1 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Both sides develop quietly toward h3 / h6 with Nbd2-f1-g3 / Nbd7-f8-g6.",
+        "White looks for kingside expansion; Black plays ...Re8 + central break."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 7,
+          "alternatives": [
+            "d4",
+            "Nc3"
+          ],
+          "label": "Italian mainline 4.c3 vs Two Knights / Italian Four Knights",
+          "rationale": "Modern Italian preference; slow build."
+        }
+      ]
+    },
+    {
+      "id": "italian-two-knights-main",
+      "opening_id": "italian-two-knights",
+      "variation_id": "italian-two-knights",
+      "name": "Two Knights Mainline",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Nf6",
+        "Ng5",
+        "d5",
+        "exd5",
+        "Na5",
+        "Bb5+",
+        "c6",
+        "dxc6",
+        "bxc6",
+        "Be2",
+        "h6",
+        "Nf3",
+        "e4",
+        "Ne5",
+        "Bd6"
+      ],
+      "depth": 20,
+      "end_fen": "r1bqk2r/p4pp1/2pb1n1p/n3N3/4p3/8/PPPPBPPP/RNBQK2R w KQkq - 2 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "italian-fried-liver",
+      "opening_id": "italian-two-knights",
+      "variation_id": "italian-two-knights",
+      "name": "Fried Liver Attack",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "Bc4",
+        "Nf6",
+        "Ng5",
         "d5",
         "exd5",
         "Nxd5",
-        "Bg2",
-        "Nxc3",
-        "bxc3",
-        "Bd6",
+        "Nxf7",
+        "Kxf7",
+        "Qf3+",
+        "Ke6",
+        "Nc3",
+        "Ncb4"
+      ],
+      "depth": 16,
+      "end_fen": "r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R w KQ - 4 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black sacrifices a pawn for piece activity and lead in development.",
+        "Critical position: White must consolidate while Black hunts the king."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 7,
+          "alternatives": [
+            "d4",
+            "d3",
+            "Nc3"
+          ],
+          "label": "4.Ng5 (sharp) vs 4.d4 (Modern Italian) vs 4.d3 (slow)",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "italian-evans-gambit-main",
+      "opening_id": "italian-evans-gambit",
+      "variation_id": "italian-evans-gambit",
+      "name": "Evans Gambit Main Line",
+      "moves": [
+        "e4",
+        "e5",
         "Nf3",
-        "O-O",
-        "O-O",
         "Nc6",
-        "Rb1",
-        "Rb8"
-      ],
-      "depth": 18,
-      "end_fen": "1rbq1rk1/ppp2ppp/2nb4/4p3/8/2P2NP1/P1PP1PBP/1RBQ1RK1 w - - 7 10",
-      "popularity": 0.8345,
-      "tags": [
-        "aggressive"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "sicilian-defense-main",
-      "opening_id": "sicilian-defense",
-      "name": "Main Line",
-      "moves": [
-        "e4",
-        "c5",
-        "Nf3",
-        "d6",
+        "Bc4",
+        "Bc5",
+        "b4",
+        "Bxb4",
+        "c3",
+        "Ba5",
         "d4",
+        "exd4",
+        "O-O",
+        "d6",
         "cxd4",
-        "Nxd4",
-        "Nf6",
+        "Bb6",
         "Nc3",
-        "a6",
-        "Be3",
-        "e5",
-        "Nb3",
-        "Be6",
-        "f3",
-        "h5",
-        "Nd5",
-        "Bxd5"
+        "Bg4",
+        "Bb2"
       ],
-      "depth": 18,
-      "end_fen": "rn1qkb1r/1p3pp1/p2p1n2/3bp2p/4P3/1N2BP2/PPP3PP/R2QKB1R w KQkq - 0 10",
-      "popularity": 0.9692,
-      "tags": [
-        "sharp",
-        "main-line"
+      "depth": 19,
+      "end_fen": "r2qk1nr/ppp2ppp/1bnp4/8/2BPP1b1/2N2N2/PB3PPP/R2Q1RK1 b kq - 4 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White sacs a pawn to gain time + central control.",
+        "Practical sharp line; lower-rated opponents often crumble under pressure."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 9,
+          "alternatives": [
+            "Bc5",
+            "Be7",
+            "Bd6"
+          ],
+          "label": "Black's 5th retreat: Ba5 main / Bc5 Lasker / Be7 Schlechter",
+          "rationale": null
+        }
+      ]
     },
     {
-      "id": "sicilian-najdorf-main",
+      "id": "sicilian-najdorf-english-attack",
       "opening_id": "sicilian-najdorf",
-      "name": "Main Line",
+      "variation_id": "sicilian-najdorf",
+      "name": "English Attack",
       "moves": [
         "e4",
         "c5",
@@ -320,26 +1600,99 @@
         "Nb3",
         "Be6",
         "f3",
-        "h5",
-        "Nd5",
-        "Bxd5",
-        "exd5",
+        "Be7",
+        "Qd2",
+        "O-O",
+        "O-O-O"
+      ],
+      "depth": 19,
+      "end_fen": "rn1q1rk1/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/2KR1B1R b - - 4 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Both sides castle opposite; race begins.",
+        "White attacks with g4-g5 + h4-h5; Black with ...b5-b4 + ...a5-a4."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "sicilian-najdorf-classical",
+      "opening_id": "sicilian-najdorf",
+      "variation_id": "sicilian-najdorf",
+      "name": "Classical (6.Be2)",
+      "moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "d6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "a6",
+        "Be2",
+        "e5",
+        "Nb3",
+        "Be7",
+        "O-O",
+        "O-O",
+        "Re1",
         "Nbd7"
       ],
-      "depth": 20,
-      "end_fen": "r2qkb1r/1p1n1pp1/p2p1n2/3Pp2p/8/1N2BP2/PPP3PP/R2QKB1R w KQkq - 1 11",
-      "popularity": 0.8231,
-      "tags": [
-        "sharp",
-        "tactical"
+      "depth": 18,
+      "end_fen": "r1bq1rk1/1p1nbppp/p2p1n2/4p3/4P3/1NN5/PPP1BPPP/R1BQR1K1 w - - 6 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White plays positionally — kingside castle, slow buildup.",
+        "Less theory than English Attack; suits classical-style players."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "sicilian-dragon-main",
+      "id": "sicilian-najdorf-poisoned-pawn",
+      "opening_id": "sicilian-najdorf",
+      "variation_id": "sicilian-najdorf",
+      "name": "Poisoned Pawn (6.Bg5)",
+      "moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "d6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "a6",
+        "Bg5",
+        "e6",
+        "f4",
+        "Qb6",
+        "Qd2",
+        "Qxb2",
+        "Rb1",
+        "Qa3"
+      ],
+      "depth": 18,
+      "end_fen": "rnb1kb1r/1p3ppp/p2ppn2/6B1/3NPP2/q1N5/P1PQ2PP/1R2KB1R w Kkq - 2 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black grabs the b2 pawn; sharpest line in chess theory.",
+        "Both sides need deep memorization; Fischer's signature."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "sicilian-dragon-yugoslav",
       "opening_id": "sicilian-dragon",
-      "name": "Main Line",
+      "variation_id": "sicilian-dragon",
+      "name": "Yugoslav Attack",
       "moves": [
         "e4",
         "c5",
@@ -357,25 +1710,157 @@
         "O-O",
         "Qd2",
         "Nc6",
-        "O-O-O",
-        "d5",
-        "exd5",
-        "Nxd5"
+        "Bc4",
+        "Bd7",
+        "O-O-O"
       ],
-      "depth": 20,
-      "end_fen": "r1bq1rk1/pp2ppbp/2n3p1/3n4/3N4/2N1BP2/PPPQ2PP/2KR1B1R w - - 0 11",
-      "popularity": 0.998,
-      "tags": [
-        "sharp",
-        "tactical"
+      "depth": 19,
+      "end_fen": "r2q1rk1/pp1bppbp/2np1np1/8/2BNP3/2N1BP2/PPPQ2PP/2KR3R b - - 6 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Sharp opposite-side castling. 'Open the h-file and mate' — Fischer.",
+        "Black's main idea: ...Rc8, ...Ne5, ...a6, ...b5 with Nxc3 sac options."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "french-defense-main",
-      "opening_id": "french-defense",
-      "name": "Main Line",
+      "id": "sicilian-dragon-classical",
+      "opening_id": "sicilian-dragon",
+      "variation_id": "sicilian-dragon",
+      "name": "Classical (6.Be2)",
+      "moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "d6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "g6",
+        "Be2",
+        "Bg7",
+        "O-O",
+        "O-O",
+        "Be3",
+        "Nc6",
+        "Nb3",
+        "Be6"
+      ],
+      "depth": 18,
+      "end_fen": "r2q1rk1/pp2ppbp/2npbnp1/8/4P3/1NN1B3/PPP1BPPP/R2Q1RK1 w - - 8 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White castles short; calmer than the Yugoslav.",
+        "Black plays ...Be6 + ...d5 break; positional Sicilian."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "sicilian-sveshnikov-main",
+      "opening_id": "sicilian-sveshnikov",
+      "variation_id": "sicilian-sveshnikov",
+      "name": "Sveshnikov Main Line",
+      "moves": [
+        "e4",
+        "c5",
+        "Nf3",
+        "Nc6",
+        "d4",
+        "cxd4",
+        "Nxd4",
+        "Nf6",
+        "Nc3",
+        "e5",
+        "Ndb5",
+        "d6",
+        "Bg5",
+        "a6",
+        "Na3",
+        "b5",
+        "Nd5",
+        "Be7",
+        "Bxf6",
+        "Bxf6"
+      ],
+      "depth": 20,
+      "end_fen": "r1bqk2r/5ppp/p1np1b2/1p1Np3/4P3/N7/PPP2PPP/R2QKB1R w KQkq - 0 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black accepts a positional weakness on d5 in exchange for activity.",
+        "Modern theory considers it fully equal; very popular at top level (Magnus uses it)."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 13,
+          "alternatives": [
+            "Nd5"
+          ],
+          "label": "7.Bg5 Main / 7.Nd5 Direct",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "sicilian-alapin-main",
+      "opening_id": "sicilian-alapin",
+      "variation_id": "sicilian-alapin",
+      "name": "Alapin Main Line",
+      "moves": [
+        "e4",
+        "c5",
+        "c3",
+        "Nf6",
+        "e5",
+        "Nd5",
+        "d4",
+        "cxd4",
+        "Nf3",
+        "Nc6",
+        "cxd4",
+        "d6",
+        "Bc4",
+        "Nb6",
+        "Bb5",
+        "dxe5",
+        "Nxe5",
+        "Bd7",
+        "Nxd7",
+        "Qxd7"
+      ],
+      "depth": 20,
+      "end_fen": "r3kb1r/pp1qpppp/1nn5/1B6/3P4/8/PP3PPP/RNBQK2R w KQkq - 0 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White avoids open Sicilian theory; aims for IQP play.",
+        "Solid practical choice for white below master level."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 3,
+          "alternatives": [
+            "d5",
+            "e6"
+          ],
+          "label": "2...Nf6 / 2...d5 / 2...e6 — three black tries vs Alapin",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "french-winawer-main",
+      "opening_id": "french-winawer",
+      "variation_id": "french-winawer",
+      "name": "Winawer Poisoned (7.Qg4)",
       "moves": [
         "e4",
         "e6",
@@ -390,25 +1875,224 @@
         "bxc3",
         "Ne7",
         "Qg4",
-        "O-O",
-        "Bd3",
-        "Nbc6",
-        "Qh5",
-        "Ng6"
+        "Qc7",
+        "Qxg7",
+        "Rg8",
+        "Qxh7",
+        "cxd4"
       ],
       "depth": 18,
-      "end_fen": "r1bq1rk1/pp3ppp/2n1p1n1/2ppP2Q/3P4/P1PB4/2P2PPP/R1B1K1NR w KQ - 7 10",
-      "popularity": 0.9487,
-      "tags": [
-        "solid"
+      "end_fen": "rnb1k1r1/ppq1np1Q/4p3/3pP3/3p4/P1P5/2P2PPP/R1B1KBNR w KQq - 0 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White grabs g7 / h7 pawns; Black gets central breaks + open lines.",
+        "Sharpest French line; both sides accept structural damage for activity."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "caro-kann-main",
-      "opening_id": "caro-kann",
-      "name": "Main Line",
+      "id": "french-winawer-positional",
+      "opening_id": "french-winawer",
+      "variation_id": "french-winawer",
+      "name": "Winawer Positional (7.Nf3)",
+      "moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "Nc3",
+        "Bb4",
+        "e5",
+        "c5",
+        "a3",
+        "Bxc3+",
+        "bxc3",
+        "Ne7",
+        "Nf3",
+        "Nbc6",
+        "Bd3",
+        "Qa5",
+        "Bd2"
+      ],
+      "depth": 17,
+      "end_fen": "r1b1k2r/pp2nppp/2n1p3/q1ppP3/3P4/P1PB1N2/2PB1PPP/R2QK2R b KQkq - 6 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Quieter alternative to 7.Qg4; White consolidates instead of grabbing pawns.",
+        "Black plays ...Qa5 + ...Nbc6 to pressure c3."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "french-classical-main",
+      "opening_id": "french-classical",
+      "variation_id": "french-classical",
+      "name": "Classical French Steinitz",
+      "moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "Nc3",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e5",
+        "Nfd7",
+        "Bxe7",
+        "Qxe7",
+        "f4",
+        "O-O",
+        "Nf3",
+        "c5",
+        "Bd3"
+      ],
+      "depth": 17,
+      "end_fen": "rnb2rk1/pp1nqppp/4p3/2ppP3/3P1P2/2NB1N2/PPP3PP/R2QK2R b KQ - 1 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Locked center; flank operations decide.",
+        "Black's main plan: ...c5 + ...f6 to challenge White's e5 chain."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 7,
+          "alternatives": [
+            "e5"
+          ],
+          "label": "4.Bg5 Classical / 4.e5 Steinitz Variation",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "french-advance-main",
+      "opening_id": "french-advance",
+      "variation_id": "french-advance",
+      "name": "Advance French Main Line",
+      "moves": [
+        "e4",
+        "e6",
+        "d4",
+        "d5",
+        "e5",
+        "c5",
+        "c3",
+        "Nc6",
+        "Nf3",
+        "Qb6",
+        "a3",
+        "Nh6",
+        "b4",
+        "cxd4",
+        "cxd4",
+        "Nf5",
+        "Bb2",
+        "Bd7"
+      ],
+      "depth": 18,
+      "end_fen": "r3kb1r/pp1b1ppp/1qn1p3/3pPn2/1P1P4/P4N2/1B3PPP/RN1QKB1R w KQkq - 3 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Pawn chain c3-d4-e5 vs c5-d5-e6; closed center.",
+        "Black undermines with ...c5 + ...f6; White holds with the Bd3-Nf3-O-O setup."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 9,
+          "alternatives": [
+            "Bd7",
+            "Nge7"
+          ],
+          "label": "5...Qb6 mainline / 5...Bd7 / 5...Nge7",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "caro-kann-classical-main",
+      "opening_id": "caro-kann-classical",
+      "variation_id": "caro-kann-classical",
+      "name": "Classical Caro-Kann Main Line",
+      "moves": [
+        "e4",
+        "c6",
+        "d4",
+        "d5",
+        "Nc3",
+        "dxe4",
+        "Nxe4",
+        "Bf5",
+        "Ng3",
+        "Bg6",
+        "h4",
+        "h6",
+        "Nf3",
+        "Nd7",
+        "h5",
+        "Bh7",
+        "Bd3",
+        "Bxd3"
+      ],
+      "depth": 18,
+      "end_fen": "r2qkbnr/pp1nppp1/2p4p/7P/3P4/3b1NN1/PPP2PP1/R1BQK2R w KQkq - 0 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black trades the bishop and accepts slightly cramped position for solidity.",
+        "Long-term plan: ...c5, ...Nf6, ...Be7, equalize the structure."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "caro-kann-karpov",
+      "opening_id": "caro-kann-classical",
+      "variation_id": "caro-kann-classical",
+      "name": "Karpov Variation (4...Nd7)",
+      "moves": [
+        "e4",
+        "c6",
+        "d4",
+        "d5",
+        "Nc3",
+        "dxe4",
+        "Nxe4",
+        "Nd7",
+        "Ng5",
+        "Ngf6",
+        "Bd3",
+        "e6",
+        "N1f3",
+        "Bd6",
+        "Qe2",
+        "h6",
+        "Ne4"
+      ],
+      "depth": 17,
+      "end_fen": "r1bqk2r/pp1n1pp1/2pbpn1p/8/3PN3/3B1N2/PPP1QPPP/R1B1K2R b KQkq - 1 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Karpov's signature: ...Nd7 instead of ...Bf5.",
+        "Cramped but rock-solid; black aims for ...c5 + ...b6 break later."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "caro-kann-advance-main",
+      "opening_id": "caro-kann-advance",
+      "variation_id": "caro-kann-advance",
+      "name": "Advance Caro-Kann Short Variation",
       "moves": [
         "e4",
         "c6",
@@ -421,193 +2105,265 @@
         "Be2",
         "Nd7",
         "O-O",
-        "Ne7",
+        "Bg6",
         "Nbd2",
-        "h6",
+        "Ne7",
         "Nb3",
-        "g5"
+        "Nb6",
+        "a4"
       ],
-      "depth": 16,
-      "end_fen": "r2qkb1r/pp1nnp2/2p1p2p/3pPbp1/3P4/1N3N2/PPP1BPPP/R1BQ1RK1 w kq - 0 9",
-      "popularity": 0.4474,
-      "tags": [
-        "solid",
-        "positional"
+      "depth": 17,
+      "end_fen": "r2qkb1r/pp2nppp/1np1p1b1/3pP3/P2P4/1N3N2/1PP1BPPP/R1BQ1RK1 b kq - 0 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White seizes space; Black plays for ...c5 break.",
+        "Black bishop on g6 is fine outside the pawn chain."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 5,
+          "alternatives": [
+            "c4",
+            "Nc3",
+            "h4"
+          ],
+          "label": "4.Nf3 Short / 4.c4 Modern / 4.Nc3 Tal / 4.h4 Wedge",
+          "rationale": null
+        }
+      ]
     },
     {
-      "id": "scandinavian-main",
-      "opening_id": "scandinavian",
-      "name": "Main Line",
+      "id": "caro-kann-exchange-main",
+      "opening_id": "caro-kann-exchange",
+      "variation_id": "caro-kann-exchange",
+      "name": "Exchange Caro-Kann",
       "moves": [
         "e4",
+        "c6",
+        "d4",
         "d5",
         "exd5",
-        "Qxd5",
-        "Nc3",
-        "Qa5",
-        "d4",
+        "cxd5",
+        "Bd3",
         "Nf6",
-        "Nf3",
-        "c6",
-        "Bc4",
-        "Bf5",
-        "Bd2",
-        "e6",
-        "Nd5",
-        "Qd8",
-        "Nxf6+",
-        "gxf6"
-      ],
-      "depth": 18,
-      "end_fen": "rn1qkb1r/pp3p1p/2p1pp2/5b2/2BP4/5N2/PPPB1PPP/R2QK2R w KQkq - 0 10",
-      "popularity": 0.6193,
-      "tags": [
-        "offbeat"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "alekhine-defense-main",
-      "opening_id": "alekhine-defense",
-      "name": "Main Line",
-      "moves": [
-        "e4",
-        "Nf6",
-        "e5",
-        "Nd5",
-        "d4",
-        "d6",
-        "Nf3",
+        "c3",
+        "Nc6",
+        "Bf4",
         "Bg4",
-        "Be2",
-        "e6",
-        "O-O",
-        "Be7",
-        "c4",
-        "Nb6",
-        "Nc3",
-        "O-O",
-        "Be3",
-        "Nc6"
+        "Qb3",
+        "Qd7",
+        "Nd2",
+        "e6"
       ],
-      "depth": 18,
-      "end_fen": "r2q1rk1/ppp1bppp/1nnpp3/4P3/2PP2b1/2N1BN2/PP2BPPP/R2Q1RK1 w - - 5 10",
-      "popularity": 0.3106,
-      "tags": [
-        "offbeat",
-        "hypermodern"
+      "depth": 16,
+      "end_fen": "r3kb1r/pp1q1ppp/2n1pn2/3p4/3P1Bb1/1QPB4/PP1N1PPP/R3K1NR w KQkq - 0 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Symmetric pawn structure; small white edge from extra tempo.",
+        "Black aims for full equality with quick development + ...Bg4 / ...Qd7."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "pirc-defense-main",
-      "opening_id": "pirc-defense",
-      "name": "Main Line",
+      "id": "qgd-orthodox-main",
+      "opening_id": "qgd-orthodox",
+      "variation_id": "qgd-orthodox",
+      "name": "Orthodox Capablanca (7.Rc1)",
       "moves": [
-        "e4",
-        "d6",
         "d4",
-        "Nf6",
+        "d5",
+        "c4",
+        "e6",
         "Nc3",
-        "g6",
-        "f4",
-        "Bg7",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e3",
+        "O-O",
         "Nf3",
+        "Nbd7",
+        "Rc1",
+        "c6",
+        "Bd3",
+        "dxc4",
+        "Bxc4",
+        "Nd5"
+      ],
+      "depth": 18,
+      "end_fen": "r1bq1rk1/pp1nbppp/2p1p3/3n2B1/2BP4/2N1PN2/PP3PPP/2RQK2R w K - 1 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black equalizes via the Capablanca freeing maneuver ...Nd5.",
+        "Solid 100-year-old line; still mainline at top level."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "qgd-orthodox-modern",
+      "opening_id": "qgd-orthodox",
+      "variation_id": "qgd-orthodox",
+      "name": "Orthodox Modern (7.Qc2)",
+      "moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e3",
+        "O-O",
+        "Nf3",
+        "Nbd7",
+        "Qc2",
+        "c5",
+        "cxd5",
+        "Nxd5",
+        "Bxe7"
+      ],
+      "depth": 17,
+      "end_fen": "r1bq1rk1/pp1nBppp/4p3/2pn4/3P4/2N1PN2/PPQ2PPP/R3KB1R b KQ - 0 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Modern engine-prep alternative — White presses with queen on c2.",
+        "More dynamic than Capablanca; often transposes to IQP positions."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "qgd-tartakower-main",
+      "opening_id": "qgd-tartakower",
+      "variation_id": "qgd-tartakower",
+      "name": "Tartakower Defense Main Line",
+      "moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "Bg5",
+        "Be7",
+        "e3",
+        "O-O",
+        "Nf3",
+        "h6",
+        "Bh4",
+        "b6",
+        "cxd5",
+        "Nxd5",
+        "Bxe7",
+        "Qxe7",
+        "Nxd5",
+        "exd5"
+      ],
+      "depth": 20,
+      "end_fen": "rnb2rk1/p1p1qpp1/1p5p/3p4/3P4/4PN2/PP3PPP/R2QKB1R w KQ - 0 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black solves the QGD bishop problem by fianchetto on b7.",
+        "Hanging-pawn structure (c+d) common; central activity vs flexibility tradeoff."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "qgd-exchange-main",
+      "opening_id": "qgd-exchange",
+      "variation_id": "qgd-exchange",
+      "name": "QGD Exchange Variation",
+      "moves": [
+        "d4",
+        "d5",
+        "c4",
+        "e6",
+        "Nc3",
+        "Nf6",
+        "cxd5",
+        "exd5",
+        "Bg5",
+        "Be7",
+        "e3",
         "O-O",
         "Bd3",
-        "Na6",
+        "Nbd7",
+        "Qc2",
+        "Re8",
+        "Nge2"
+      ],
+      "depth": 17,
+      "end_fen": "r1bqr1k1/pppnbppp/5n2/3p2B1/3P4/2NBP3/PPQ1NPPP/R3K2R b KQ - 6 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White launches minority attack b4-b5 to weaken Black's queenside.",
+        "Black counters with kingside play and active piece coordination."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 11,
+          "alternatives": [
+            "Nf3"
+          ],
+          "label": "6.e3 (with Nge2 minority attack) / 6.Nf3 (more flexible)",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "kid-mar-del-plata-main",
+      "opening_id": "kid-mar-del-plata",
+      "variation_id": "kid-mar-del-plata",
+      "name": "Mar del Plata Classical (9.Ne1)",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "e4",
+        "d6",
+        "Nf3",
         "O-O",
-        "c5",
-        "d5",
-        "Bg4",
-        "Bc4",
-        "Nc7"
-      ],
-      "depth": 18,
-      "end_fen": "r2q1rk1/ppn1ppbp/3p1np1/2pP4/2B1PPb1/2N2N2/PPP3PP/R1BQ1RK1 w - - 3 10",
-      "popularity": 0.7647,
-      "tags": [
-        "hypermodern"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "queens-gambit-main",
-      "opening_id": "queens-gambit",
-      "name": "Main Line",
-      "moves": [
-        "d4",
-        "d5",
-        "c4",
-        "c6",
-        "Nf3",
-        "Nf6",
-        "Nc3",
-        "e6",
-        "Bg5",
-        "h6",
-        "Bh4",
-        "dxc4",
-        "e4",
-        "g5",
-        "Bg3",
-        "b5",
         "Be2",
-        "Bb7"
-      ],
-      "depth": 18,
-      "end_fen": "rn1qkb1r/pb3p2/2p1pn1p/1p4p1/2pPP3/2N2NB1/PP2BPPP/R2QK2R w KQkq - 2 10",
-      "popularity": 0.9125,
-      "tags": [
-        "classical",
-        "main-line"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "slav-defense-main",
-      "opening_id": "slav-defense",
-      "name": "Main Line",
-      "moves": [
-        "d4",
+        "e5",
+        "O-O",
+        "Nc6",
         "d5",
-        "c4",
-        "c6",
-        "Nf3",
-        "Nf6",
-        "Nc3",
-        "e6",
-        "Bg5",
-        "h6",
-        "Bh4",
-        "dxc4",
-        "e4",
-        "g5",
-        "Bg3",
-        "b5",
-        "Be2",
-        "Bb7"
+        "Ne7",
+        "Ne1",
+        "Nd7",
+        "Nd3",
+        "f5"
       ],
-      "depth": 18,
-      "end_fen": "rn1qkb1r/pb3p2/2p1pn1p/1p4p1/2pPP3/2N2NB1/PP2BPPP/R2QK2R w KQkq - 2 10",
-      "popularity": 0.9125,
-      "tags": [
-        "solid"
+      "depth": 20,
+      "end_fen": "r1bq1rk1/pppnn1bp/3p2p1/3Ppp2/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 w - - 0 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Closed center; opposite-flank attacks. Pure 'race' — kingside vs queenside.",
+        "Black plays ...f5-f4-g5; White plays b4-c5 + breaking on the queenside."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "kings-indian-main",
-      "opening_id": "kings-indian",
-      "name": "Main Line",
+      "id": "kid-bayonet",
+      "opening_id": "kid-mar-del-plata",
+      "variation_id": "kid-mar-del-plata",
+      "name": "Bayonet Attack (9.b4)",
       "moves": [
         "d4",
         "Nf6",
@@ -626,56 +2382,116 @@
         "d5",
         "Ne7",
         "b4",
-        "Nh5"
+        "Nh5",
+        "Re1",
+        "Nf4"
       ],
-      "depth": 18,
-      "end_fen": "r1bq1rk1/ppp1npbp/3p2p1/3Pp2n/1PP1P3/2N2N2/P3BPPP/R1BQ1RK1 w - - 1 10",
-      "popularity": 0.5989,
-      "tags": [
-        "hypermodern",
-        "fighting"
+      "depth": 20,
+      "end_fen": "r1bq1rk1/ppp1npbp/3p2p1/3Pp3/1PP1Pn2/2N2N2/P3BPPP/R1BQR1K1 w - - 3 11",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Aggressive queenside lever — White hits a5 + c5 break early.",
+        "Faster than Classical 9.Ne1; popularized by Kramnik."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": []
     },
     {
-      "id": "nimzo-indian-main",
-      "opening_id": "nimzo-indian",
-      "name": "Main Line",
+      "id": "kid-saemisch-main",
+      "opening_id": "kid-saemisch",
+      "variation_id": "kid-saemisch",
+      "name": "Sämisch Main Line",
       "moves": [
         "d4",
         "Nf6",
         "c4",
-        "e6",
+        "g6",
         "Nc3",
-        "Bb4",
-        "e3",
+        "Bg7",
+        "e4",
+        "d6",
+        "f3",
         "O-O",
-        "Bd3",
+        "Be3",
+        "e5",
         "d5",
-        "Nf3",
-        "c5",
-        "O-O",
-        "Nc6",
-        "a3",
-        "Bxc3",
-        "bxc3",
-        "Qc7"
+        "Nh5",
+        "Qd2",
+        "f5",
+        "O-O-O"
       ],
-      "depth": 18,
-      "end_fen": "r1b2rk1/ppq2ppp/2n1pn2/2pp4/2PP4/P1PBPN2/5PPP/R1BQ1RK1 w - - 1 10",
-      "popularity": 0.5161,
-      "tags": [
-        "classical",
-        "positional"
+      "depth": 17,
+      "end_fen": "rnbq1rk1/ppp3bp/3p2p1/3Ppp1n/2P1P3/2N1BP2/PP1Q2PP/2KR1BNR b - - 1 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White plays for a slow kingside attack with g4 + h4-h5 after castling long.",
+        "Black hits center with ...e5/...c5 and exploits the f3 weakness."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 11,
+          "alternatives": [
+            "c5",
+            "Nc6"
+          ],
+          "label": "6...e5 mainline / 6...c5 Panno / 6...Nc6",
+          "rationale": null
+        }
+      ]
     },
     {
-      "id": "london-system-main",
-      "opening_id": "london-system",
-      "name": "Main Line",
+      "id": "kid-fianchetto-main",
+      "opening_id": "kid-fianchetto",
+      "variation_id": "kid-fianchetto",
+      "name": "Fianchetto Variation Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "g3",
+        "O-O",
+        "Bg2",
+        "d6",
+        "Nf3",
+        "Nbd7",
+        "O-O",
+        "e5",
+        "e4",
+        "c6",
+        "h3"
+      ],
+      "depth": 17,
+      "end_fen": "r1bq1rk1/pp1n1pbp/2pp1np1/4p3/2PPP3/2N2NPP/PP3PB1/R1BQ1RK1 b - - 0 9",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White's bishop on g2 controls the long diagonal; calmer than the Sämisch.",
+        "Quiet positional struggle; both sides build slowly."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 11,
+          "alternatives": [
+            "Nc6",
+            "c5"
+          ],
+          "label": "6...Nbd7 Classical / 6...Nc6 Panno / 6...c5 Yugoslav",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "london-modern-main",
+      "opening_id": "london-modern",
+      "variation_id": "london-modern",
+      "name": "Modern London Main Line",
       "moves": [
         "d4",
         "d5",
@@ -686,123 +2502,146 @@
         "e3",
         "Nc6",
         "Nbd2",
-        "Qb6",
-        "dxc5",
-        "Qxb2",
-        "Rb1",
-        "Qc3",
-        "Bb5",
-        "e6"
-      ],
-      "depth": 16,
-      "end_fen": "r1b1kb1r/pp3ppp/2n1pn2/1BPp4/5B2/2q1PN2/P1PN1PPP/1R1QK2R w Kkq - 0 9",
-      "popularity": 0.7119,
-      "tags": [
-        "system",
-        "quiet"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "english-opening-main",
-      "opening_id": "english-opening",
-      "name": "Main Line",
-      "moves": [
-        "c4",
-        "Nf6",
-        "Nc3",
-        "g6",
-        "e4",
-        "d6",
-        "d4",
-        "Bg7",
-        "Nf3",
-        "O-O",
-        "Be2",
-        "e5",
-        "O-O",
-        "Nc6",
-        "d5",
-        "Ne7",
-        "b4",
-        "Nh5"
-      ],
-      "depth": 18,
-      "end_fen": "r1bq1rk1/ppp1npbp/3p2p1/3Pp2n/1PP1P3/2N2N2/P3BPPP/R1BQ1RK1 w - - 1 10",
-      "popularity": 0.5989,
-      "tags": [
-        "flank"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "english-opening-alt",
-      "opening_id": "english-opening",
-      "name": "Alternative Line",
-      "moves": [
-        "c4",
-        "e5",
-        "Nc3",
-        "Nf6",
-        "Nf3",
-        "Nc6",
-        "g3",
-        "d5",
-        "cxd5",
-        "Nxd5",
-        "Bg2",
-        "Nb6",
-        "O-O",
-        "Be7",
-        "a3",
-        "O-O",
-        "b4",
-        "Be6"
-      ],
-      "depth": 18,
-      "end_fen": "r2q1rk1/ppp1bppp/1nn1b3/4p3/1P6/P1N2NP1/3PPPBP/R1BQ1RK1 w - - 1 10",
-      "popularity": 0.8346,
-      "tags": [
-        "flank"
-      ],
-      "strategic_notes": [],
-      "key_squares": []
-    },
-    {
-      "id": "birds-opening-main",
-      "opening_id": "birds-opening",
-      "name": "Main Line",
-      "moves": [
-        "f4",
-        "d5",
-        "Nf3",
-        "g6",
-        "g3",
-        "Bg7",
-        "Bg2",
-        "Nf6",
-        "O-O",
-        "O-O",
-        "d3",
-        "c5",
+        "e6",
         "c3",
-        "Nc6",
-        "Na3",
-        "Rb8",
-        "Ne5",
-        "Qc7"
+        "Bd6",
+        "Bg3",
+        "O-O",
+        "Bd3",
+        "b6",
+        "O-O",
+        "Bb7"
       ],
       "depth": 18,
-      "end_fen": "1rb2rk1/ppq1ppbp/2n2np1/2ppN3/5P2/N1PP2P1/PP2P1BP/R1BQ1RK1 w - - 5 10",
-      "popularity": 0.6104,
-      "tags": [
-        "flank",
-        "offbeat"
+      "end_fen": "r2q1rk1/pb3ppp/1pnbpn2/2pp4/3P4/2PBPNB1/PP1N1PPP/R2Q1RK1 w - - 2 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White builds a bishop battery on b1-h7 for the kingside attack.",
+        "Black challenges the d4-pawn with c5; play around the central tension."
       ],
-      "strategic_notes": [],
-      "key_squares": []
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 5,
+          "alternatives": [
+            "Bf5",
+            "e6",
+            "c6"
+          ],
+          "label": "3...c5 Direct / 3...Bf5 Symmetric / 3...e6 Classical",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "london-anti-kid-main",
+      "opening_id": "london-anti-kid",
+      "variation_id": "london-anti-kid",
+      "name": "London vs King's Indian Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "Bf4",
+        "g6",
+        "Nc3",
+        "Bg7",
+        "Qd2",
+        "d6",
+        "O-O-O",
+        "O-O",
+        "e4",
+        "c5",
+        "d5"
+      ],
+      "depth": 13,
+      "end_fen": "rnbq1rk1/pp2ppbp/3p1np1/2pP4/4PB2/2N5/PPPQ1PPP/2KR1BNR b - - 0 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White avoids classical KID theory by skipping c4.",
+        "Long-side castling gives White attacking chances; Black plays for ...b5 break."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "london-jobava-main",
+      "opening_id": "london-jobava",
+      "variation_id": "london-jobava",
+      "name": "Jobava London Main Line",
+      "moves": [
+        "d4",
+        "d5",
+        "Nc3",
+        "Nf6",
+        "Bf4",
+        "c5",
+        "e3",
+        "Nc6",
+        "Nb5",
+        "Rb8",
+        "dxc5",
+        "a6",
+        "Nd6+",
+        "exd6",
+        "cxd6",
+        "Bxd6",
+        "Bxd6",
+        "Qxd6"
+      ],
+      "depth": 18,
+      "end_fen": "1rb1k2r/1p3ppp/p1nq1n2/3p4/8/4P3/PPP2PPP/R2QKBNR w KQk - 0 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Sharp anti-classical setup popularized by GM Baadur Jobava.",
+        "Surprise weapon at club level; theory is light, ideas matter more than memorization."
+      ],
+      "key_squares": [],
+      "forks": [
+        {
+          "ply_index": 9,
+          "alternatives": [
+            "e3",
+            "dxc5"
+          ],
+          "label": "5.Nb5 Aggressive / 5.e3 Standard / 5.dxc5 Simple",
+          "rationale": null
+        }
+      ]
+    },
+    {
+      "id": "scotch-classical-main",
+      "opening_id": "scotch-classical",
+      "variation_id": "scotch-classical",
+      "name": "Scotch Classical Main Line",
+      "moves": [
+        "e4",
+        "e5",
+        "Nf3",
+        "Nc6",
+        "d4",
+        "exd4",
+        "Nxd4",
+        "Bc5",
+        "Be3",
+        "Qf6",
+        "c3",
+        "Nge7",
+        "Bc4",
+        "Ne5"
+      ],
+      "depth": 14,
+      "end_fen": "r1b1k2r/ppppnppp/5q2/2b1n3/2BNP3/2P1B3/PP3PPP/RN1QK2R w KQkq - 3 8",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White trades center for piece play and open lines.",
+        "Practical alternative to Spanish/Italian; Magnus championed it 2010s."
+      ],
+      "key_squares": [],
+      "forks": []
     }
   ]
 }

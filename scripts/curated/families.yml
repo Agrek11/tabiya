@@ -1,0 +1,194 @@
+# Curated families — Tier 1 = must-have, Tier 2 = common, Tier 3 = offbeat.
+#
+# Tier 1 covers ~70% of all club games. Tier 2 covers next ~20%. Tier 3 is
+# the long tail (BDG, Polish, Grob etc) — included for completeness but not
+# drilled in default presets.
+#
+# Each family has 1-4 child variations declared in variations.yml.
+
+families:
+  # ── Tier 1: open games (1.e4 e5) ──────────────────────────────
+  - id: spanish
+    name: Spanish (Ruy Lopez)
+    category: open
+    tier: 1
+    eco_range: C60-C99
+
+  - id: italian
+    name: Italian Game
+    category: open
+    tier: 1
+    eco_range: C50-C59
+
+  # ── Tier 1: vs 1.e4 not e5 ──────────────────────────────────
+  - id: sicilian
+    name: Sicilian Defense
+    category: semi-open
+    tier: 1
+    eco_range: B20-B99
+
+  - id: french
+    name: French Defense
+    category: semi-open
+    tier: 1
+    eco_range: C00-C19
+
+  - id: caro-kann
+    name: Caro-Kann Defense
+    category: semi-open
+    tier: 1
+    eco_range: B10-B19
+
+  # ── Tier 1: 1.d4 d5 + Indian defenses ────────────────────────
+  - id: queens-gambit-declined
+    name: Queen's Gambit Declined
+    category: closed
+    tier: 1
+    eco_range: D30-D69
+
+  - id: kings-indian
+    name: King's Indian Defense
+    category: indian
+    tier: 1
+    eco_range: E60-E99
+
+  # ── Tier 1: anti-system ──────────────────────────────────────
+  - id: london
+    name: London System
+    category: closed
+    tier: 1
+    eco_range: D02
+
+  # ── Tier 2: common but not must-have ─────────────────────────
+  - id: vienna
+    name: Vienna Game
+    category: open
+    tier: 2
+    eco_range: C25-C29
+
+  - id: scotch
+    name: Scotch Game
+    category: open
+    tier: 2
+    eco_range: C44-C45
+
+  - id: scandinavian
+    name: Scandinavian Defense
+    category: semi-open
+    tier: 2
+    eco_range: B01
+
+  - id: pirc
+    name: Pirc Defense
+    category: semi-open
+    tier: 2
+    eco_range: B07-B09
+
+  - id: alekhine
+    name: Alekhine's Defense
+    category: semi-open
+    tier: 2
+    eco_range: B02-B05
+
+  - id: slav
+    name: Slav Defense
+    category: closed
+    tier: 2
+    eco_range: D10-D19
+
+  - id: semi-slav
+    name: Semi-Slav Defense
+    category: closed
+    tier: 2
+    eco_range: D43-D49
+
+  - id: nimzo-indian
+    name: Nimzo-Indian Defense
+    category: indian
+    tier: 2
+    eco_range: E20-E59
+
+  - id: queens-indian
+    name: Queen's Indian Defense
+    category: indian
+    tier: 2
+    eco_range: E12-E19
+
+  - id: grunfeld
+    name: Grünfeld Defense
+    category: indian
+    tier: 2
+    eco_range: D70-D99
+
+  - id: catalan
+    name: Catalan Opening
+    category: closed
+    tier: 2
+    eco_range: E00-E09
+
+  - id: english
+    name: English Opening
+    category: flank
+    tier: 2
+    eco_range: A10-A39
+
+  - id: kings-indian-attack
+    name: King's Indian Attack
+    category: flank
+    tier: 2
+    eco_range: A07-A08
+
+  - id: dutch
+    name: Dutch Defense
+    category: indian
+    tier: 2
+    eco_range: A80-A99
+
+  # ── Tier 3: offbeat (defaults off in presets) ────────────────
+  - id: kings-gambit
+    name: King's Gambit
+    category: gambit
+    tier: 3
+    eco_range: C30-C39
+
+  - id: birds
+    name: Bird's Opening
+    category: flank
+    tier: 3
+    eco_range: A02-A03
+
+  - id: trompowsky
+    name: Trompowsky Attack
+    category: closed
+    tier: 3
+    eco_range: A45
+
+  - id: bdg
+    name: Blackmar-Diemer Gambit
+    category: gambit
+    tier: 3
+    eco_range: D00
+
+  - id: budapest
+    name: Budapest Gambit
+    category: gambit
+    tier: 3
+    eco_range: A51-A52
+
+  - id: benko
+    name: Benko Gambit
+    category: gambit
+    tier: 3
+    eco_range: A57-A59
+
+  - id: latvian
+    name: Latvian Gambit
+    category: gambit
+    tier: 3
+    eco_range: C40
+
+  - id: polish
+    name: Polish Opening
+    category: flank
+    tier: 3
+    eco_range: A00

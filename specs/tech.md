@@ -40,8 +40,9 @@ Single-language backend: Python owns the catalog build script, AI service, and a
 | `tailwindcss` (MIT) | Utility-first CSS |
 | `vitest` (MIT) | Unit tests |
 | `idb` (ISC) | IndexedDB wrapper for local SRS state |
+| `fake-indexeddb` (MIT, dev-only) | IndexedDB simulator for tests |
 
-All MIT / Apache-2 / BSD / GPL — fully open source, no proprietary deps.
+All MIT / Apache-2 / BSD / GPL / ISC — fully open source, no proprietary deps.
 
 ## Build & Development
 

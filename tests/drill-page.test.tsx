@@ -16,15 +16,25 @@ vi.mock('canvas-confetti', () => ({
 
 import { DrillPage } from '../src/pages/DrillPage';
 import { _setRepositoryForTesting } from '../src/storage';
-import type { Line, Opening, OpeningRepository, SearchQuery } from '../src/storage/types';
+import type { Family, Line, Opening, OpeningRepository, SearchQuery, Variation } from '../src/storage/types';
 import { renderWithProviders } from './test-utils';
 
 const opening: Opening = {
   id: 'ruy-lopez',
+  family_id: 'open-games',
   name: 'Ruy Lopez',
   eco: 'C60-C99',
   color: 'white',
   line_ids: ['ruy-lopez-main'],
+  is_gambit: false,
+};
+
+const family: Family = {
+  id: 'open-games',
+  name: 'Open Games',
+  category: 'open',
+  eco_range: 'C20-C99',
+  opening_ids: ['ruy-lopez'],
 };
 
 const line: Line = {
@@ -64,6 +74,26 @@ class MockRepo implements OpeningRepository {
     await this.gate;
     return [line];
   }
+  async listFamilies(): Promise<Family[]> {
+    await this.gate;
+    return [family];
+  }
+  async getFamily(id: string): Promise<Family | null> {
+    await this.gate;
+    return id === family.id ? family : null;
+  }
+  async listOpeningsByFamily(familyId: string): Promise<Opening[]> {
+    await this.gate;
+    return familyId === family.id ? [opening] : [];
+  }
+  async listGambits(): Promise<Opening[]> {
+    await this.gate;
+    return [];
+  }
+  async listVariations(): Promise<Variation[]> { await this.gate; return []; }
+  async getVariation(): Promise<null> { await this.gate; return null; }
+  async listVariationsByFamily(): Promise<Variation[]> { await this.gate; return []; }
+  async listLinesByVariation(): Promise<Line[]> { await this.gate; return []; }
 }
 
 class FailingRepo implements OpeningRepository {
@@ -82,6 +112,22 @@ class FailingRepo implements OpeningRepository {
   async searchLines(): Promise<Line[]> {
     return [];
   }
+  async listFamilies(): Promise<Family[]> {
+    return [];
+  }
+  async getFamily(): Promise<null> {
+    return null;
+  }
+  async listOpeningsByFamily(): Promise<Opening[]> {
+    return [];
+  }
+  async listGambits(): Promise<Opening[]> {
+    return [];
+  }
+  async listVariations(): Promise<Variation[]> { return []; }
+  async getVariation(): Promise<null> { return null; }
+  async listVariationsByFamily(): Promise<Variation[]> { return []; }
+  async listLinesByVariation(): Promise<Line[]> { return []; }
 }
 
 beforeEach(() => {

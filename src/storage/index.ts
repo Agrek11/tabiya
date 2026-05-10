@@ -6,9 +6,12 @@
  */
 
 import { JsonOpeningRepository } from './JsonOpeningRepository';
-import type { OpeningRepository } from './types';
+import { IndexedDbSrsRepository } from './srs/IndexedDbSrsRepository';
+import { InMemorySrsRepository } from './srs/InMemorySrsRepository';
+import type { OpeningRepository, SrsRepository } from './types';
 
 let _repo: OpeningRepository | null = null;
+let _srsRepo: SrsRepository | null = null;
 
 export function getRepository(): OpeningRepository {
   if (_repo === null) {
@@ -17,9 +20,42 @@ export function getRepository(): OpeningRepository {
   return _repo;
 }
 
+/** Phase 1 — single SRS repository entry point. */
+export function getSrsRepository(): SrsRepository {
+  if (_srsRepo === null) {
+    _srsRepo = new IndexedDbSrsRepository();
+  }
+  return _srsRepo;
+}
+
 /** Test-only: replace the singleton with a custom impl (e.g. an in-memory mock). */
 export function _setRepositoryForTesting(repo: OpeningRepository | null): void {
   _repo = repo;
 }
 
-export type { OpeningRepository, Opening, Line, KeySquare, Catalog, SearchQuery, Color, Side } from './types';
+/** Test-only: replace the SRS repository singleton. */
+export function _setSrsRepositoryForTesting(repo: SrsRepository | null): void {
+  _srsRepo = repo;
+}
+
+export { InMemorySrsRepository };
+
+export type {
+  OpeningRepository,
+  Opening,
+  Line,
+  KeySquare,
+  Catalog,
+  SearchQuery,
+  Color,
+  Side,
+  Family,
+  FamilyCategory,
+  Variation,
+  ForkAnnotation,
+  SrsBox,
+  SrsState,
+  DrillResult,
+  SrsRepository,
+} from './types';
+export { BOX_INTERVALS_DAYS } from './types';

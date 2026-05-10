@@ -2,8 +2,8 @@
  * SettingsPage — theme toggle, sound, About, version stamp.
  */
 
-import { useState } from 'react';
-import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useTheme, useTokens } from '../theme/ThemeContext';
 import { useBoardTheme } from '../theme/BoardThemeContext';
 import { usePieceSet } from '../theme/PieceSetContext';
@@ -12,6 +12,7 @@ import { Card } from '../ui/primitives/Card';
 import { Button } from '../ui/primitives/Button';
 import { fonts, radius } from '../theme/tokens';
 import { getSettings, playMove, writeSettings, type SoundSettings } from '../sound/sounds';
+import { getSrsRepository } from '../storage';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -19,10 +20,34 @@ export function SettingsPage() {
   const { themeId: boardThemeId, setThemeId: setBoardThemeId, options: boardThemeOptions } = useBoardTheme();
   const { id: pieceSetId, setId: setPieceSetId, options: pieceSetOptions } = usePieceSet();
   const [sound, setSoundState] = useState<SoundSettings>(() => getSettings());
+  const [srsCount, setSrsCount] = useState<number | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const updateSound = (next: SoundSettings): void => {
     setSoundState(next);
     writeSettings(next);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    void getSrsRepository()
+      .listAllStates()
+      .then((all) => {
+        if (!cancelled) setSrsCount(all.length);
+      })
+      .catch(() => {
+        if (!cancelled) setSrsCount(0);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [resetMessage]);
+
+  const onResetAll = async (): Promise<void> => {
+    await getSrsRepository().resetAll();
+    setConfirmReset(false);
+    setResetMessage('All SRS progress cleared.');
   };
 
   return (
@@ -311,6 +336,73 @@ export function SettingsPage() {
             Test
           </button>
         </div>
+      </Card>
+
+      <Card style={{ border: `1px solid ${t.red}` }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 6,
+          }}
+        >
+          <AlertTriangle size={15} color={t.red} />
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: 14,
+              color: t.red,
+              fontFamily: fonts.sans,
+            }}
+          >
+            Danger Zone
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: t.inkDim,
+            fontFamily: fonts.sans,
+            marginBottom: 14,
+          }}
+        >
+          Wipes spaced-repetition progress for every line. Cannot be undone.
+        </div>
+        {!confirmReset ? (
+          <Button
+            variant="secondary"
+            onClick={() => setConfirmReset(true)}
+            disabled={srsCount === 0 || srsCount === null}
+          >
+            Reset all SRS progress
+            {srsCount !== null && srsCount > 0 ? ` (${srsCount} record${srsCount === 1 ? '' : 's'})` : ''}
+          </Button>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13, color: t.ink, fontFamily: fonts.sans }}>
+              Delete {srsCount} record{srsCount === 1 ? '' : 's'}?
+            </span>
+            <Button variant="primary" onClick={() => void onResetAll()}>
+              Yes, reset
+            </Button>
+            <Button variant="secondary" onClick={() => setConfirmReset(false)}>
+              Cancel
+            </Button>
+          </div>
+        )}
+        {resetMessage !== null && (
+          <div
+            style={{
+              fontSize: 12,
+              color: t.inkDim,
+              fontFamily: fonts.sans,
+              marginTop: 10,
+            }}
+          >
+            {resetMessage}
+          </div>
+        )}
       </Card>
 
       <Card>

@@ -6,6 +6,7 @@ import { PieceSetProvider } from './theme/PieceSetContext';
 import { AppShell } from './ui/shell/AppShell';
 import { DashboardPage } from './pages/DashboardPage';
 import { RepertoirePage } from './pages/RepertoirePage';
+import { GambitsPage } from './pages/GambitsPage';
 import { DrillPage } from './pages/DrillPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -31,6 +32,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/repertoire" element={<RepertoirePage />} />
+                <Route path="/repertoire/gambits" element={<GambitsPage />} />
                 <Route path="/drill" element={<DrillPage />} />
                 <Route path="/progress" element={<ProgressPage />} />
                 <Route path="/settings" element={<SettingsPage />} />

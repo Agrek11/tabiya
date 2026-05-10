@@ -17,6 +17,15 @@ from dataclasses import dataclass
 from typing import Literal
 
 Color = Literal["white", "black"]
+FamilyCategory = Literal[
+    "open",
+    "semi-open",
+    "closed",
+    "indian",
+    "flank",
+    "gambit",
+    "uncategorized",
+]
 
 
 @dataclass(frozen=True)
@@ -28,11 +37,35 @@ class OpeningSpec:
     eco_range: str
     color: Color
     seed_pgn: str
+    family_id: str = ""
+    is_gambit: bool = False
     depth_override: int | None = None
     tags: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class FamilySpec:
+    """Static declaration of an opening family (Phase 0d.3)."""
+
+    id: str
+    display_name: str
+    category: FamilyCategory
+    eco_range: str
+
+
 DEFAULT_DEPTH = 18
+
+
+# Family declarations. Order = display order in catalog.json + Repertoire UX.
+TARGET_FAMILIES: list[FamilySpec] = [
+    FamilySpec("open-games", "Open Games", "open", "C20-C99"),
+    FamilySpec("semi-open", "Semi-Open Games", "semi-open", "B00-B99 / C00-C19"),
+    FamilySpec("closed-games", "Closed Games", "closed", "D00-D69"),
+    FamilySpec("indian-defenses", "Indian Defenses", "indian", "E00-E99"),
+    FamilySpec("flank", "Flank Openings", "flank", "A00-A39"),
+    FamilySpec("gambits", "Gambits", "gambit", ""),
+    FamilySpec("uncategorized", "Uncategorized", "uncategorized", ""),
+]
 
 
 # Order here is the order they appear in catalog.json (insertion-preserving).
@@ -44,6 +77,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="C60-C99",
         color="white",
         seed_pgn="1. e4 e5 2. Nf3 Nc6 3. Bb5",
+        family_id="open-games",
         tags=("classical", "main-line"),
     ),
     OpeningSpec(
@@ -52,6 +86,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="C50-C59",
         color="white",
         seed_pgn="1. e4 e5 2. Nf3 Nc6 3. Bc4",
+        family_id="open-games",
         tags=("classical",),
     ),
     OpeningSpec(
@@ -60,6 +95,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="C25-C29",
         color="white",
         seed_pgn="1. e4 e5 2. Nc3",
+        family_id="open-games",
         tags=("aggressive",),
     ),
     # --- 1.e4 (other) — black defenses ---
@@ -69,6 +105,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B20-B99",
         color="black",
         seed_pgn="1. e4 c5",
+        family_id="semi-open",
         tags=("sharp", "main-line"),
     ),
     OpeningSpec(
@@ -77,6 +114,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B90-B99",
         color="black",
         seed_pgn="1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6",
+        family_id="semi-open",
         depth_override=20,
         tags=("sharp", "tactical"),
     ),
@@ -86,6 +124,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B70-B79",
         color="black",
         seed_pgn="1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6",
+        family_id="semi-open",
         depth_override=20,
         tags=("sharp", "tactical"),
     ),
@@ -95,6 +134,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="C00-C19",
         color="black",
         seed_pgn="1. e4 e6",
+        family_id="semi-open",
         tags=("solid",),
     ),
     OpeningSpec(
@@ -103,6 +143,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B10-B19",
         color="black",
         seed_pgn="1. e4 c6",
+        family_id="semi-open",
         depth_override=16,
         tags=("solid", "positional"),
     ),
@@ -112,6 +153,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B01",
         color="black",
         seed_pgn="1. e4 d5",
+        family_id="semi-open",
         tags=("offbeat",),
     ),
     OpeningSpec(
@@ -120,6 +162,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B02-B05",
         color="black",
         seed_pgn="1. e4 Nf6",
+        family_id="semi-open",
         tags=("offbeat", "hypermodern"),
     ),
     OpeningSpec(
@@ -128,6 +171,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="B07-B09",
         color="black",
         seed_pgn="1. e4 d6",
+        family_id="semi-open",
         tags=("hypermodern",),
     ),
     # --- 1.d4 family ---
@@ -137,6 +181,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="D06-D69",
         color="white",
         seed_pgn="1. d4 d5 2. c4",
+        family_id="closed-games",
         tags=("classical", "main-line"),
     ),
     OpeningSpec(
@@ -145,6 +190,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="D10-D19",
         color="black",
         seed_pgn="1. d4 d5 2. c4 c6",
+        family_id="closed-games",
         tags=("solid",),
     ),
     OpeningSpec(
@@ -153,6 +199,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="E60-E99",
         color="black",
         seed_pgn="1. d4 Nf6 2. c4 g6",
+        family_id="indian-defenses",
         tags=("hypermodern", "fighting"),
     ),
     OpeningSpec(
@@ -161,6 +208,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="E20-E59",
         color="black",
         seed_pgn="1. d4 Nf6 2. c4 e6 3. Nc3 Bb4",
+        family_id="indian-defenses",
         tags=("classical", "positional"),
     ),
     OpeningSpec(
@@ -169,6 +217,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="D02",
         color="white",
         seed_pgn="1. d4 d5 2. Nf3 Nf6 3. Bf4",
+        family_id="closed-games",
         depth_override=16,
         tags=("system", "quiet"),
     ),
@@ -179,6 +228,7 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="A10-A39",
         color="white",
         seed_pgn="1. c4",
+        family_id="flank",
         tags=("flank",),
     ),
     OpeningSpec(
@@ -187,9 +237,18 @@ TARGET_OPENINGS: list[OpeningSpec] = [
         eco_range="A02-A03",
         color="white",
         seed_pgn="1. f4",
+        family_id="flank",
         tags=("flank", "offbeat"),
     ),
 ]
+
+
+def get_family(family_id: str) -> FamilySpec | None:
+    """Return the FamilySpec with the given id, or None if not found."""
+    for fam in TARGET_FAMILIES:
+        if fam.id == family_id:
+            return fam
+    return None
 
 
 def get_opening(opening_id: str) -> OpeningSpec | None:
