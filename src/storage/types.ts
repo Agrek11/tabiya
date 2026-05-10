@@ -73,12 +73,22 @@ export type Variation = {
   line_ids: string[];
 };
 
+export type Preset = {
+  id: string;
+  name: string;
+  description: string;
+  tier_band: number[];
+  family_ids: string[];
+  recommended_color: 'white-only' | 'black-only' | 'both';
+};
+
 export type Catalog = {
   version: string;
   families: Family[];
   variations: Variation[];
   openings: Opening[];
   lines: Line[];
+  presets?: Preset[];
 };
 
 export type SearchQuery = {
@@ -149,4 +159,8 @@ export interface OpeningRepository {
   getVariation(id: string): Promise<Variation | null>;
   listVariationsByFamily(familyId: string): Promise<Variation[]>;
   listLinesByVariation(variationId: string): Promise<Line[]>;
+
+  // Phase 1c — Preset layer
+  listPresets(): Promise<Preset[]>;
+  getPreset(id: string): Promise<Preset | null>;
 }

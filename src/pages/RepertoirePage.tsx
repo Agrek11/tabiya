@@ -13,14 +13,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Inbox, Search, Swords } from 'lucide-react';
+import { ChevronDown, ChevronRight, Inbox, RotateCcw, Search, Swords } from 'lucide-react';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts, radius } from '../theme/tokens';
 import { Card } from '../ui/primitives/Card';
 import { PageHeader } from '../ui/primitives/PageHeader';
 import { StateMessage } from '../ui/primitives/StateMessage';
-import { getRepository } from '../storage';
+import { getRepository, getSrsRepository } from '../storage';
 import { useSRS } from '../hooks/useSRS';
+import { familyPassesPreset, usePreset } from '../hooks/usePreset';
 import {
   aggregateMasteryByFamily,
   aggregateMasteryByOpening,
@@ -53,7 +54,13 @@ export function RepertoirePage() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const { states: srsStates } = useSRS();
+  const { states: srsStates, refresh: refreshSrs } = useSRS();
+  const { preset } = usePreset();
+
+  const onResetLine = async (lineId: string): Promise<void> => {
+    await getSrsRepository().resetState(lineId);
+    await refreshSrs();
+  };
 
   useEffect(() => {
     const repo = getRepository();
@@ -95,6 +102,7 @@ export function RepertoirePage() {
     if (families === null || openings === null) return null;
     const q = search.trim().toLowerCase();
     return families
+      .filter((f) => familyPassesPreset(f.id, f.tier, preset))
       .filter((f) => category === 'all' || f.category === category)
       .map((f) => {
         const ids = f.opening_ids
@@ -277,6 +285,8 @@ export function RepertoirePage() {
               onToggle={() => toggleFamily(family.id)}
               onLineClick={(line) => navigate(`/drill?line=${line.id}`)}
               onOpeningClick={(op) => navigate(`/drill?opening=${op.id}`)}
+              onResetLine={(lineId) => void onResetLine(lineId)}
+              hasSrsState={(lineId) => srsStates.has(lineId)}
               familyMastery={masteryByFamily.get(family.id) ?? 0}
               openingMastery={masteryByOpening}
             />
@@ -351,6 +361,8 @@ function FamilyCard({
   onToggle,
   onOpeningClick,
   onLineClick,
+  onResetLine,
+  hasSrsState,
   familyMastery,
   openingMastery,
 }: {
@@ -361,6 +373,8 @@ function FamilyCard({
   onToggle: () => void;
   onOpeningClick: (o: Opening) => void;
   onLineClick: (l: Line) => void;
+  onResetLine: (lineId: string) => void;
+  hasSrsState: (lineId: string) => boolean;
   familyMastery: number;
   openingMastery: Map<string, number>;
 }) {
@@ -421,34 +435,48 @@ function FamilyCard({
             // Single-line variation: collapse — render one row that drills directly.
             if (opLines.length === 1) {
               const line = opLines[0]!;
+              const canReset = hasSrsState(line.id);
               return (
-                <button
+                <div
                   key={o.id}
-                  onClick={() => onLineClick(line)}
-                  className="tabiya-popover-item"
                   style={{
-                    width: '100%',
-                    padding: '10px 16px 10px 44px',
-                    background: 'transparent',
-                    border: 'none',
                     display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    fontFamily: fonts.sans,
+                    alignItems: 'stretch',
+                    width: '100%',
                   }}
                 >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: t.inkSoft, fontWeight: 600, marginBottom: 2 }}>
-                      {o.eco} · {o.color === 'white' ? 'WHITE' : 'BLACK'}
-                      {o.is_gambit ? ' · GAMBIT' : ''}
+                  <button
+                    onClick={() => onLineClick(line)}
+                    className="tabiya-popover-item"
+                    style={{
+                      flex: 1,
+                      padding: '10px 8px 10px 44px',
+                      background: 'transparent',
+                      border: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontFamily: fonts.sans,
+                    }}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: t.inkSoft, fontWeight: 600, marginBottom: 2 }}>
+                        {o.eco} · {o.color === 'white' ? 'WHITE' : 'BLACK'}
+                        {o.is_gambit ? ' · GAMBIT' : ''}
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: t.ink }}>{o.name}</div>
+                      <MasteryBar percent={opPct} caption={opPct > 0 ? `${opPct}% mastery` : 'Not started'} compact />
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: t.ink }}>{o.name}</div>
-                    <MasteryBar percent={opPct} caption={opPct > 0 ? `${opPct}% mastery` : 'Not started'} compact />
-                  </div>
-                  <ChevronRight size={14} color={t.brand} />
-                </button>
+                    <ChevronRight size={14} color={t.brand} />
+                  </button>
+                  <ResetIconButton
+                    enabled={canReset}
+                    onReset={() => onResetLine(line.id)}
+                    label={`Reset SRS for ${line.name}`}
+                  />
+                </div>
               );
             }
 
@@ -484,32 +512,44 @@ function FamilyCard({
                   </span>
                 </button>
                 <div style={{ paddingBottom: 6 }}>
-                  {opLines.map((line) => (
-                    <button
-                      key={line.id}
-                      onClick={() => onLineClick(line)}
-                      className="tabiya-popover-item"
-                      style={{
-                        width: '100%',
-                        padding: '7px 16px 7px 64px',
-                        background: 'transparent',
-                        border: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontFamily: fonts.sans,
-                        fontSize: 13,
-                        color: t.ink,
-                      }}
-                    >
-                      <span style={{ width: 4, height: 4, borderRadius: 999, background: t.inkSoft }} />
-                      <span style={{ flex: 1 }}>{line.name}</span>
-                      <span style={{ fontSize: 11, color: t.inkSoft }}>{line.depth} ply</span>
-                      <ChevronRight size={12} color={t.brand} />
-                    </button>
-                  ))}
+                  {opLines.map((line) => {
+                    const canReset = hasSrsState(line.id);
+                    return (
+                      <div
+                        key={line.id}
+                        style={{ display: 'flex', alignItems: 'stretch', width: '100%' }}
+                      >
+                        <button
+                          onClick={() => onLineClick(line)}
+                          className="tabiya-popover-item"
+                          style={{
+                            flex: 1,
+                            padding: '7px 8px 7px 64px',
+                            background: 'transparent',
+                            border: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            fontFamily: fonts.sans,
+                            fontSize: 13,
+                            color: t.ink,
+                          }}
+                        >
+                          <span style={{ width: 4, height: 4, borderRadius: 999, background: t.inkSoft }} />
+                          <span style={{ flex: 1 }}>{line.name}</span>
+                          <span style={{ fontSize: 11, color: t.inkSoft }}>{line.depth} ply</span>
+                          <ChevronRight size={12} color={t.brand} />
+                        </button>
+                        <ResetIconButton
+                          enabled={canReset}
+                          onReset={() => onResetLine(line.id)}
+                          label={`Reset SRS for ${line.name}`}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -517,6 +557,43 @@ function FamilyCard({
         </div>
       )}
     </Card>
+  );
+}
+
+function ResetIconButton({
+  enabled,
+  onReset,
+  label,
+}: {
+  enabled: boolean;
+  onReset: () => void;
+  label: string;
+}) {
+  const t = useTokens();
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        if (enabled) onReset();
+      }}
+      disabled={!enabled}
+      aria-label={label}
+      title={enabled ? label : 'No SRS state to reset'}
+      style={{
+        width: 36,
+        background: 'transparent',
+        border: 'none',
+        cursor: enabled ? 'pointer' : 'not-allowed',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: enabled ? t.inkDim : t.inkSoft,
+        opacity: enabled ? 1 : 0.3,
+        padding: 0,
+      }}
+    >
+      <RotateCcw size={13} />
+    </button>
   );
 }
 

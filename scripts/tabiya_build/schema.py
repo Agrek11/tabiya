@@ -103,6 +103,19 @@ class Variation(BaseModel):
     line_ids: list[str] = Field(default_factory=list)
 
 
+class Preset(BaseModel):
+    """A one-click repertoire loadout (Phase 1c)."""
+
+    id: str
+    name: str
+    description: str
+    tier_band: list[int] = Field(default_factory=list, description="1/2/3 tiers included")
+    family_ids: list[str] = Field(
+        default_factory=list, description="Explicit additions outside tier_band"
+    )
+    recommended_color: Literal["white-only", "black-only", "both"] = "both"
+
+
 class Catalog(BaseModel):
     """The full bundled catalog written to public/catalog.json."""
 
@@ -111,3 +124,4 @@ class Catalog(BaseModel):
     variations: list[Variation] = Field(default_factory=list)
     openings: list[Opening] = Field(default_factory=list)
     lines: list[Line] = Field(default_factory=list)
+    presets: list[Preset] = Field(default_factory=list)

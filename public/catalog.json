@@ -104,7 +104,9 @@
       "category": "open",
       "eco_range": "C25-C29",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "vienna-game-main"
+      ]
     },
     {
       "id": "scotch",
@@ -122,7 +124,9 @@
       "category": "semi-open",
       "eco_range": "B01",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "scandinavian-qa5"
+      ]
     },
     {
       "id": "pirc",
@@ -130,7 +134,9 @@
       "category": "semi-open",
       "eco_range": "B07-B09",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "pirc-classical"
+      ]
     },
     {
       "id": "alekhine",
@@ -138,7 +144,9 @@
       "category": "semi-open",
       "eco_range": "B02-B05",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "alekhine-modern"
+      ]
     },
     {
       "id": "slav",
@@ -146,7 +154,9 @@
       "category": "closed",
       "eco_range": "D10-D19",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "slav-main"
+      ]
     },
     {
       "id": "semi-slav",
@@ -154,7 +164,9 @@
       "category": "closed",
       "eco_range": "D43-D49",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "semi-slav-meran"
+      ]
     },
     {
       "id": "nimzo-indian",
@@ -162,7 +174,9 @@
       "category": "indian",
       "eco_range": "E20-E59",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "nimzo-rubinstein"
+      ]
     },
     {
       "id": "queens-indian",
@@ -170,7 +184,9 @@
       "category": "indian",
       "eco_range": "E12-E19",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "queens-indian-petrosian"
+      ]
     },
     {
       "id": "grunfeld",
@@ -178,7 +194,9 @@
       "category": "indian",
       "eco_range": "D70-D99",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "grunfeld-exchange"
+      ]
     },
     {
       "id": "catalan",
@@ -186,7 +204,9 @@
       "category": "closed",
       "eco_range": "E00-E09",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "catalan-open"
+      ]
     },
     {
       "id": "english",
@@ -194,7 +214,9 @@
       "category": "flank",
       "eco_range": "A10-A39",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "english-symmetrical"
+      ]
     },
     {
       "id": "kings-indian-attack",
@@ -202,7 +224,9 @@
       "category": "flank",
       "eco_range": "A07-A08",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "kia-main"
+      ]
     },
     {
       "id": "dutch",
@@ -210,7 +234,9 @@
       "category": "indian",
       "eco_range": "A80-A99",
       "tier": 2,
-      "opening_ids": []
+      "opening_ids": [
+        "dutch-stonewall"
+      ]
     },
     {
       "id": "kings-gambit",
@@ -815,6 +841,259 @@
       "line_ids": [
         "scotch-classical-main"
       ]
+    },
+    {
+      "id": "vienna-game-main",
+      "family_id": "vienna",
+      "name": "Vienna Gambit",
+      "eco": "C29",
+      "color": "white",
+      "trunk_moves": [
+        "e4",
+        "e5",
+        "Nc3",
+        "Nf6",
+        "f4"
+      ],
+      "line_ids": [
+        "vienna-gambit-main"
+      ]
+    },
+    {
+      "id": "scandinavian-qa5",
+      "family_id": "scandinavian",
+      "name": "Modern Scandinavian (3...Qa5)",
+      "eco": "B01",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "d5",
+        "exd5",
+        "Qxd5",
+        "Nc3",
+        "Qa5"
+      ],
+      "line_ids": [
+        "scandinavian-qa5-main"
+      ]
+    },
+    {
+      "id": "pirc-classical",
+      "family_id": "pirc",
+      "name": "Pirc Classical",
+      "eco": "B08",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "d6",
+        "d4",
+        "Nf6",
+        "Nc3",
+        "g6",
+        "Nf3",
+        "Bg7"
+      ],
+      "line_ids": [
+        "pirc-classical-main"
+      ]
+    },
+    {
+      "id": "alekhine-modern",
+      "family_id": "alekhine",
+      "name": "Alekhine Modern",
+      "eco": "B04",
+      "color": "black",
+      "trunk_moves": [
+        "e4",
+        "Nf6",
+        "e5",
+        "Nd5",
+        "d4",
+        "d6",
+        "Nf3"
+      ],
+      "line_ids": [
+        "alekhine-modern-main"
+      ]
+    },
+    {
+      "id": "slav-main",
+      "family_id": "slav",
+      "name": "Slav Main Line",
+      "eco": "D17",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "c4",
+        "c6",
+        "Nf3",
+        "Nf6",
+        "Nc3",
+        "dxc4",
+        "a4"
+      ],
+      "line_ids": [
+        "slav-main-line"
+      ]
+    },
+    {
+      "id": "semi-slav-meran",
+      "family_id": "semi-slav",
+      "name": "Meran Variation",
+      "eco": "D47",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "d5",
+        "c4",
+        "c6",
+        "Nf3",
+        "Nf6",
+        "Nc3",
+        "e6",
+        "e3",
+        "Nbd7",
+        "Bd3",
+        "dxc4",
+        "Bxc4",
+        "b5"
+      ],
+      "line_ids": [
+        "semi-slav-meran-main"
+      ]
+    },
+    {
+      "id": "nimzo-rubinstein",
+      "family_id": "nimzo-indian",
+      "name": "Rubinstein System",
+      "eco": "E40",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "Nc3",
+        "Bb4",
+        "e3"
+      ],
+      "line_ids": [
+        "nimzo-rubinstein-main"
+      ]
+    },
+    {
+      "id": "queens-indian-petrosian",
+      "family_id": "queens-indian",
+      "name": "Petrosian Variation",
+      "eco": "E12",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "Nf3",
+        "b6",
+        "a3"
+      ],
+      "line_ids": [
+        "queens-indian-petrosian-main"
+      ]
+    },
+    {
+      "id": "grunfeld-exchange",
+      "family_id": "grunfeld",
+      "name": "Exchange Variation",
+      "eco": "D85",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "d5",
+        "cxd5",
+        "Nxd5",
+        "e4"
+      ],
+      "line_ids": [
+        "grunfeld-exchange-main"
+      ]
+    },
+    {
+      "id": "catalan-open",
+      "family_id": "catalan",
+      "name": "Open Catalan",
+      "eco": "E04",
+      "color": "white",
+      "trunk_moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "g3",
+        "d5",
+        "Bg2",
+        "dxc4"
+      ],
+      "line_ids": [
+        "catalan-open-main"
+      ]
+    },
+    {
+      "id": "english-symmetrical",
+      "family_id": "english",
+      "name": "Symmetrical English",
+      "eco": "A30",
+      "color": "white",
+      "trunk_moves": [
+        "c4",
+        "c5"
+      ],
+      "line_ids": [
+        "english-symmetrical-main"
+      ]
+    },
+    {
+      "id": "kia-main",
+      "family_id": "kings-indian-attack",
+      "name": "KIA Main Line",
+      "eco": "A07",
+      "color": "white",
+      "trunk_moves": [
+        "Nf3",
+        "d5",
+        "g3",
+        "Nf6",
+        "Bg2",
+        "c6",
+        "O-O"
+      ],
+      "line_ids": [
+        "kia-main-line"
+      ]
+    },
+    {
+      "id": "dutch-stonewall",
+      "family_id": "dutch",
+      "name": "Stonewall Dutch",
+      "eco": "A95",
+      "color": "black",
+      "trunk_moves": [
+        "d4",
+        "f5",
+        "g3",
+        "Nf6",
+        "Bg2",
+        "e6",
+        "Nf3",
+        "d5"
+      ],
+      "line_ids": [
+        "dutch-stonewall-main"
+      ]
     }
   ],
   "openings": [
@@ -1113,6 +1392,149 @@
       "color": "white",
       "line_ids": [
         "scotch-classical-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "vienna-game-main",
+      "family_id": "vienna",
+      "name": "Vienna Gambit",
+      "eco": "C29",
+      "color": "white",
+      "line_ids": [
+        "vienna-gambit-main"
+      ],
+      "is_gambit": true
+    },
+    {
+      "id": "scandinavian-qa5",
+      "family_id": "scandinavian",
+      "name": "Modern Scandinavian (3...Qa5)",
+      "eco": "B01",
+      "color": "black",
+      "line_ids": [
+        "scandinavian-qa5-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "pirc-classical",
+      "family_id": "pirc",
+      "name": "Pirc Classical",
+      "eco": "B08",
+      "color": "black",
+      "line_ids": [
+        "pirc-classical-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "alekhine-modern",
+      "family_id": "alekhine",
+      "name": "Alekhine Modern",
+      "eco": "B04",
+      "color": "black",
+      "line_ids": [
+        "alekhine-modern-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "slav-main",
+      "family_id": "slav",
+      "name": "Slav Main Line",
+      "eco": "D17",
+      "color": "black",
+      "line_ids": [
+        "slav-main-line"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "semi-slav-meran",
+      "family_id": "semi-slav",
+      "name": "Meran Variation",
+      "eco": "D47",
+      "color": "black",
+      "line_ids": [
+        "semi-slav-meran-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "nimzo-rubinstein",
+      "family_id": "nimzo-indian",
+      "name": "Rubinstein System",
+      "eco": "E40",
+      "color": "black",
+      "line_ids": [
+        "nimzo-rubinstein-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "queens-indian-petrosian",
+      "family_id": "queens-indian",
+      "name": "Petrosian Variation",
+      "eco": "E12",
+      "color": "black",
+      "line_ids": [
+        "queens-indian-petrosian-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "grunfeld-exchange",
+      "family_id": "grunfeld",
+      "name": "Exchange Variation",
+      "eco": "D85",
+      "color": "black",
+      "line_ids": [
+        "grunfeld-exchange-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "catalan-open",
+      "family_id": "catalan",
+      "name": "Open Catalan",
+      "eco": "E04",
+      "color": "white",
+      "line_ids": [
+        "catalan-open-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "english-symmetrical",
+      "family_id": "english",
+      "name": "Symmetrical English",
+      "eco": "A30",
+      "color": "white",
+      "line_ids": [
+        "english-symmetrical-main"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "kia-main",
+      "family_id": "kings-indian-attack",
+      "name": "KIA Main Line",
+      "eco": "A07",
+      "color": "white",
+      "line_ids": [
+        "kia-main-line"
+      ],
+      "is_gambit": false
+    },
+    {
+      "id": "dutch-stonewall",
+      "family_id": "dutch",
+      "name": "Stonewall Dutch",
+      "eco": "A95",
+      "color": "black",
+      "line_ids": [
+        "dutch-stonewall-main"
       ],
       "is_gambit": false
     }
@@ -2642,6 +3064,453 @@
       ],
       "key_squares": [],
       "forks": []
+    },
+    {
+      "id": "vienna-gambit-main",
+      "opening_id": "vienna-game-main",
+      "variation_id": "vienna-game-main",
+      "name": "Vienna Gambit Main Line",
+      "moves": [
+        "e4",
+        "e5",
+        "Nc3",
+        "Nf6",
+        "f4",
+        "d5",
+        "fxe5",
+        "Nxe4",
+        "Nf3",
+        "Be7",
+        "d4"
+      ],
+      "depth": 11,
+      "end_fen": "rnbqk2r/ppp1bppp/8/3pP3/3Pn3/2N2N2/PPP3PP/R1BQKB1R b KQkq - 0 6",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White sacs the e4 pawn for central control + open f-file.",
+        "Sharp practical weapon below master level."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "scandinavian-qa5-main",
+      "opening_id": "scandinavian-qa5",
+      "variation_id": "scandinavian-qa5",
+      "name": "Scandinavian 3...Qa5 Main",
+      "moves": [
+        "e4",
+        "d5",
+        "exd5",
+        "Qxd5",
+        "Nc3",
+        "Qa5",
+        "d4",
+        "Nf6",
+        "Nf3",
+        "c6",
+        "Bc4",
+        "Bf5",
+        "Bd2"
+      ],
+      "depth": 13,
+      "end_fen": "rn2kb1r/pp2pppp/2p2n2/q4b2/2BP4/2N2N2/PPPB1PPP/R2QK2R b KQkq - 3 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black retains queenside pressure with Qa5.",
+        "Solid setup with ...c6, ...Nf6, ...Bf5; equalizes."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "pirc-classical-main",
+      "opening_id": "pirc-classical",
+      "variation_id": "pirc-classical",
+      "name": "Pirc Classical Main Line",
+      "moves": [
+        "e4",
+        "d6",
+        "d4",
+        "Nf6",
+        "Nc3",
+        "g6",
+        "Nf3",
+        "Bg7",
+        "Be2",
+        "O-O",
+        "O-O",
+        "c6",
+        "a4"
+      ],
+      "depth": 13,
+      "end_fen": "rnbq1rk1/pp2ppbp/2pp1np1/8/P2PP3/2N2N2/1PP1BPPP/R1BQ1RK1 b - - 0 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black builds a hypermodern setup, attacking center after development.",
+        "White holds central space; play around ...e5 and ...c5 breaks."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "alekhine-modern-main",
+      "opening_id": "alekhine-modern",
+      "variation_id": "alekhine-modern",
+      "name": "Alekhine Modern Main Line",
+      "moves": [
+        "e4",
+        "Nf6",
+        "e5",
+        "Nd5",
+        "d4",
+        "d6",
+        "Nf3",
+        "Bg4",
+        "Be2",
+        "e6",
+        "O-O",
+        "Be7"
+      ],
+      "depth": 12,
+      "end_fen": "rn1qk2r/ppp1bppp/3pp3/3nP3/3P2b1/5N2/PPP1BPPP/RNBQ1RK1 w kq - 2 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black provokes pawn pushes and chips away with ...Bg4 + ...d6.",
+        "Counter-attacking opening; concedes space for piece activity."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "slav-main-line",
+      "opening_id": "slav-main",
+      "variation_id": "slav-main",
+      "name": "Slav Main Line (5.a4 Bf5)",
+      "moves": [
+        "d4",
+        "d5",
+        "c4",
+        "c6",
+        "Nf3",
+        "Nf6",
+        "Nc3",
+        "dxc4",
+        "a4",
+        "Bf5",
+        "e3",
+        "e6",
+        "Bxc4",
+        "Bb4"
+      ],
+      "depth": 14,
+      "end_fen": "rn1qk2r/pp3ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P3PPP/R1BQK2R w KQkq - 1 8",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black grabs c4 then develops Bf5 outside the pawn chain.",
+        "Solid mainline; classical Slav strategy."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "semi-slav-meran-main",
+      "opening_id": "semi-slav-meran",
+      "variation_id": "semi-slav-meran",
+      "name": "Meran Main Line",
+      "moves": [
+        "d4",
+        "d5",
+        "c4",
+        "c6",
+        "Nf3",
+        "Nf6",
+        "Nc3",
+        "e6",
+        "e3",
+        "Nbd7",
+        "Bd3",
+        "dxc4",
+        "Bxc4",
+        "b5",
+        "Bd3",
+        "a6",
+        "e4",
+        "c5"
+      ],
+      "depth": 18,
+      "end_fen": "r1bqkb1r/3n1ppp/p3pn2/1pp5/3PP3/2NB1N2/PP3PPP/R1BQK2R w KQkq - 0 10",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black grabs queenside space with ...b5 + ...a6.",
+        "Sharp central tension after 9.e4 c5."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "nimzo-rubinstein-main",
+      "opening_id": "nimzo-rubinstein",
+      "variation_id": "nimzo-rubinstein",
+      "name": "Rubinstein System Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "Nc3",
+        "Bb4",
+        "e3",
+        "O-O",
+        "Bd3",
+        "d5",
+        "Nf3",
+        "c5",
+        "O-O",
+        "Nc6",
+        "a3"
+      ],
+      "depth": 15,
+      "end_fen": "r1bq1rk1/pp3ppp/2n1pn2/2pp4/1bPP4/P1NBPN2/1P3PPP/R1BQ1RK1 b - - 0 8",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White builds quietly with e3 + Bd3 instead of sharp Qc2/f3 setups.",
+        "Most popular Nimzo system at top level."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "queens-indian-petrosian-main",
+      "opening_id": "queens-indian-petrosian",
+      "variation_id": "queens-indian-petrosian",
+      "name": "Petrosian Variation Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "Nf3",
+        "b6",
+        "a3",
+        "Bb7",
+        "Nc3",
+        "d5",
+        "cxd5",
+        "Nxd5",
+        "Qc2"
+      ],
+      "depth": 13,
+      "end_fen": "rn1qkb1r/pbp2ppp/1p2p3/3n4/3P4/P1N2N2/1PQ1PPPP/R1B1KB1R b KQkq - 1 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White plays a3 to prevent ...Bb4 ideas.",
+        "Quiet positional Indian; Petrosian's signature."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "grunfeld-exchange-main",
+      "opening_id": "grunfeld-exchange",
+      "variation_id": "grunfeld-exchange",
+      "name": "Grünfeld Exchange Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "g6",
+        "Nc3",
+        "d5",
+        "cxd5",
+        "Nxd5",
+        "e4",
+        "Nxc3",
+        "bxc3",
+        "Bg7",
+        "Nf3",
+        "c5",
+        "Be3"
+      ],
+      "depth": 15,
+      "end_fen": "rnbqk2r/pp2ppbp/6p1/2p5/3PP3/2P1BN2/P4PPP/R2QKB1R b KQkq - 1 8",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black challenges White's big center with ...c5 + ...Bg7.",
+        "Classical attacking line; Kasparov championed it."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "catalan-open-main",
+      "opening_id": "catalan-open",
+      "variation_id": "catalan-open",
+      "name": "Open Catalan Main Line",
+      "moves": [
+        "d4",
+        "Nf6",
+        "c4",
+        "e6",
+        "g3",
+        "d5",
+        "Bg2",
+        "dxc4",
+        "Nf3",
+        "a6",
+        "O-O",
+        "Nc6",
+        "e3"
+      ],
+      "depth": 13,
+      "end_fen": "r1bqkb1r/1pp2ppp/p1n1pn2/8/2pP4/4PNP1/PP3PBP/RNBQ1RK1 b kq - 0 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White stays comfortable; long-term pressure on c4 + d5.",
+        "Modern engine-prep favorite (Carlsen, Anand)."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "english-symmetrical-main",
+      "opening_id": "english-symmetrical",
+      "variation_id": "english-symmetrical",
+      "name": "Symmetrical English Main Line",
+      "moves": [
+        "c4",
+        "c5",
+        "Nc3",
+        "Nc6",
+        "g3",
+        "g6",
+        "Bg2",
+        "Bg7",
+        "Nf3",
+        "Nf6",
+        "O-O",
+        "O-O",
+        "d3"
+      ],
+      "depth": 13,
+      "end_fen": "r1bq1rk1/pp1pppbp/2n2np1/2p5/2P5/2NP1NP1/PP2PPBP/R1BQ1RK1 b - - 0 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Mirror development; both sides fianchetto.",
+        "Quiet positional fight; small white edge from initiative."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "kia-main-line",
+      "opening_id": "kia-main",
+      "variation_id": "kia-main",
+      "name": "KIA Main Line",
+      "moves": [
+        "Nf3",
+        "d5",
+        "g3",
+        "Nf6",
+        "Bg2",
+        "c6",
+        "O-O",
+        "Bg4",
+        "d3",
+        "Nbd7",
+        "Nbd2"
+      ],
+      "depth": 11,
+      "end_fen": "r2qkb1r/pp1npppp/2p2n2/3p4/6b1/3P1NP1/PPPNPPBP/R1BQ1RK1 b kq - 2 6",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "White plays a reversed KID setup, slow buildup.",
+        "Avoids opening theory; trick at club level."
+      ],
+      "key_squares": [],
+      "forks": []
+    },
+    {
+      "id": "dutch-stonewall-main",
+      "opening_id": "dutch-stonewall",
+      "variation_id": "dutch-stonewall",
+      "name": "Stonewall Dutch Main Line",
+      "moves": [
+        "d4",
+        "f5",
+        "g3",
+        "Nf6",
+        "Bg2",
+        "e6",
+        "Nf3",
+        "d5",
+        "O-O",
+        "Bd6",
+        "c4",
+        "c6",
+        "b3"
+      ],
+      "depth": 13,
+      "end_fen": "rnbqk2r/pp4pp/2pbpn2/3p1p2/2PP4/1P3NP1/P3PPBP/RNBQ1RK1 b kq - 0 7",
+      "popularity": 0.0,
+      "tags": [],
+      "strategic_notes": [
+        "Black builds the f5-e6-d5-c6 stonewall; locks center.",
+        "Counter-attacks with ...Ne4 + kingside pieces."
+      ],
+      "key_squares": [],
+      "forks": []
+    }
+  ],
+  "presets": [
+    {
+      "id": "beginner",
+      "name": "Beginner",
+      "description": "Solid, low-theory openings. Great starting point.",
+      "tier_band": [
+        1
+      ],
+      "family_ids": [
+        "london",
+        "caro-kann",
+        "italian"
+      ],
+      "recommended_color": "both"
+    },
+    {
+      "id": "intermediate",
+      "name": "Intermediate",
+      "description": "Classical mainlines covering ~70% of club games.",
+      "tier_band": [
+        1,
+        2
+      ],
+      "family_ids": [],
+      "recommended_color": "both"
+    },
+    {
+      "id": "advanced",
+      "name": "Advanced",
+      "description": "Full theory including sharp tactical lines.",
+      "tier_band": [
+        1,
+        2,
+        3
+      ],
+      "family_ids": [],
+      "recommended_color": "both"
     }
   ]
 }

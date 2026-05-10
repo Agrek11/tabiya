@@ -16,7 +16,7 @@ vi.mock('canvas-confetti', () => ({
 
 import { DrillPage } from '../src/pages/DrillPage';
 import { _setRepositoryForTesting } from '../src/storage';
-import type { Family, Line, Opening, OpeningRepository, SearchQuery, Variation } from '../src/storage/types';
+import type { Family, Line, Opening, OpeningRepository, Preset, SearchQuery, Variation } from '../src/storage/types';
 import { renderWithProviders } from './test-utils';
 
 const opening: Opening = {
@@ -94,6 +94,8 @@ class MockRepo implements OpeningRepository {
   async getVariation(): Promise<null> { await this.gate; return null; }
   async listVariationsByFamily(): Promise<Variation[]> { await this.gate; return []; }
   async listLinesByVariation(): Promise<Line[]> { await this.gate; return []; }
+  async listPresets(): Promise<Preset[]> { await this.gate; return []; }
+  async getPreset(): Promise<null> { await this.gate; return null; }
 }
 
 class FailingRepo implements OpeningRepository {
@@ -128,6 +130,8 @@ class FailingRepo implements OpeningRepository {
   async getVariation(): Promise<null> { return null; }
   async listVariationsByFamily(): Promise<Variation[]> { return []; }
   async listLinesByVariation(): Promise<Line[]> { return []; }
+  async listPresets(): Promise<Preset[]> { return []; }
+  async getPreset(): Promise<null> { return null; }
 }
 
 beforeEach(() => {

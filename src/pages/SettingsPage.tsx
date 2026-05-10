@@ -13,6 +13,7 @@ import { Button } from '../ui/primitives/Button';
 import { fonts, radius } from '../theme/tokens';
 import { getSettings, playMove, writeSettings, type SoundSettings } from '../sound/sounds';
 import { getSrsRepository } from '../storage';
+import { usePreset } from '../hooks/usePreset';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -20,6 +21,7 @@ export function SettingsPage() {
   const { themeId: boardThemeId, setThemeId: setBoardThemeId, options: boardThemeOptions } = useBoardTheme();
   const { id: pieceSetId, setId: setPieceSetId, options: pieceSetOptions } = usePieceSet();
   const [sound, setSoundState] = useState<SoundSettings>(() => getSettings());
+  const { preset: activePreset, presets, setPresetId } = usePreset();
   const [srsCount, setSrsCount] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
@@ -335,6 +337,76 @@ export function SettingsPage() {
           >
             Test
           </button>
+        </div>
+      </Card>
+
+      <Card>
+        <div
+          style={{
+            fontWeight: 600,
+            fontSize: 14,
+            color: t.ink,
+            fontFamily: fonts.sans,
+            marginBottom: 4,
+          }}
+        >
+          Repertoire preset
+        </div>
+        <div
+          style={{
+            fontSize: 13,
+            color: t.inkDim,
+            fontFamily: fonts.sans,
+            marginBottom: 12,
+          }}
+        >
+          Filter the Repertoire and Drill picker to a curated subset. Off shows everything.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <button
+            onClick={() => setPresetId(null)}
+            style={{
+              padding: '10px 12px',
+              borderRadius: radius.chip,
+              border: `1px solid ${activePreset === null ? t.brand : t.border}`,
+              background: activePreset === null ? t.brandSoft : t.surfaceAlt,
+              color: t.ink,
+              fontFamily: fonts.sans,
+              fontSize: 13,
+              fontWeight: activePreset === null ? 600 : 500,
+              cursor: 'pointer',
+              textAlign: 'left',
+            }}
+          >
+            <div>Off — show all</div>
+            <div style={{ fontSize: 11, color: t.inkDim, marginTop: 2 }}>
+              Browse the full catalog. No filter.
+            </div>
+          </button>
+          {presets.map((p) => {
+            const isSel = activePreset?.id === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setPresetId(p.id)}
+                style={{
+                  padding: '10px 12px',
+                  borderRadius: radius.chip,
+                  border: `1px solid ${isSel ? t.brand : t.border}`,
+                  background: isSel ? t.brandSoft : t.surfaceAlt,
+                  color: t.ink,
+                  fontFamily: fonts.sans,
+                  fontSize: 13,
+                  fontWeight: isSel ? 600 : 500,
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div>{p.name}</div>
+                <div style={{ fontSize: 11, color: t.inkDim, marginTop: 2 }}>{p.description}</div>
+              </button>
+            );
+          })}
         </div>
       </Card>
 

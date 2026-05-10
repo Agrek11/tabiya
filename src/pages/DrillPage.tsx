@@ -24,7 +24,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
   AlertTriangle,
@@ -42,18 +42,27 @@ import {
 } from 'lucide-react';
 import { useClickOutside } from '../ui/use-click-outside';
 import { useDrill } from '../drill/useDrill';
+import { useSRS } from '../hooks/useSRS';
+import { familyPassesPreset, usePreset } from '../hooks/usePreset';
 import { useDrillHistoryOpen } from '../drill/use-drill-history-open';
 import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts, radius } from '../theme/tokens';
 import { StateMessage } from '../ui/primitives/StateMessage';
+import { StrategicNotesPanel } from '../ui/StrategicNotesPanel';
+import { EndOfLineSummary } from '../ui/EndOfLineSummary';
 import { getRepository, getSrsRepository } from '../storage';
-import type { Family, Line, Opening } from '../storage/types';
+import type { Family, ForkAnnotation, Line, Opening } from '../storage/types';
 
 type CatalogState =
   | { kind: 'loading' }
   | { kind: 'ready'; openings: Opening[]; lines: Line[]; families: Family[] }
   | { kind: 'error'; message: string };
+
+type QueueState =
+  | { kind: 'off' }
+  | { kind: 'active'; lineIds: string[]; index: number }
+  | { kind: 'exhausted'; total: number };
 
 type ModeId = 'theory' | 'coach' | 'visualizer' | 'engine';
 
@@ -129,10 +138,12 @@ export function DrillPage() {
   //                         line.
   const requestedLine = searchParams.get('line');
   const requestedOpening = searchParams.get('opening');
+  const requestedQueue = searchParams.get('queue');
 
   const [catalog, setCatalog] = useState<CatalogState>({ kind: 'loading' });
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
   const [selectedLineId, setSelectedLineId] = useState<string>('');
+  const [queueState, setQueueState] = useState<QueueState>({ kind: 'off' });
   const [openingMenuOpen, setOpeningMenuOpen] = useState(false);
   const [openingSearch, setOpeningSearch] = useState('');
   const [lineMenuOpen, setLineMenuOpen] = useState(false);
@@ -212,6 +223,40 @@ export function DrillPage() {
     };
   }, [requestedLine, requestedOpening]);
 
+  // SRS hook — used for queue mode + the existing wiring.
+  const { dueLineIds, loading: srsLoading } = useSRS();
+  const { preset } = usePreset();
+
+  // Queue mode initialization. Triggered when:
+  //   1. URL has `?queue=due`
+  //   2. Catalog is ready
+  //   3. SRS hook has finished loading
+  // Snapshots dueLineIds at activation so a Box transition mid-session doesn't
+  // reorder remaining drills.
+  useEffect(() => {
+    if (requestedQueue !== 'due') return;
+    if (catalog.kind !== 'ready') return;
+    if (srsLoading) return;
+    if (queueState.kind !== 'off') return; // already initialized
+    if (dueLineIds.length === 0) {
+      setQueueState({ kind: 'exhausted', total: 0 });
+      return;
+    }
+    // Filter to lines that actually exist in the loaded catalog (orphan
+    // protection per Article 6 — old SrsState may reference removed lines).
+    const valid = dueLineIds.filter((id) => catalog.lines.some((l) => l.id === id));
+    if (valid.length === 0) {
+      setQueueState({ kind: 'exhausted', total: 0 });
+      return;
+    }
+    setQueueState({ kind: 'active', lineIds: valid, index: 0 });
+    // Set the first line as the active drill.
+    setSelectedLineId(valid[0]!);
+    const firstLine = catalog.lines.find((l) => l.id === valid[0]);
+    const firstOpening = firstLine ? catalog.openings.find((o) => o.id === firstLine.opening_id) : undefined;
+    if (firstOpening) setSelectedFamilyId(firstOpening.family_id);
+  }, [requestedQueue, catalog, srsLoading, dueLineIds, queueState.kind]);
+
   // When the selected family changes, point the line picker at that family's
   // first line. No fetch needed — all lines already loaded above.
   useEffect(() => {
@@ -287,6 +332,38 @@ export function DrillPage() {
   useEffect(() => {
     srsRecordedForRef.current = null;
   }, [activeLine]);
+
+  // Queue advance on completion. Decoupled from SRS write so timing is
+  // straightforward: when a line finishes in queue mode, advance OR exhaust.
+  useEffect(() => {
+    if (state.kind !== 'complete') return;
+    if (queueState.kind !== 'active') return;
+    if (catalog.kind !== 'ready') return;
+    if (activeLine === null) return;
+    // Only advance if the just-completed line is the current queue position.
+    const currentLineId = queueState.lineIds[queueState.index];
+    if (currentLineId !== activeLine.id) return;
+    const nextIndex = queueState.index + 1;
+    if (nextIndex >= queueState.lineIds.length) {
+      setQueueState({ kind: 'exhausted', total: queueState.lineIds.length });
+      return;
+    }
+    // Small delay so user sees "complete" flash before next line loads.
+    const id = window.setTimeout(() => {
+      const nextLineId = queueState.lineIds[nextIndex]!;
+      const nextLine = catalog.lines.find((l) => l.id === nextLineId);
+      const nextOpening = nextLine ? catalog.openings.find((o) => o.id === nextLine.opening_id) : undefined;
+      setQueueState({ ...queueState, index: nextIndex });
+      setSelectedLineId(nextLineId);
+      if (nextOpening) setSelectedFamilyId(nextOpening.family_id);
+    }, 800);
+    return () => window.clearTimeout(id);
+  }, [state, queueState, catalog, activeLine]);
+
+  // Exit queue when user manually picks a different line/family.
+  const exitQueue = useCallback(() => {
+    if (queueState.kind !== 'off') setQueueState({ kind: 'off' });
+  }, [queueState.kind]);
 
   // Click-to-move state.
   const legalDestSquares = useMemo<string[]>(() => {
@@ -411,6 +488,38 @@ export function DrillPage() {
       />
     );
   }
+  if (queueState.kind === 'exhausted') {
+    return (
+      <StateMessage
+        icon={Inbox}
+        title="All caught up"
+        body={
+          queueState.total === 0
+            ? "Nothing's due right now. Drill any line to seed your queue."
+            : `${queueState.total} line${queueState.total === 1 ? '' : 's'} drilled. Come back tomorrow.`
+        }
+        action={
+          <Link to="/" style={{ textDecoration: 'none' }}>
+            <button
+              style={{
+                background: t.brand,
+                color: '#fff',
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: 8,
+                fontFamily: fonts.sans,
+                fontSize: 14,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Back to Dashboard
+            </button>
+          </Link>
+        }
+      />
+    );
+  }
 
   const nextIdx = state.kind === 'awaiting_player' ? state.lineIndex : undefined;
   const currentPly = 'lineIndex' in state ? (state.lineIndex as number) : drillMoves.length;
@@ -422,12 +531,14 @@ export function DrillPage() {
   );
   const linesForFamily = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
   const filteredLines = filterLines(linesForFamily, lineSearch);
-  const familiesWithLines = catalog.families.filter((f) =>
-    catalog.lines.some((l) => {
-      const op = catalog.openings.find((o) => o.id === l.opening_id);
-      return op?.family_id === f.id;
-    })
-  );
+  const familiesWithLines = catalog.families
+    .filter((f) =>
+      catalog.lines.some((l) => {
+        const op = catalog.openings.find((o) => o.id === l.opening_id);
+        return op?.family_id === f.id;
+      })
+    )
+    .filter((f) => familyPassesPreset(f.id, f.tier, preset));
   const filteredFamilies = filterFamilies(familiesWithLines, openingSearch);
 
   const currentMode = MODES.find((m) => m.id === activeMode) ?? MODES[0]!;
@@ -492,6 +603,28 @@ export function DrillPage() {
               }}
             >
               Repertoire
+              {queueState.kind === 'active' && (
+                <button
+                  onClick={exitQueue}
+                  title="Exit queue mode"
+                  style={{
+                    marginLeft: 8,
+                    padding: '2px 8px',
+                    background: t.brandSoft,
+                    color: t.brand,
+                    border: 'none',
+                    borderRadius: 999,
+                    fontSize: 10.5,
+                    fontWeight: 700,
+                    fontFamily: fonts.sans,
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Queue {queueState.index + 1}/{queueState.lineIds.length} ✕
+                </button>
+              )}
             </div>
 
             <div
@@ -524,6 +657,7 @@ export function DrillPage() {
                       onPick: () => {
                         setSelectedFamilyId(f.id);
                         closeOpeningMenu();
+                        exitQueue();
                       },
                     }))}
                     emptyHint={
@@ -555,6 +689,7 @@ export function DrillPage() {
                       onPick: (id) => {
                         setSelectedLineId(id);
                         closeLineMenu();
+                        exitQueue();
                       },
                     })}
                     emptyHint={
@@ -713,6 +848,32 @@ export function DrillPage() {
           />
         </div>
 
+        {/* END-OF-LINE SUMMARY (non-queue mode) */}
+        {state.kind === 'complete' &&
+          queueState.kind !== 'active' &&
+          activeLine !== null &&
+          drillResult !== null && (
+            <EndOfLineSummary
+              line={activeLine}
+              drillResult={drillResult}
+              dueCount={dueLineIds.length}
+              nextLineInFamily={(() => {
+                if (catalog.kind !== 'ready' || activeFamily === null) return null;
+                const familyOpIds = new Set(
+                  catalog.openings.filter((o) => o.family_id === activeFamily.id).map((o) => o.id)
+                );
+                const famLines = catalog.lines.filter((l) => familyOpIds.has(l.opening_id));
+                const idx = famLines.findIndex((l) => l.id === activeLine.id);
+                return idx >= 0 && idx + 1 < famLines.length ? famLines[idx + 1]! : null;
+              })()}
+              onRestart={restart}
+              onPickLine={(id) => setSelectedLineId(id)}
+            />
+          )}
+
+        {/* STRATEGY PANEL */}
+        <StrategicNotesPanel notes={activeLine?.strategic_notes ?? []} />
+
         {/* INLINE COACH LINE */}
         <div
           style={{
@@ -833,6 +994,7 @@ export function DrillPage() {
         {historyOpen && (
           <div style={{ padding: '8px 8px 12px', maxHeight: 540, overflowY: 'auto' }}>
             <MoveHistoryGrid
+              forks={activeLine?.forks ?? []}
               moves={drillMoves}
               playedCount={
                 state.kind === 'complete'
@@ -1181,12 +1343,17 @@ function MoveHistoryGrid({
   moves,
   playedCount,
   nextIdx,
+  forks,
 }: {
   moves: readonly string[];
   playedCount: number;
   nextIdx?: number | undefined;
+  forks?: readonly ForkAnnotation[];
 }) {
   const t = useTokens();
+  const [openForkPly, setOpenForkPly] = useState<number | null>(null);
+  const forksByPly = new Map<number, ForkAnnotation>();
+  if (forks) for (const f of forks) forksByPly.set(f.ply_index, f);
 
   if (moves.length === 0) {
     return (
@@ -1230,7 +1397,50 @@ function MoveHistoryGrid({
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
+      position: 'relative',
     };
+  };
+
+  const renderCell = (idx: number) => {
+    const fork = forksByPly.get(idx);
+    return (
+      <div data-testid={`move-cell-${idx}`} style={cellStyle(idx)}>
+        <span>{moves[idx]}</span>
+        {fork && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenForkPly((cur) => (cur === idx ? null : idx));
+            }}
+            aria-label={`Fork at ply ${idx}`}
+            data-testid={`fork-badge-${idx}`}
+            style={{
+              marginLeft: 4,
+              padding: 0,
+              width: 14,
+              height: 14,
+              borderRadius: 999,
+              background: t.amber ?? '#E0B423',
+              color: '#fff',
+              border: 'none',
+              fontSize: 9,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              verticalAlign: 'middle',
+            }}
+            title={fork.label}
+          >
+            ⋔
+          </button>
+        )}
+        {fork && openForkPly === idx && (
+          <ForkPopover fork={fork} onClose={() => setOpenForkPly(null)} />
+        )}
+      </div>
+    );
   };
 
   return (
@@ -1256,18 +1466,62 @@ function MoveHistoryGrid({
           >
             {r.n}.
           </div>
-          <div data-testid={`move-cell-${r.wIdx}`} style={cellStyle(r.wIdx)}>
-            {moves[r.wIdx]}
-          </div>
-          {r.bIdx !== null ? (
-            <div data-testid={`move-cell-${r.bIdx}`} style={cellStyle(r.bIdx)}>
-              {moves[r.bIdx]}
-            </div>
-          ) : (
-            <div />
-          )}
+          {renderCell(r.wIdx)}
+          {r.bIdx !== null ? renderCell(r.bIdx) : <div />}
         </div>
       ))}
+    </div>
+  );
+}
+
+function ForkPopover({ fork, onClose }: { fork: ForkAnnotation; onClose: () => void }) {
+  const t = useTokens();
+  const ref = useClickOutside<HTMLDivElement>(true, onClose);
+  return (
+    <div
+      ref={ref}
+      style={{
+        position: 'absolute',
+        top: '100%',
+        left: 0,
+        marginTop: 4,
+        background: t.surface,
+        border: `1px solid ${t.border}`,
+        borderRadius: 10,
+        boxShadow: t.shadowMd,
+        padding: 12,
+        width: 280,
+        zIndex: 50,
+        fontFamily: fonts.sans,
+        fontSize: 12.5,
+        color: t.ink,
+        textAlign: 'left',
+        whiteSpace: 'normal',
+      }}
+    >
+      <div style={{ fontWeight: 700, fontSize: 12, color: t.brand, marginBottom: 6 }}>
+        {fork.label}
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
+        {fork.alternatives.map((alt) => (
+          <span
+            key={alt}
+            style={{
+              padding: '2px 8px',
+              background: t.surfaceAlt,
+              borderRadius: 999,
+              fontSize: 12,
+              fontFamily: fonts.mono,
+              color: t.ink,
+            }}
+          >
+            {alt}
+          </span>
+        ))}
+      </div>
+      {fork.rationale && (
+        <div style={{ fontSize: 12, color: t.inkDim, lineHeight: 1.45 }}>{fork.rationale}</div>
+      )}
     </div>
   );
 }

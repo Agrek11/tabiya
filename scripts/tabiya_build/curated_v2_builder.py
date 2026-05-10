@@ -24,7 +24,7 @@ from pathlib import Path
 import chess
 import yaml
 
-from .schema import Catalog, Family, ForkAnnotation, Line, Opening, Variation
+from .schema import Catalog, Family, ForkAnnotation, Line, Opening, Preset, Variation
 from .slug import IdMinter, slugify
 
 logger = logging.getLogger(__name__)
@@ -104,6 +104,26 @@ def load_variations(path: Path) -> list[Variation]:
     return out
 
 
+def load_presets(path: Path) -> list[Preset]:
+    """Load presets.yml. Returns [] if file missing (back-compat)."""
+    if not path.exists():
+        return []
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    out: list[Preset] = []
+    for entry in raw.get("presets", []):
+        out.append(
+            Preset(
+                id=entry["id"],
+                name=entry["name"],
+                description=entry.get("description", ""),
+                tier_band=list(entry.get("tier_band", [])),
+                family_ids=list(entry.get("family_ids", [])),
+                recommended_color=entry.get("recommended_color", "both"),
+            )
+        )
+    return out
+
+
 def load_lines(path: Path) -> list[tuple[str, Line]]:
     """Returns list of (variation_id, Line) tuples; opening_id filled later."""
     raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -143,8 +163,11 @@ def load_lines(path: Path) -> list[tuple[str, Line]]:
 
 
 def build(
-    families_path: Path, variations_path: Path, lines_path: Path
-) -> tuple[list[Family], list[Variation], list[Opening], list[Line]]:
+    families_path: Path,
+    variations_path: Path,
+    lines_path: Path,
+    presets_path: Path | None = None,
+) -> tuple[list[Family], list[Variation], list[Opening], list[Line], list[Preset]]:
     """Build the full Family/Variation/Opening/Line set from YAMLs.
 
     Synthesizes one Opening per Variation (1:1) so the existing Opening
@@ -206,13 +229,16 @@ def build(
             if v.family_id == fam.id
         ]
 
+    presets = load_presets(presets_path) if presets_path is not None else []
+
     logger.info(
-        "Curated v2 build: %d families, %d variations, %d lines",
+        "Curated v2 build: %d families, %d variations, %d lines, %d presets",
         len(families),
         len(variations),
         len(lines),
+        len(presets),
     )
-    return families, variations, openings, lines
+    return families, variations, openings, lines, presets
 
 
 def build_catalog(

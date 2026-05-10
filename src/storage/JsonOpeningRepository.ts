@@ -14,6 +14,7 @@ import type {
   Line,
   Opening,
   OpeningRepository,
+  Preset,
   SearchQuery,
   Variation,
 } from './types';
@@ -95,6 +96,16 @@ export class JsonOpeningRepository implements OpeningRepository {
   async listLinesByVariation(variationId: string): Promise<Line[]> {
     const cat = await this.load();
     return cat.lines.filter((l) => l.variation_id === variationId);
+  }
+
+  async listPresets(): Promise<Preset[]> {
+    const cat = await this.load();
+    return (cat.presets ?? []).slice();
+  }
+
+  async getPreset(id: string): Promise<Preset | null> {
+    const cat = await this.load();
+    return (cat.presets ?? []).find((p) => p.id === id) ?? null;
   }
 
   async searchLines(query: SearchQuery): Promise<Line[]> {

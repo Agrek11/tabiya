@@ -15,6 +15,7 @@ import type {
   Line,
   Opening,
   OpeningRepository,
+  Preset,
   SearchQuery,
   Variation,
 } from '../src/storage/types';
@@ -99,6 +100,8 @@ class MockRepo implements OpeningRepository {
   async getVariation(): Promise<null> { return null; }
   async listVariationsByFamily(): Promise<Variation[]> { return []; }
   async listLinesByVariation(): Promise<Line[]> { return []; }
+  async listPresets(): Promise<Preset[]> { return []; }
+  async getPreset(): Promise<null> { return null; }
 }
 
 beforeEach(() => {

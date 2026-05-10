@@ -134,7 +134,8 @@ lines:
     pgn: "1. e4 e5 2. Nf3 Nc6 3. Bb5"
 """,
     )
-    families, variations, openings, lines = build(families_yml, variations_yml, lines_yml)
+    families, variations, openings, lines, presets = build(families_yml, variations_yml, lines_yml)
+    assert presets == []
     assert len(families) == 1
     assert len(variations) == 1
     assert len(openings) == 1

@@ -204,7 +204,7 @@ variations:
     trunk_pgn: "1. d4 d5 2. Nc3 Nf6 3. Bf4"
 
   # ═══════════════════════════════════════════════════════════
-  # Tier 2 sample variation (Scotch)
+  # Tier 2 variations
   # ═══════════════════════════════════════════════════════════
   - id: scotch-classical
     family_id: scotch
@@ -212,3 +212,94 @@ variations:
     eco: C45
     color: white
     trunk_pgn: "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Bc5"
+
+  - id: vienna-game-main
+    family_id: vienna
+    name: Vienna Gambit
+    eco: C29
+    color: white
+    trunk_pgn: "1. e4 e5 2. Nc3 Nf6 3. f4"
+
+  - id: scandinavian-qa5
+    family_id: scandinavian
+    name: Modern Scandinavian (3...Qa5)
+    eco: B01
+    color: black
+    trunk_pgn: "1. e4 d5 2. exd5 Qxd5 3. Nc3 Qa5"
+
+  - id: pirc-classical
+    family_id: pirc
+    name: Pirc Classical
+    eco: B08
+    color: black
+    trunk_pgn: "1. e4 d6 2. d4 Nf6 3. Nc3 g6 4. Nf3 Bg7"
+
+  - id: alekhine-modern
+    family_id: alekhine
+    name: Alekhine Modern
+    eco: B04
+    color: black
+    trunk_pgn: "1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. Nf3"
+
+  - id: slav-main
+    family_id: slav
+    name: Slav Main Line
+    eco: D17
+    color: black
+    trunk_pgn: "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 dxc4 5. a4"
+
+  - id: semi-slav-meran
+    family_id: semi-slav
+    name: Meran Variation
+    eco: D47
+    color: black
+    trunk_pgn: "1. d4 d5 2. c4 c6 3. Nf3 Nf6 4. Nc3 e6 5. e3 Nbd7 6. Bd3 dxc4 7. Bxc4 b5"
+
+  - id: nimzo-rubinstein
+    family_id: nimzo-indian
+    name: Rubinstein System
+    eco: E40
+    color: black
+    trunk_pgn: "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3"
+
+  - id: queens-indian-petrosian
+    family_id: queens-indian
+    name: Petrosian Variation
+    eco: E12
+    color: black
+    trunk_pgn: "1. d4 Nf6 2. c4 e6 3. Nf3 b6 4. a3"
+
+  - id: grunfeld-exchange
+    family_id: grunfeld
+    name: Exchange Variation
+    eco: D85
+    color: black
+    trunk_pgn: "1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. cxd5 Nxd5 5. e4"
+
+  - id: catalan-open
+    family_id: catalan
+    name: Open Catalan
+    eco: E04
+    color: white
+    trunk_pgn: "1. d4 Nf6 2. c4 e6 3. g3 d5 4. Bg2 dxc4"
+
+  - id: english-symmetrical
+    family_id: english
+    name: Symmetrical English
+    eco: A30
+    color: white
+    trunk_pgn: "1. c4 c5"
+
+  - id: kia-main
+    family_id: kings-indian-attack
+    name: KIA Main Line
+    eco: A07
+    color: white
+    trunk_pgn: "1. Nf3 d5 2. g3 Nf6 3. Bg2 c6 4. O-O"
+
+  - id: dutch-stonewall
+    family_id: dutch
+    name: Stonewall Dutch
+    eco: A95
+    color: black
+    trunk_pgn: "1. d4 f5 2. g3 Nf6 3. Bg2 e6 4. Nf3 d5"

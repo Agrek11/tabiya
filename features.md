@@ -2,13 +2,14 @@
 
 ## Opening Repertoire Trainer (v1)
 
-**Curated content (Phase 0d.4 v2):**
+**Curated content (Phase 0d.4 v2 + 1c expansion):**
 - 30 families across 3 tiers (8 Tier 1 / 14 Tier 2 / 8 Tier 3)
-- 26 hand-curated variations under 8 fully fleshed Tier 1 families
-- 26 lines, 13-20 ply, depth cap honored (Article 8)
-- Fork annotations on every line (decision points + alternative SANs inline)
+- 39 hand-curated variations (24 Tier 1 + 14 Tier 2 + 1 Scotch)
+- 51 lines, 12-20 ply, depth cap honored (Article 8)
+- Fork annotations on key lines (decision points + alternative SANs inline)
 - Strategic notes per line (1-3 sentences, feeds Phase 1b/3 explanations)
-- ~50 KB bundled catalog.json
+- 3 presets (Beginner / Intermediate / Advanced) + Off
+- ~76 KB bundled catalog.json
 
 **Hierarchy: 3 layers**
 - Family (Spanish, Sicilian, KID, ...) → Variation (Najdorf, Marshall, ...) → Line (drillable sequence)
@@ -20,6 +21,10 @@
 - Green tick on correct move + auto-advance
 - Red cross + auto-undo on wrong move
 - Two-tier hint (H once = pulse, twice = full highlight)
+- Strategic notes panel (collapsible, persisted)
+- Fork annotations as inline `⋔` badges on move history with popover (label + alternatives + rationale)
+- End-of-line summary card (line name, stats, notes, Restart / Drill due / Next CTAs)
+- **Queue mode** (`?queue=due`): cycles through all due lines, auto-advance, "All caught up" exhaustion state
 
 **Spaced repetition (Phase 1, friction-tuned Leitner)**
 - 5 boxes: 1d / 3d / 1w / 2w / 1m
@@ -34,8 +39,15 @@
 - Dashboard stats: lines mastered (%), due-for-review count, drilled lines
 - Sidebar due badge (hides at 0)
 - Settings → Reset all SRS progress (Danger Zone, confirmation gated)
+- Per-line SRS reset (`↺` icon on each line in Repertoire, disabled when no state)
 - Stable line.id across catalog refreshes (Article 6, SRS state preserved)
 - Streak counter — Phase 1.5
+
+**Repertoire presets**
+- One-click loadouts: Beginner / Intermediate / Advanced (or Off = full catalog)
+- Filter applies to RepertoirePage + Drill opening picker
+- Persisted in localStorage `tabiya.repertoirePreset`
+- Schema in `scripts/curated/presets.yml` (additive, optional)
 
 ## Pattern Visualization Mode (v1.5)
 

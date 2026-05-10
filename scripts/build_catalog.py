@@ -54,6 +54,7 @@ DEFAULT_CACHE = REPO_ROOT / "scripts" / ".cache"
 DEFAULT_FAMILIES = REPO_ROOT / "scripts" / "curated" / "families.yml"
 DEFAULT_VARIATIONS = REPO_ROOT / "scripts" / "curated" / "variations.yml"
 DEFAULT_LINES = REPO_ROOT / "scripts" / "curated" / "lines.yml"
+DEFAULT_PRESETS = REPO_ROOT / "scripts" / "curated" / "presets.yml"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -78,6 +79,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--families", type=Path, default=DEFAULT_FAMILIES)
     p.add_argument("--variations", type=Path, default=DEFAULT_VARIATIONS)
     p.add_argument("--lines", type=Path, default=DEFAULT_LINES)
+    p.add_argument("--presets", type=Path, default=DEFAULT_PRESETS)
     return p.parse_args(argv)
 
 
@@ -180,8 +182,8 @@ def main(argv: list[str] | None = None) -> int:
     variations: list[Variation] = []
     if args.source == "curated-v2":
         # Hand-authored YAML pipeline (default).
-        families_v2, variations, openings, lines = build_curated_v2(
-            args.families, args.variations, args.lines
+        families_v2, variations, openings, lines, presets = build_curated_v2(
+            args.families, args.variations, args.lines, args.presets
         )
         catalog = Catalog(
             version=build_version(),
@@ -189,6 +191,7 @@ def main(argv: list[str] | None = None) -> int:
             variations=variations,
             openings=openings,
             lines=lines,
+            presets=presets,
         )
         size = write_catalog(catalog, args.out)
         print_summary(catalog, size)

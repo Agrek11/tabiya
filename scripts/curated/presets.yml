@@ -1,0 +1,30 @@
+# Curated repertoire presets — one-click loadouts.
+#
+# Filter applied to RepertoirePage and DrillPage when active. 'custom' (no
+# preset) shows everything. tier_band and family_ids combine inclusively
+# (a family is shown if it matches EITHER its tier OR is explicitly listed).
+
+presets:
+  - id: beginner
+    name: Beginner
+    description: Solid, low-theory openings. Great starting point.
+    tier_band: [1]
+    family_ids:
+      - london
+      - caro-kann
+      - italian
+    recommended_color: both
+
+  - id: intermediate
+    name: Intermediate
+    description: Classical mainlines covering ~70% of club games.
+    tier_band: [1, 2]
+    family_ids: []
+    recommended_color: both
+
+  - id: advanced
+    name: Advanced
+    description: Full theory including sharp tactical lines.
+    tier_band: [1, 2, 3]
+    family_ids: []
+    recommended_color: both
