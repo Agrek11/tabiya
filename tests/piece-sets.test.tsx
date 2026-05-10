@@ -55,9 +55,11 @@ describe('pieceSets', () => {
     const obj = buildPieceRenderObject('letter');
     expect(obj).toBeDefined();
     if (!obj) return;
-    const fenChars = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k'];
-    for (const c of fenChars) {
-      expect(typeof obj[c]).toBe('function');
+    // react-chessboard 5.10+ keys: 'wK', 'wQ', 'wR', 'wB', 'wN', 'wP',
+    //                              'bK', 'bQ', 'bR', 'bB', 'bN', 'bP'.
+    const codes = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK'];
+    for (const code of codes) {
+      expect(typeof obj[code]).toBe('function');
     }
   });
 

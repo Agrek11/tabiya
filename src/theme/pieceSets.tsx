@@ -8,8 +8,13 @@
  *   - 'letter'  — bold colored letter pieces (K Q R B N P)
  *   - 'symbol'  — Unicode chess characters (♔ ♕ ♖ ♗ ♘ ♙)
  *
- * react-chessboard `PieceRenderObject` shape:
- *   Record<FenPieceChar, (props?: { fill?, square?, svgStyle? }) => ReactNode>
+ * react-chessboard `PieceRenderObject` shape (v5.10+):
+ *   Record<ColorPrefixedPieceCode, (props?: { square?, svgStyle? }) => ReactNode>
+ *
+ * Codes: 'wK', 'wQ', 'wR', 'wB', 'wN', 'wP', 'bK', 'bQ', 'bR', 'bB', 'bN', 'bP'.
+ * (NOT FEN chars — earlier doc was wrong; verified in react-chessboard 5.10.0
+ * `defaultPieces` map and the Piece component's `pieces[pieceType]` lookup at
+ * runtime. Mismatched keys yield undefined → "Element type is invalid" crash.)
  *
  * We render plain SVG with text-as-piece — kept under 30 lines/set total.
  */
@@ -161,7 +166,10 @@ export function buildPieceRenderObject(id: PieceSetId): PieceRenderObject | unde
   const fenChars = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k'];
   const obj: PieceRenderObject = {};
   for (const c of fenChars) {
-    obj[c] = factory(c);
+    // react-chessboard's pieceType uses 'w'+upper / 'b'+upper (e.g. 'wP', 'bK').
+    const colorPrefix = c === c.toUpperCase() ? 'w' : 'b';
+    const code = colorPrefix + c.toUpperCase();
+    obj[code] = factory(c);
   }
   return obj;
 }
