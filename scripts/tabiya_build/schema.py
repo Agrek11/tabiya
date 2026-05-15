@@ -61,6 +61,25 @@ class Line(BaseModel):
     forks: list[ForkAnnotation] = Field(default_factory=list)
 
 
+class OpeningKeySquare(BaseModel):
+    """Phase 2a — structured key-square attached to an opening's canonical position.
+
+    Distinct from the legacy ``KeySquare`` (free-text note on Line). This is
+    the role-typed, source-cited record curated via the Phase 2a pipeline
+    (scrape → LLM extract → manual review → ``scripts/curated/key_squares.yml``).
+    Rendered by the Phase 2b ``<SpotlightOverlay>`` component.
+
+    The catalog build attaches a list of these to ``Opening.key_squares`` when
+    ``scripts/curated/key_squares.yml`` carries an entry for the opening's slug.
+    """
+
+    square: str = Field(..., pattern=r"^[a-h][1-8]$")
+    role: Literal["outpost", "weak", "tension", "control"]
+    for_color: Color
+    rationale: str = Field(..., max_length=280)
+    source_url: str = Field(..., min_length=1)
+
+
 class Opening(BaseModel):
     """A single opening (e.g. Ruy Lopez, Sicilian Najdorf)."""
 
@@ -71,6 +90,12 @@ class Opening(BaseModel):
     color: Color = Field(..., description="Side the player drills")
     line_ids: list[str] = Field(default_factory=list)
     is_gambit: bool = Field(default=False, description="True for true gambits (King's, Evans, etc)")
+    # Phase 2a — optional structured key-squares (R4.4 additive).
+    # Frontend graceful-degrades when None / empty (R4.6, R6.6).
+    key_squares: list[OpeningKeySquare] = Field(
+        default_factory=list,
+        description="Phase 2a curated key-squares for the canonical opening position.",
+    )
 
 
 class Family(BaseModel):
@@ -130,12 +155,13 @@ class Catalog(BaseModel):
 
     version: str = Field(..., description="Build date in YYYY-MM-DD UTC")
     schema_version: int = Field(
-        default=2,
+        default=3,
         ge=1,
         description=(
             "Catalog schema generation. Bumped 1 → 2 in Phase 1b when explain "
-            "sidecars landed. Frontend logs a warning on mismatch but does not "
-            "fail to load (Article 5 — graceful degrade)."
+            "sidecars landed; 2 → 3 in Phase 2a when Opening.key_squares + "
+            "the transposition sidecar landed. Frontend logs a warning on "
+            "mismatch but does not fail to load (Article 5 — graceful degrade)."
         ),
     )
     families: list[Family] = Field(default_factory=list)

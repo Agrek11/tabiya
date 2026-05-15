@@ -33,6 +33,13 @@ scripts/.cache/
 # Phase 1b — Explain Mode sidecar build output (regenerated from data/explain/)
 public/explain/
 
+# Phase 2a — key-squares pipeline intermediates (regenerable; never committed).
+# scraped/ + pending/ + .review_state.json are reviewer state, not source of truth.
+# rejected/ is git-tracked deliberately as a prompt-tuning corpus (see R3.7).
+data/key_squares/scraped/
+data/key_squares/pending/
+data/key_squares/.review_state.json
+
 # Design screenshots — kept locally for reference, not in repo
 Screenshot*.png
 Screenshot*.jpg

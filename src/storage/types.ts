@@ -22,6 +22,15 @@ export type KeySquare = {
   side?: Side;
 };
 
+// Re-export Phase 2a OpeningKeySquare type so Opening's optional field has a
+// concrete shape without a circular import. See src/types/keySquares.ts.
+export type {
+  OpeningKeySquare,
+  KeySquareRole,
+  KeySquareForColor,
+} from '../types/keySquares';
+import type { OpeningKeySquare as _OpeningKeySquare } from '../types/keySquares';
+
 export type ForkAnnotation = {
   ply_index: number;
   alternatives: string[];
@@ -91,6 +100,12 @@ export type Opening = {
   color: Color;
   line_ids: string[];
   is_gambit: boolean;
+  /**
+   * Phase 2a — curated key-squares for the canonical opening position.
+   * Optional and additive (Article 5 / R4.4) — frontend graceful-degrades
+   * when absent or empty (R6.6). Loaded as part of `catalog.json`.
+   */
+  key_squares?: _OpeningKeySquare[];
 };
 
 export type Family = {

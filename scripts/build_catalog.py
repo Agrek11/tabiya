@@ -29,25 +29,44 @@ import logging  # noqa: E402
 import sys  # noqa: E402
 from pathlib import Path  # noqa: E402
 
-from .tabiya_build.explorer import ExplorerClient
-from .tabiya_build.extender import extend_with_branch, seed_to_san
-from .tabiya_build.curated_v2_builder import build as build_curated_v2
-from .tabiya_build.flat_tsv_builder import build_from_tsv_rows
-from .tabiya_build.notes import load_notes, merge_into_lines
-from .tabiya_build.schema import Catalog, Family, Line, Opening, Variation
-from .tabiya_build.slug import IdMinter, slugify
-from .tabiya_build.tsv import TsvRow, download_all, parse_all
-from .tabiya_build.whitelist import (
-    TARGET_FAMILIES,
-    OpeningSpec,
-    filter_openings,
+from .tabiya_build.curated_v2_builder import build as build_curated_v2  # noqa: E402
+from .tabiya_build.explorer import ExplorerClient  # noqa: E402
+from .tabiya_build.extender import extend_with_branch, seed_to_san  # noqa: E402
+from .tabiya_build.flat_tsv_builder import build_from_tsv_rows  # noqa: E402
+from .tabiya_build.key_squares import BuildError as KeySquaresBuildError  # noqa: E402
+from .tabiya_build.key_squares import (  # noqa: E402
+    join_to_openings as join_key_squares_to_openings,
 )
-from .tabiya_build.validate_explain import (
+from .tabiya_build.key_squares import (  # noqa: E402
+    license_audit as audit_key_squares_licenses,
+)
+from .tabiya_build.key_squares import load_curated_key_squares  # noqa: E402
+from .tabiya_build.notes import load_notes, merge_into_lines  # noqa: E402
+from .tabiya_build.schema import (  # noqa: E402
+    Catalog,
+    Family,
+    Line,
+    Opening,
+    OpeningKeySquare,
+    Variation,
+)
+from .tabiya_build.slug import IdMinter, slugify  # noqa: E402
+from .tabiya_build.transposition import (  # noqa: E402
+    build_transposition_index,
+    write_transposition_sidecar,
+)
+from .tabiya_build.tsv import TsvRow, download_all, parse_all  # noqa: E402
+from .tabiya_build.validate_explain import (  # noqa: E402
     ExplainValidationError,
     copy_explain_to_public,
     validate_all_explain_sidecars,
 )
-from .tabiya_build.writer import build_version, print_summary, write_catalog
+from .tabiya_build.whitelist import (  # noqa: E402
+    TARGET_FAMILIES,
+    OpeningSpec,
+    filter_openings,
+)
+from .tabiya_build.writer import build_version, print_summary, write_catalog  # noqa: E402
 
 logger = logging.getLogger("tabiya.build")
 
@@ -62,6 +81,9 @@ DEFAULT_LINES = REPO_ROOT / "scripts" / "curated" / "lines.yml"
 DEFAULT_PRESETS = REPO_ROOT / "scripts" / "curated" / "presets.yml"
 DEFAULT_EXPLAIN_SRC = REPO_ROOT / "data" / "explain"
 DEFAULT_EXPLAIN_DST = REPO_ROOT / "public" / "explain"
+DEFAULT_KEY_SQUARES = REPO_ROOT / "scripts" / "curated" / "key_squares.yml"
+DEFAULT_SOURCES_YML = REPO_ROOT / "scripts" / "key_squares" / "sources.yml"
+DEFAULT_TRANSPOSITIONS_OUT = REPO_ROOT / "public" / "transpositions.json"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -104,7 +126,99 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_EXPLAIN_DST,
         help="Destination dir for explain sidecars (default: public/explain).",
     )
+    p.add_argument(
+        "--key-squares",
+        type=Path,
+        default=DEFAULT_KEY_SQUARES,
+        help="Phase 2a curated key_squares.yml (default: scripts/curated/key_squares.yml).",
+    )
+    p.add_argument(
+        "--sources-yml",
+        type=Path,
+        default=DEFAULT_SOURCES_YML,
+        help="Phase 2a sources whitelist (default: scripts/key_squares/sources.yml).",
+    )
+    p.add_argument(
+        "--transpositions-out",
+        type=Path,
+        default=DEFAULT_TRANSPOSITIONS_OUT,
+        help="Sidecar output (default: public/transpositions.json).",
+    )
+    p.add_argument(
+        "--skip-key-squares",
+        action="store_true",
+        help="Skip key_squares load + license audit + join (Phase 2a additive).",
+    )
+    p.add_argument(
+        "--skip-transpositions",
+        action="store_true",
+        help="Skip transposition index sidecar emission (Phase 2a additive).",
+    )
     return p.parse_args(argv)
+
+
+def _attach_key_squares(
+    openings: list[Opening], args: argparse.Namespace
+) -> int:
+    """Phase 2a — load curated key_squares.yml, license-audit, join onto Openings.
+
+    Returns 0 on success, 1 on a build invariant violation. Skips silently when
+    --skip-key-squares is set or when key_squares.yml does not exist (the
+    additive feature is content-gated — see R9.1 / Phase 7 gate_check).
+    """
+    if args.skip_key_squares:
+        logger.info("Skipping key_squares load (--skip-key-squares)")
+        return 0
+    try:
+        curated = load_curated_key_squares(args.key_squares)
+    except KeySquaresBuildError as e:
+        logger.error("key_squares load failed: %s", e)
+        return 1
+    if not curated:
+        logger.info("No curated key_squares — Opening.key_squares stays empty")
+        return 0
+    try:
+        audit_key_squares_licenses(curated, args.sources_yml)
+    except KeySquaresBuildError as e:
+        logger.error("key_squares license audit failed: %s", e)
+        return 1
+    try:
+        joined = join_key_squares_to_openings(openings, curated)
+    except KeySquaresBuildError as e:
+        logger.error("key_squares join failed: %s", e)
+        return 1
+    # Attach as Pydantic models on the in-memory Openings (additive R4.4)
+    by_id = {o.id: o for o in openings}
+    for slug, records in joined.items():
+        opening = by_id[slug]
+        opening.key_squares = [OpeningKeySquare.model_validate(r) for r in records]
+    logger.info(
+        "Attached key_squares to %d opening(s) from %s", len(joined), args.key_squares
+    )
+    return 0
+
+
+def _emit_transposition_sidecar(
+    lines: list[Line], args: argparse.Namespace
+) -> int:
+    """Phase 2a — build + write public/transpositions.json sidecar.
+
+    Returns 0 on success. Skipped when --skip-transpositions is set.
+    """
+    if args.skip_transpositions:
+        logger.info("Skipping transposition sidecar emission (--skip-transpositions)")
+        return 0
+    if not lines:
+        logger.info("No lines — transposition sidecar will be empty")
+    index = build_transposition_index(lines)
+    size = write_transposition_sidecar(index, args.transpositions_out)
+    logger.info(
+        "Transposition sidecar: %d shared positions, %d bytes → %s",
+        len(index),
+        size,
+        args.transpositions_out,
+    )
+    return 0
 
 
 def _process_explain_sidecars(catalog: Catalog, args: argparse.Namespace) -> int:
@@ -230,6 +344,9 @@ def main(argv: list[str] | None = None) -> int:
         families_v2, variations, openings, lines, presets = build_curated_v2(
             args.families, args.variations, args.lines, args.presets
         )
+        # Phase 2a — attach curated key_squares (additive R4.4).
+        if _attach_key_squares(openings, args) != 0:
+            return 1
         catalog = Catalog(
             version=build_version(),
             families=families_v2,
@@ -240,6 +357,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         size = write_catalog(catalog, args.out)
         print_summary(catalog, size)
+        # Phase 2a — transposition sidecar emission.
+        if _emit_transposition_sidecar(lines, args) != 0:
+            return 1
         if _process_explain_sidecars(catalog, args) != 0:
             return 1
         return 0
@@ -280,8 +400,10 @@ def main(argv: list[str] | None = None) -> int:
         overlays = load_notes(args.notes)
         lines = merge_into_lines(lines, overlays)
 
-    # 5. Build families (Phase 0d.3) + write catalog
+    # 5. Build families (Phase 0d.3) + key_squares + write catalog
     families = build_families(openings)
+    if _attach_key_squares(openings, args) != 0:
+        return 1
     catalog = Catalog(
         version=build_version(),
         families=families,
@@ -290,6 +412,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     size = write_catalog(catalog, args.out)
     print_summary(catalog, size)
+    if _emit_transposition_sidecar(lines, args) != 0:
+        return 1
     if _process_explain_sidecars(catalog, args) != 0:
         return 1
     return 0

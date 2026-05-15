@@ -122,3 +122,30 @@ Project ships as `docker compose up` at every phase milestone. Dual distribution
 - **No LangChain / CrewAI / heavy AI orchestration libs.** Direct SDK calls (Anthropic, OpenAI) or local HF models.
 - **No backend in v0/v1** — introduce only when AI coach lands (Phase 3).
 - **No proprietary dependencies.** Every dep must be OSS with permissive or copyleft license declared.
+
+## Phase 2a — Scrape source whitelist (Article 1)
+
+The key-squares pipeline (`scripts/key_squares/`) only fetches prose from
+sources whose license is in the permissive SPDX allowlist
+(`scripts/key_squares/adapters/base.py::PERMISSIVE_SPDX`). The active
+whitelist is `scripts/key_squares/sources.yml`. Every `source_url` in
+`scripts/curated/key_squares.yml` is checked against this list at build time
+by `scripts/tabiya_build/key_squares.py::license_audit` — the build fails if
+any unaudited host slips through.
+
+| Source                     | License        | Base URL                          | Notes |
+|----------------------------|----------------|-----------------------------------|-------|
+| `wikipedia-en`             | CC-BY-SA-4.0   | https://en.wikipedia.org          | English Wikipedia chess opening articles. Attribution preserved via `source_url` citation in curated YAML. |
+| `lichess-opening-explorer` | ODbL-1.0       | https://explorer.lichess.ovh      | Lichess public masters database. Returns opening name/ECO; thin prose, used to ground canonical opening identity. |
+
+### Adding a new source
+
+1. Confirm the source's license is in `PERMISSIVE_SPDX`. If not, do not add it.
+2. Add the entry to `scripts/key_squares/sources.yml` with: `id`, `license` (SPDX), `base_url`, `adapter` (module name), `url_pattern`, `rate_limit_rps`.
+3. Add the adapter module under `scripts/key_squares/adapters/` and register it in `scripts/key_squares/scrape.py::ADAPTER_REGISTRY`.
+4. Append a row to the table above with license + rationale.
+5. Re-run `uv run pytest tests/python/build/test_license_audit_smoke.py` to confirm the live curated corpus still passes.
+
+Article 11: the scrape pipeline is an OFFLINE BUILD STEP. The runtime app
+never fetches scrape sources; only the bundled `public/catalog.json` and
+`public/transpositions.json` are loaded.

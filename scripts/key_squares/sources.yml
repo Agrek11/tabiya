@@ -1,0 +1,38 @@
+# Phase 2a — Scrape source whitelist + license register.
+#
+# Article 1 (Open Source / Open Data): only permissively-licensed sources may
+# land in `scripts/curated/key_squares.yml`. The build-time `license_audit`
+# (scripts/tabiya_build/key_squares.py) cross-checks every curated source_url
+# against the hosts derived from this file.
+#
+# Each entry MUST declare:
+#   id              stable adapter id (matches SourceAdapter.name + adapter file)
+#   license         SPDX identifier (must be in PERMISSIVE_SPDX in adapters/base.py)
+#   base_url        host root used for derived URL patterns + license_audit host check
+#   adapter         module name under scripts/key_squares/adapters/
+#   url_pattern     template string (vars: opening_name_url, fen_after_main_line, opening_slug)
+#   rate_limit_rps  max requests/sec/host (driver enforces)
+#   selector        (optional, HTML adapters only) CSS selector for prose container
+#
+# To add a source:
+#   1. Confirm SPDX license is in adapters/base.py PERMISSIVE_SPDX.
+#   2. Add an entry here.
+#   3. Add the matching adapter file under adapters/.
+#   4. Document in tech.md addendum.
+#   5. Re-run license_audit.
+
+sources:
+  - id: wikipedia-en
+    license: CC-BY-SA-4.0
+    base_url: https://en.wikipedia.org
+    adapter: wikipedia
+    url_pattern: /wiki/{opening_name_url}
+    selector: "#mw-content-text .mw-parser-output > p"
+    rate_limit_rps: 1
+
+  - id: lichess-opening-explorer
+    license: ODbL-1.0
+    base_url: https://explorer.lichess.ovh
+    adapter: lichess_explorer
+    url_pattern: /masters?fen={fen_after_main_line}
+    rate_limit_rps: 1
