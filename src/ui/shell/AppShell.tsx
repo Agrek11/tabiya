@@ -1,65 +1,44 @@
 /**
- * AppShell — composes Sidebar + TopBar around the active route's content.
+ * AppShell — column layout matching v1 preview:
  *
- * Layout grid + mobile drawer state + desktop sidebar collapse state.
+ *   ┌─────────── TopBar (sticky 68px) ───────────┐
+ *   │ PageSidebar (220px) │ main content (flex)  │
+ *   └─────────────────────┴──────────────────────┘
  *
- * Drill route intentionally suppresses TopBar title/breadcrumb (wireframe v1.1
- * — drill page owns its own header chrome via line/mode dropdowns).
+ * Source of truth: specs/wireframes/tabiya-v1-preview.html.
+ *
+ * Mobile (≤880px, see src/index.css): PageSidebar is hidden via the
+ * `.tabiya-page-sidebar` rule. TopBar stays. A future pass can add a drawer.
  */
 
-import { useState, type PropsWithChildren } from 'react';
-import { useLocation } from 'react-router-dom';
+import { type PropsWithChildren } from 'react';
 import { useTokens } from '../../theme/ThemeContext';
-import { sp } from '../../theme/tokens';
-import { Sidebar } from './Sidebar';
+import { PageSidebar } from './PageSidebar';
 import { TopBar } from './TopBar';
-import { useSidebarCollapsed } from './use-sidebar-collapsed';
-
-const PATH_TITLES: Record<string, { title: string; breadcrumb?: string }> = {
-  '/': { title: 'Dashboard' },
-  '/repertoire': { title: 'Repertoire' },
-  '/repertoire/gambits': { title: 'Gambits', breadcrumb: 'Repertoire' },
-  '/drill': { title: '', breadcrumb: '' },
-  '/progress': { title: 'Progress' },
-  '/settings': { title: 'Settings' },
-};
 
 export function AppShell({ children }: PropsWithChildren) {
   const t = useTokens();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [desktopCollapsed, setDesktopCollapsed] = useSidebarCollapsed();
-  const location = useLocation();
-  const meta = PATH_TITLES[location.pathname] ?? { title: '' };
 
   return (
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
         minHeight: '100vh',
         background: t.bg,
         color: t.ink,
       }}
     >
-      <Sidebar
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
-        desktopCollapsed={desktopCollapsed}
-        onToggleDesktop={() => setDesktopCollapsed(!desktopCollapsed)}
-      />
-
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        <TopBar
-          breadcrumb={meta.breadcrumb}
-          title={meta.title}
-          onMenuClick={() => setMobileOpen(true)}
-        />
+      <TopBar />
+      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+        <PageSidebar />
         <main
           style={{
             flex: 1,
-            padding: `${sp[6]}px ${sp[7]}px`,
-            maxWidth: 1280,
-            width: '100%',
-            margin: '0 auto',
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 0,
+            overflowX: 'hidden',
           }}
         >
           {children}

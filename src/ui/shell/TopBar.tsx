@@ -1,79 +1,209 @@
 /**
- * TopBar — sticky 56px header with breadcrumb (left) and theme toggle (right).
+ * TopBar — 68px sticky header matching v1 preview (`.topbar`).
  *
- * Phase 0d.1 trims v1's search box + notifications bell — they re-appear
- * once their data sources land (catalog growth, review-due alerts).
+ * Layout (3 columns):
+ *   - Left:   brand mark (30px ♞ square) + "tabiya" wordmark + tagline
+ *   - Center: 5 NavLinks (Home / Repertoire / Insights / Games / Coach)
+ *   - Right:  gear → /settings, theme toggle, "Continue Training" CTA with
+ *             live `N due` badge driven by useSRS().
+ *
+ * Source of truth: specs/wireframes/tabiya-v1-preview.html `.topbar` block +
+ * the matching `<header class="topbar">` markup.
  */
 
-import { Menu, Moon, Sun } from 'lucide-react';
+import { Moon, Play, Settings as SettingsIcon, Sun } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useTheme, useTokens } from '../../theme/ThemeContext';
-import { fonts, radius, sp } from '../../theme/tokens';
+import { fonts } from '../../theme/tokens';
+import { useSRS } from '../../hooks/useSRS';
 
-type TopBarProps = {
-  breadcrumb?: string;
-  title?: string;
-  onMenuClick: () => void;
-};
+type NavSpec = { to: string; label: string; end?: boolean };
 
-export function TopBar({ breadcrumb, title, onMenuClick }: TopBarProps) {
+const NAV: NavSpec[] = [
+  { to: '/', label: 'Home', end: true },
+  { to: '/repertoire', label: 'Repertoire' },
+  { to: '/insights', label: 'Insights' },
+  { to: '/games', label: 'Games' },
+  { to: '/coach', label: 'Coach' },
+];
+
+export function TopBar(): JSX.Element {
   const t = useTokens();
   const { scheme, toggle } = useTheme();
+  const navigate = useNavigate();
+  const { dueLineIds } = useSRS();
+  const dueCount = dueLineIds.length;
+
   return (
-    <div
+    <header
       style={{
-        height: 56,
-        borderBottom: `1px solid ${t.border}`,
+        height: 68,
+        borderBottom: `0.5px solid ${t.border}`,
         background: t.surface,
         display: 'flex',
         alignItems: 'center',
-        padding: `0 ${sp[6]}px`,
-        gap: sp[3],
+        padding: '0 28px',
+        gap: 16,
         position: 'sticky',
         top: 0,
-        zIndex: 20,
+        zIndex: 100,
+        fontFamily: fonts.sans,
       }}
     >
-      <button
-        onClick={onMenuClick}
-        className="tabiya-topbar-menu"
-        aria-label="Open menu"
-        style={{
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          color: t.inkDim,
-          padding: sp[2],
-          display: 'none',
-        }}
-      >
-        <Menu size={20} />
-      </button>
-
-      <div style={{ flex: 1, fontFamily: fonts.sans }}>
-        {breadcrumb && (
-          <div style={{ fontSize: 12, color: t.inkDim, marginBottom: 1 }}>{breadcrumb}</div>
-        )}
-        {title && <div style={{ fontSize: 15, fontWeight: 600, color: t.ink }}>{title}</div>}
+      {/* LEFT — brand */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            background: t.brand,
+            color: t.brandInk,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+          }}
+          aria-hidden
+        >
+          ♞
+        </div>
+        <div>
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 700,
+              color: t.ink,
+              letterSpacing: '-0.02em',
+              lineHeight: 1,
+            }}
+          >
+            tabiya
+          </div>
+          <div
+            style={{
+              fontSize: 10.5,
+              fontWeight: 500,
+              color: t.inkSoft,
+              marginTop: 3,
+            }}
+          >
+            Attention-guided chess learning
+          </div>
+        </div>
       </div>
 
-      <button
-        onClick={toggle}
-        aria-label="Toggle theme"
+      {/* CENTER — nav */}
+      <nav
         style={{
-          width: 36,
-          height: 36,
-          background: t.surfaceAlt,
-          border: `1px solid ${t.border}`,
-          borderRadius: radius.chip,
+          flex: 1,
           display: 'flex',
-          alignItems: 'center',
           justifyContent: 'center',
-          cursor: 'pointer',
-          color: t.inkDim,
+          gap: 4,
         }}
       >
-        {scheme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
-      </button>
-    </div>
+        {NAV.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            style={({ isActive }) => ({
+              textDecoration: 'none',
+              background: isActive ? t.brandSoft : 'transparent',
+              border: `0.5px solid ${isActive ? t.brandSoftBorder : 'transparent'}`,
+              color: isActive ? t.brand : t.inkDim,
+              padding: '8px 14px',
+              borderRadius: 11,
+              fontSize: 13,
+              fontWeight: isActive ? 600 : 500,
+              fontFamily: fonts.sans,
+              cursor: 'pointer',
+              transition: 'all 150ms ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+            })}
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      {/* RIGHT — actions */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <button
+          onClick={() => navigate('/settings')}
+          aria-label="Settings"
+          title="Settings"
+          style={iconBtnStyle(t)}
+        >
+          <SettingsIcon size={16} />
+        </button>
+        <button
+          onClick={toggle}
+          aria-label="Toggle theme"
+          title="Toggle theme"
+          style={iconBtnStyle(t)}
+        >
+          {scheme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+        <button
+          onClick={() => navigate('/drill?queue=due')}
+          aria-label="Continue training"
+          style={{
+            background: t.brand,
+            color: t.brandInk,
+            border: 'none',
+            padding: '9px 16px',
+            borderRadius: 11,
+            fontSize: 13,
+            fontWeight: 600,
+            fontFamily: fonts.sans,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            transition: 'background 150ms ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = t.brandHover;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = t.brand;
+          }}
+        >
+          <Play size={14} fill="currentColor" />
+          Continue Training
+          <span
+            data-testid="topbar-due-badge"
+            style={{
+              background: 'rgba(0,0,0,0.18)',
+              padding: '1px 6px',
+              borderRadius: 999,
+              fontSize: 10.5,
+              fontWeight: 700,
+            }}
+          >
+            {dueCount} due
+          </span>
+        </button>
+      </div>
+    </header>
   );
+}
+
+function iconBtnStyle(t: ReturnType<typeof useTokens>): React.CSSProperties {
+  return {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    background: 'transparent',
+    border: `0.5px solid ${t.border}`,
+    color: t.inkDim,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 150ms ease',
+    padding: 0,
+  };
 }
