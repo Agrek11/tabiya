@@ -59,6 +59,8 @@ import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts } from '../theme/tokens';
 import { StateMessage } from '../ui/primitives/StateMessage';
+import { Card } from '../ui/primitives/Card';
+import { CardTitle } from '../ui/primitives/CardTitle';
 import { EndOfLineSummary } from '../ui/EndOfLineSummary';
 import { PillTrigger } from '../components/drill/PillTrigger';
 import { SlickMenu, type SlickMenuItem } from '../components/drill/SlickMenu';
@@ -818,20 +820,29 @@ export function DrillPage() {
         </div>
       </div>
 
-      {/* WORKSPACE */}
+      {/* WORKSPACE.
+         Layout:
+           - Col 1 = Board (big, capped by viewport).
+           - Col 2 = stack [Moves card top, WhyThisMove card bottom].
+           - Col 3 = EndOfLine card (only when complete; column collapses otherwise). */}
       <div
         style={{
           flex: 1,
           display: 'grid',
-          gridTemplateColumns: '1fr 340px',
-          gap: 14,
-          padding: '20px 28px 28px',
+          gridTemplateColumns: isExplainViewActive
+            ? '1fr'
+            : state.kind === 'complete' && queueState.kind !== 'active'
+              ? 'auto 320px 320px'
+              : 'auto 320px',
+          justifyContent: 'center',
+          gap: 12,
+          padding: '10px 20px 14px',
           alignItems: 'start',
           background: `radial-gradient(circle at center, ${t.bg} 0%, ${t.surfaceAlt} 100%)`,
         }}
       >
         {isExplainViewActive ? (
-          <div style={{ gridColumn: '1 / -1' }}>
+          <div>
             <ExplainView
               key={`explain-${activeLine.id}`}
               line={activeLine}
@@ -848,18 +859,16 @@ export function DrillPage() {
           </div>
         ) : (
           <>
+            {/* COL 1 — board + inline actions */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 14,
-                maxWidth: 760,
+                gap: 8,
                 width: '100%',
-                justifySelf: 'start',
                 minWidth: 0,
               }}
             >
-              {/* Board shell */}
               <div
                 style={{
                   borderRadius: MODE_PILL_TARGET_RADIUS * 2,
@@ -868,6 +877,8 @@ export function DrillPage() {
                   background: t.surface,
                   boxShadow: t.shadowLg,
                   position: 'relative',
+                  width: 'min(900px, calc(100vh - 230px))',
+                  height: 'min(900px, calc(100vh - 230px))',
                 }}
               >
                 <ChessBoardPanel
@@ -883,16 +894,6 @@ export function DrillPage() {
                 />
               </div>
 
-              {/* Moves row (no overflow — actions are inline below).
-                  Click any played chip → jump board to that position. */}
-              <MovesRow
-                moves={drillMoves}
-                playedCount={playedCount}
-                nextIdx={nextIdx}
-                forks={activeLine?.forks ?? []}
-                onJumpToPly={(ply) => jumpToPly(ply + 1)}
-              />
-
               {/* Inline action buttons: Restart / Skip / Hint */}
               <div
                 style={{
@@ -900,7 +901,7 @@ export function DrillPage() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
-                  padding: '4px 0',
+                  padding: '2px 0',
                 }}
               >
                 {overflowItems.map((item) => (
@@ -910,7 +911,7 @@ export function DrillPage() {
                     disabled={item.disabled}
                     data-testid={item.testid}
                     style={{
-                      padding: '7px 14px',
+                      padding: '6px 13px',
                       borderRadius: 999,
                       background: t.surface,
                       border: `0.5px solid ${t.border}`,
@@ -926,12 +927,39 @@ export function DrillPage() {
                   </button>
                 ))}
               </div>
+            </div>
 
-              {/* End-of-line summary (non-queue) */}
-              {state.kind === 'complete' &&
-                queueState.kind !== 'active' &&
-                activeLine !== null &&
-                drillResult !== null && (
+            {/* COL 2 — Moves card on top, WhyThisMove card on bottom */}
+            <aside
+              style={{
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 12,
+              }}
+            >
+              <Card>
+                <CardTitle>Moves</CardTitle>
+                <MovesRow
+                  moves={drillMoves}
+                  playedCount={playedCount}
+                  nextIdx={nextIdx}
+                  forks={activeLine?.forks ?? []}
+                  onJumpToPly={(ply) => jumpToPly(ply + 1)}
+                />
+              </Card>
+              <WhyThisMoveRail
+                notes={activeLine?.strategic_notes ?? []}
+                keySquares={activeLine?.key_squares ?? []}
+              />
+            </aside>
+
+            {/* COL 3 — End-of-line summary (only when complete + non-queue) */}
+            {state.kind === 'complete' &&
+              queueState.kind !== 'active' &&
+              activeLine !== null &&
+              drillResult !== null && (
+                <aside style={{ minWidth: 0 }}>
                   <EndOfLineSummary
                     line={activeLine}
                     drillResult={drillResult}
@@ -950,16 +978,8 @@ export function DrillPage() {
                     onRestart={restart}
                     onPickLine={(id) => setSelectedLineId(id)}
                   />
-                )}
-            </div>
-
-            {/* Why This Move rail */}
-            <aside style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-              <WhyThisMoveRail
-                notes={activeLine?.strategic_notes ?? []}
-                keySquares={activeLine?.key_squares ?? []}
-              />
-            </aside>
+                </aside>
+              )}
           </>
         )}
       </div>

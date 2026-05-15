@@ -57,54 +57,113 @@ export function MovesRow({
   if (forks) for (const f of forks) forksByPly.set(f.ply_index, f);
 
   const visibleEnd = Math.min(moves.length, playedCount);
+  // Render in classic notation pairs. Ply 0 = white move of move 1; ply 1 =
+  // black move of move 1; etc. Each row = [move_no, white_chip, black_chip].
+  // The "next-expected" ply renders as a ghost chip in its slot when not yet
+  // played.
+  const totalToShow = Math.max(
+    visibleEnd,
+    nextIdx !== undefined && nextIdx >= visibleEnd && nextIdx < moves.length ? nextIdx + 1 : 0
+  );
+  const moveCount = Math.ceil(totalToShow / 2);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 7,
-        flexWrap: 'wrap',
-        alignItems: 'center',
-      }}
-    >
-      {moves.slice(0, visibleEnd).map((mv, idx) => {
-        const isActive = idx === visibleEnd - 1; // most recent played
-        const fork = forksByPly.get(idx);
-        return (
-          <MoveChip
-            key={idx}
-            move={mv}
-            active={isActive}
-            ply={idx}
-            fork={fork ?? null}
-            isNext={nextIdx !== undefined && idx === nextIdx}
-            tokens={t}
-            onJump={onJumpToPly}
-          />
-        );
-      })}
-      {/* Render the "next-expected" chip outlined when there's a clear next
-          move and we want to draw the user's eye to where the system is
-          waiting. */}
-      {nextIdx !== undefined && nextIdx >= visibleEnd && nextIdx < moves.length && (
-        <MoveChip
-          move={moves[nextIdx]!}
-          ply={nextIdx}
-          active={false}
-          fork={forksByPly.get(nextIdx) ?? null}
-          isNext
-          ghostNext
-          tokens={t}
-        />
-      )}
+    <div style={{ width: '100%' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '28px 1fr 1fr',
+          rowGap: 4,
+          columnGap: 6,
+          alignItems: 'center',
+        }}
+      >
+        {Array.from({ length: moveCount }).map((_, moveIdx) => {
+          const whitePly = moveIdx * 2;
+          const blackPly = moveIdx * 2 + 1;
+          return (
+            <div key={moveIdx} style={{ display: 'contents' }}>
+              <div
+                style={{
+                  fontSize: 11.5,
+                  fontFamily: fonts.mono,
+                  color: t.inkSoft,
+                  fontWeight: 600,
+                  textAlign: 'right',
+                  paddingRight: 2,
+                }}
+              >
+                {moveIdx + 1}.
+              </div>
+              <PlySlot
+                ply={whitePly}
+                move={moves[whitePly]}
+                visibleEnd={visibleEnd}
+                nextIdx={nextIdx}
+                fork={forksByPly.get(whitePly) ?? null}
+                tokens={t}
+                onJump={onJumpToPly}
+              />
+              <PlySlot
+                ply={blackPly}
+                move={moves[blackPly]}
+                visibleEnd={visibleEnd}
+                nextIdx={nextIdx}
+                fork={forksByPly.get(blackPly) ?? null}
+                tokens={t}
+                onJump={onJumpToPly}
+              />
+            </div>
+          );
+        })}
+      </div>
       {overflowItems.length > 0 && (
-        <OverflowMenu
-          open={openOverflow}
-          onOpenChange={setOpenOverflow}
-          items={overflowItems}
-        />
+        <div style={{ marginTop: 8 }}>
+          <OverflowMenu
+            open={openOverflow}
+            onOpenChange={setOpenOverflow}
+            items={overflowItems}
+          />
+        </div>
       )}
     </div>
+  );
+}
+
+function PlySlot({
+  ply,
+  move,
+  visibleEnd,
+  nextIdx,
+  fork,
+  tokens,
+  onJump,
+}: {
+  ply: number;
+  move: string | undefined;
+  visibleEnd: number;
+  nextIdx: number | undefined;
+  fork: ForkAnnotation | null;
+  tokens: ReturnType<typeof useTokens>;
+  onJump?: (ply: number) => void;
+}) {
+  if (move === undefined) return <span />;
+  const played = ply < visibleEnd;
+  const isActive = played && ply === visibleEnd - 1;
+  const isNext = nextIdx !== undefined && ply === nextIdx;
+  const ghostNext = !played && isNext;
+  if (!played && !ghostNext) return <span />;
+  return (
+    <MoveChip
+      move={move}
+      ply={ply}
+      active={isActive}
+      fork={fork}
+      isNext={isNext}
+      ghostNext={ghostNext}
+      tokens={tokens}
+      onJump={onJump}
+    />
   );
 }
 
