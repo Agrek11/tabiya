@@ -1,0 +1,68 @@
+{# Phase 1b — Explain block LLM prompt.
+
+   Variables:
+     opening_name        — e.g. "Italian Game"
+     eco                 — ECO code, e.g. "C50"
+     line_id             — slug, e.g. "ruy-lopez-closed-main"
+     plies               — list of { index: int, san: str, fen_after: str }
+     gold_blocks_json    — pre-truncated few-shot blocks from the gold sidecar
+                           (JSON string)
+
+   The template renders a single message body. Consumer wraps it in the
+   Anthropic SDK's `messages.create({...})` call with `cache_control` on the
+   few-shot block to reduce token spend across multi-line batches.
+#}
+You are an opening-theory annotator. Given a chess opening line, produce
+per-ply rationale for a beginner audience.
+
+Output STRICT JSON conforming to this shape:
+
+{
+  "line_id": "<string>",
+  "schema_version": 2,
+  "blocks": [
+    {
+      "rationale": "<1-3 sentences, beginner-friendly>",
+      "arrows": [{"from": "<sq>", "to": "<sq>", "color": "green|red|blue"}],
+      "highlights": [{"square": "<sq>", "intent": "focus|threat|support"}],
+      "threats": "<optional 'if X then Y' note, else null>",
+      "pauseMs": <optional int 500-20000, else null>
+    }
+  ]
+}
+
+Rules:
+  - Exactly ONE block per ply, in order.
+  - rationale: 1-3 sentences. Name pieces by descriptive role
+    ("the king's bishop"), not just SAN. Avoid engine eval scores.
+  - arrows: at most 2 per ply.
+    - green = the move that is about to play or a planned follow-up
+    - red   = a threat being prevented or piece under attack
+    - blue  = piece coordination (battery, support)
+  - highlights: at most 3 squares.
+    - focus   = the square the move fights for
+    - threat  = a square the opponent could exploit
+    - support = a square we shore up
+  - threats: optional. Only set on moves with a real tactical alarm.
+  - pauseMs: leave null for normal moves. Bump to 3500-4000 for critical
+    turning-point moves the learner needs extra time to absorb.
+
+Few-shot example (gold reference, abbreviated):
+
+```json
+{{ gold_blocks_json }}
+```
+
+Now annotate the following line.
+
+Opening: {{ opening_name }} ({{ eco }})
+Line: {{ line_id }}
+
+Moves (SAN with resulting FEN):
+
+{% for ply in plies -%}
+  {{ ply.index }}. {{ ply.san }}    FEN after: {{ ply.fen_after }}
+{% endfor %}
+
+Produce the JSON object now. Do not include any prose, markdown fences, or
+commentary outside the JSON.

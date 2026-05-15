@@ -27,6 +27,8 @@ Single-language backend: Python owns the catalog build script, AI service, and a
 | `transformers` + `peft` (Apache-2) | HuggingFace, AI fine-tune layer (Phase 3+) |
 | `torch` (BSD) | PyTorch, AI runtime (Phase 3+) |
 | `sentence-transformers` (Apache-2) | Embeddings for RAG approach (Phase 3+) |
+| `anthropic` (MIT) | Anthropic SDK for Phase 1b explain-block authoring (build-time only; never ships in frontend bundle) |
+| `jinja2` (BSD-3) | Prompt templating for Phase 1b authoring pipeline (build-time only) |
 
 ### Frontend (browser only)
 

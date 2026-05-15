@@ -9,9 +9,14 @@
 - **Article 13 (Weekend Pace)** — implementation must fit weekend cadence; do not pull from battle-plan time.
 
 **Scope split:**
-- This phase (1b): mode toggle, schema extension, explain-block authoring pipeline, autoplay loop, overlay rendering on existing primitive, 1 hand-authored gold line.
+- This phase (1b): mode toggle, schema extension, explain-block authoring pipeline, autoplay loop, overlay rendering on existing primitive, 1 hand-authored gold line, TTS narration behind feature flag (default off).
 - Deferred to 1b.2: GPT-batch authoring across full repertoire; bulk review tooling.
-- Deferred to 1b.3: voice-over / TTS narration.
+
+**Open questions resolved 2026-05-15:**
+1. Storage: **sidecar files, lazy-loaded** (`data/explain/<lineId>.json`). Smaller base catalog, lazy-load on Explain Mode entry.
+2. Skip-to-drill: **drill starts at ply 0**. Matches existing drill semantics.
+3. Rationale length: **soft cap with UI truncate + expand**. No validator hard cap; UI shows first ~280 chars + "show more" toggle.
+4. TTS: **shipped now behind feature flag** (`tabiya:flag:explainTts`, default off). Uses Web Speech API (`SpeechSynthesisUtterance`). Per-line + global toggle. Article 11-compliant (browser-native, no network).
 
 **Out of scope:**
 - Branching commentary (Article 7).
@@ -86,7 +91,7 @@ controls: prev / pause / next / restart / skip
 
 ### Acceptance criteria
 
-- [ ] One opening line hand-authored end-to-end as gold reference (target: Italian Game main line, ~10-12 ply). Lives in catalog source under `data/explain/<lineId>.json` or merged inline — pipeline owner picks one.
+- [ ] One opening line hand-authored end-to-end as gold reference (target: Italian Game main line, ~10-12 ply). Lives in sidecar at `data/explain/<lineId>.json` (resolved 2026-05-15).
 - [ ] Authoring schema documented in `specs/phase-1b-explain-mode/authoring.md` (separate doc, this phase).
 - [ ] GPT-batch script (`scripts/build_explain.py`) takes line FEN sequence + opening name + few-shot from gold line → drafts `ExplainBlock` per ply → writes to a `pending/` dir for manual review.
 - [ ] Manual-review CLI (`scripts/review_explain.py`) shows board + draft + accept/edit/reject flow. Approved blocks written to canonical catalog.
@@ -129,10 +134,26 @@ controls: prev / pause / next / restart / skip
 
 ## Open questions
 
-1. **Where do `explain` blocks live in storage?** Inline in catalog JSON (single source of truth, larger bundle) vs sidecar files (`data/explain/<lineId>.json`, lazy-loaded per line). Lean: sidecar — keeps base catalog small, lazy-load on Explain Mode entry.
-2. **TTS later or never?** Cheap accessibility win, but battery drain on mobile and voice quality issues. Defer to 1b.3.
-3. **Skip-to-drill mid-line — preserve drill SRS state?** If user skips at ply 6, drill starts from ply 0 (current behavior) or ply 6? Lean: ply 0, simpler, matches drill semantics.
-4. **Rationale length policing.** Hard cap of N characters or soft? Risk: GPT verbose drafts overflow rail. Lean: 280-char hard cap per `rationale`, validator enforced.
+All resolved 2026-05-15 — see header "Open questions resolved" block. No outstanding decisions blocking implementation.
+
+### New requirements added from resolutions
+
+#### R6 — TTS narration (feature-flagged)
+
+- [ ] `tabiya:flag:explainTts` localStorage flag; default `false`. Toggle in Settings → Explain Mode.
+- [ ] When flag is on AND Explain Mode is active AND a step renders rationale, the rationale is spoken via `window.speechSynthesis.speak(new SpeechSynthesisUtterance(text))`.
+- [ ] Per-line override key `tabiya:linePrefs:<lineId>:ttsMute` (boolean) suppresses TTS for that line only.
+- [ ] Pause / Next / Prev cancels the current utterance before advancing.
+- [ ] Voice selection (rate, pitch, voice) deferred to 1b.3 — v1 ships with browser defaults.
+- [ ] No TTS on Skip-to-drill or summary card.
+- [ ] Graceful no-op if `window.speechSynthesis` is undefined (older browsers / privacy modes).
+
+#### R7 — Rationale soft truncation in UI
+
+- [ ] `ExplainRail` renders rationale text. If `rationale.length > 280` characters, render first 280 + "… show more" toggle.
+- [ ] Expanded state persists for the current ply only — advancing to next ply resets to truncated view.
+- [ ] No build-time hard cap on rationale length (any length passes schema validation).
+- [ ] Threats field (R2) renders below rationale with same truncate-at-280 rule, independent toggle.
 
 ---
 
