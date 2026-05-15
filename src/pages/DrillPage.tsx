@@ -40,7 +40,7 @@ import {
   useState,
   type CSSProperties,
 } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
   AlertTriangle,
@@ -66,6 +66,11 @@ import { PillTrigger } from '../components/drill/PillTrigger';
 import { SlickMenu, type SlickMenuItem } from '../components/drill/SlickMenu';
 import { MovesRow, type OverflowItem } from '../components/drill/MovesRow';
 import { WhyThisMoveRail } from '../components/drill/WhyThisMoveRail';
+import { DrillModeToggleHeader } from '../components/drill/DrillModeToggleHeader';
+import { TranspositionBanner } from '../components/drill/TranspositionBanner';
+import { useSpotlightOverlay } from '../ui/board/useSpotlightOverlay';
+import { useKeySquareOverlay } from '../hooks/useKeySquareOverlay';
+import { useTransposition } from '../hooks/useTransposition';
 import { getRepository, getSrsRepository } from '../storage';
 import type { Family, Line, Opening } from '../storage/types';
 
@@ -136,6 +141,7 @@ function fireGrandConfetti(): void {
 
 export function DrillPage() {
   const t = useTokens();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const requestedLine = searchParams.get('line');
   const requestedOpening = searchParams.get('opening');
@@ -450,12 +456,28 @@ export function DrillPage() {
     [state, selectedSquare, legalDestSquares, onPieceDrop]
   );
 
+  // Phase 2b — Pattern Viz overlay (R6/R7).
+  // The drill-mode toggle persists per-line; Explain Mode force-on is
+  // handled inside the hook. ExplainView is rendered in a separate branch
+  // below — `explainModeActive=true` here applies when the user picked
+  // explain mode for this line but the explain content didn't load
+  // (graceful degrade) OR before the explain branch renders.
+  const explainModeActive = explainMode === 'explain';
+  const keySquareToggle = useKeySquareOverlay({
+    lineId: activeLineId,
+    hasKeySquares: (activeLine?.key_squares?.length ?? 0) > 0,
+    explainModeActive,
+  });
+  const spotlight = useSpotlightOverlay({
+    keySquares: keySquareToggle.visible ? activeLine?.key_squares : undefined,
+  });
+
   const squareStyles = useMemo<Record<string, CSSProperties>>(() => {
-    const styles: Record<string, CSSProperties> = {};
+    const styles: Record<string, CSSProperties> = { ...spotlight.squareStyles };
     if (lastMove) {
       const lastStyle: CSSProperties = { backgroundColor: 'rgba(155, 199, 0, 0.42)' };
-      styles[lastMove.from] = { ...lastStyle };
-      styles[lastMove.to] = { ...lastStyle };
+      styles[lastMove.from] = { ...(styles[lastMove.from] ?? {}), ...lastStyle };
+      styles[lastMove.to] = { ...(styles[lastMove.to] ?? {}), ...lastStyle };
     }
     if (hintSquare) {
       if (hintTier === 2) {
@@ -472,7 +494,32 @@ export function DrillPage() {
       }
     }
     return styles;
-  }, [lastMove, hintSquare, hintTier]);
+  }, [lastMove, hintSquare, hintTier, spotlight.squareStyles]);
+
+  // Phase 2b — Transposition banner (R8). Picked repertoire comes from
+  // useEffectivePick; lineNames map is derived from the catalog. Banner
+  // is drill-only (suppressed in Explain Mode via the OQ3 resolution).
+  const pickedLineIds = effective.lineIds;
+  const lineNames = useMemo(() => {
+    if (catalog.kind !== 'ready') return new Map<string, string>();
+    const m = new Map<string, string>();
+    for (const l of catalog.lines) m.set(l.id, l.name);
+    return m;
+  }, [catalog]);
+  const currentPlyForTransposition = 'lineIndex' in state ? (state.lineIndex as number) : 0;
+  const transposition = useTransposition({
+    currentFen: fen,
+    currentPly: currentPlyForTransposition,
+    activeLineId,
+    pickedLineIds,
+    lineNames,
+  });
+  const onTranspositionJump = useCallback(
+    (lineId: string): void => {
+      navigate(`/drill?line=${lineId}`);
+    },
+    [navigate]
+  );
 
   // Keyboard nav.
   useEffect(() => {
@@ -744,6 +791,15 @@ export function DrillPage() {
               />
             )}
           </div>
+          {/* Phase 2b — Key squares overlay toggle (R7). Hidden when the
+              active opening has no curated key_squares (graceful degrade). */}
+          {!keySquareToggle.toggleDisabled && (
+            <DrillModeToggleHeader
+              active={keySquareToggle.drillPreference}
+              forcedByExplain={explainModeActive && keySquareToggle.visible}
+              onClick={keySquareToggle.toggle}
+            />
+          )}
         </div>
 
         {/* Stats strip */}
@@ -855,6 +911,8 @@ export function DrillPage() {
                 setExplainMode('drill');
                 setActiveMode('drill');
               }}
+              /* R7.3 — Pattern Viz key squares force on for the explain run. */
+              patternKeySquares={activeLine.key_squares}
             />
           </div>
         ) : (
@@ -892,6 +950,13 @@ export function DrillPage() {
                   onPieceClick={onPieceClick}
                   onSquareClick={onSquareClick}
                 />
+                {/* Phase 2b — Pattern Viz tooltip surface (R6.4). The
+                    spotlight square-styles flow through `squareStyles`
+                    above; this overlay only carries the hover tooltip
+                    element. The board wrapper is position:relative
+                    (parent `<div>` above), so the tooltip absolute-
+                    positions inside it. */}
+                {spotlight.tooltip}
               </div>
 
               {/* Inline action buttons: Restart / Skip / Hint */}
@@ -938,6 +1003,14 @@ export function DrillPage() {
                 gap: 12,
               }}
             >
+              {/* Phase 2b — Transposition banner (R8). Drill-only per
+                  OQ3 resolution; Explain Mode renders in its own branch
+                  above and never reaches this aside. */}
+              <TranspositionBanner
+                matches={transposition.matches}
+                truncatedCount={transposition.truncated}
+                onJump={onTranspositionJump}
+              />
               <Card>
                 <CardTitle>Moves</CardTitle>
                 <MovesRow

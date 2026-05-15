@@ -28,11 +28,12 @@ import { Sparkles, Swords } from 'lucide-react';
 import { ChessBoardPanel } from '../ChessBoardPanel';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts, radius } from '../../theme/tokens';
-import type { ExplainBlock, Line } from '../../storage/types';
+import type { ExplainBlock, KeySquare, Line } from '../../storage/types';
 import { useExplainMode } from '../../hooks/useExplainMode';
 import { useExplainTts } from '../../hooks/useExplainTts';
 import { deriveHighlightStyles } from '../board/HighlightLayer';
 import { ArrowLayer } from '../board/ArrowLayer';
+import { useSpotlightOverlay } from '../board/useSpotlightOverlay';
 import { ExplainRail } from './ExplainRail';
 
 export type ExplainViewProps = {
@@ -46,6 +47,13 @@ export type ExplainViewProps = {
   progressBarPlyOverride?: number;
   /** Called when user clicks "Skip to drill" or "Drill this line". */
   onSkipToDrill(): void;
+  /**
+   * Phase 2b R7.3 — Pattern Viz key squares to force-render under the
+   * board for the duration of the explain run, regardless of the drill-
+   * mode toggle. Optional; absent / empty → no extra overlay (the
+   * per-ply explain highlights from `blocks` are unaffected).
+   */
+  patternKeySquares?: readonly KeySquare[];
 };
 
 export function ExplainView({
@@ -54,6 +62,7 @@ export function ExplainView({
   playerColor,
   totalPlies,
   onSkipToDrill,
+  patternKeySquares,
 }: ExplainViewProps): React.JSX.Element {
   const t = useTokens();
   const [paused, setPaused] = useState(false);
@@ -110,16 +119,27 @@ export function ExplainView({
     [highlights],
   );
 
+  // Phase 2b R7.3 — pattern-viz key squares are force-rendered under
+  // the Explain board for the explain run's duration. Stays inert when
+  // the caller passed no `patternKeySquares` (graceful degrade R6.6).
+  const patternOverlay = useSpotlightOverlay({
+    keySquares: patternKeySquares,
+    fadePieces: false, // Don't fight the explain-mode highlights with a heavy fade.
+  });
+
   // Last-move highlight (light green tint, matches drill's lichess style).
   const squareStylesWithLastMove = useMemo<Record<string, CSSProperties>>(() => {
-    const styles: Record<string, CSSProperties> = { ...squareStyles };
+    const styles: Record<string, CSSProperties> = {
+      ...patternOverlay.squareStyles,
+      ...squareStyles,
+    };
     if (explain.lastMove !== null && explain.state.kind !== 'showOverlays') {
       const lastStyle: CSSProperties = { backgroundColor: 'rgba(155, 199, 0, 0.42)' };
       styles[explain.lastMove.from] = { ...lastStyle, ...(styles[explain.lastMove.from] ?? {}) };
       styles[explain.lastMove.to] = { ...lastStyle, ...(styles[explain.lastMove.to] ?? {}) };
     }
     return styles;
-  }, [squareStyles, explain.lastMove, explain.state]);
+  }, [squareStyles, patternOverlay.squareStyles, explain.lastMove, explain.state]);
 
   // Measure board size so ArrowLayer can size its SVG. We use a ResizeObserver
   // on the board wrapper. Default fallback 480px.
@@ -191,6 +211,7 @@ export function ExplainView({
         {explain.state.kind === 'showOverlays' && arrows.length > 0 && (
           <ArrowLayer arrows={arrows} boardSize={boardSize} isFlipped={playerColor === 'black'} />
         )}
+        {patternOverlay.tooltip}
       </div>
 
       {/* Completion banner OR rail */}
