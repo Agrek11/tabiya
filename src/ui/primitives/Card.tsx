@@ -12,16 +12,24 @@ type CardProps = PropsWithChildren<{
   elevated?: boolean;
 }>;
 
-export function Card({ children, padding = 18, style, elevated = false }: CardProps) {
+/**
+ * Card — surface panel matching v1 preview `.card`.
+ *
+ * Preview style: 18px radius, 0.5px border, 20px padding default.
+ * `elevated` swaps the resting shadow to `shadowMd` for cards that float
+ * (popovers, summaries).
+ */
+export function Card({ children, padding = 20, style, elevated = false }: CardProps) {
   const t = useTokens();
   return (
     <div
       style={{
         background: t.surface,
-        border: `1px solid ${t.border}`,
-        borderRadius: radius.card,
+        border: `0.5px solid ${t.border}`,
+        borderRadius: 18,
         padding,
-        boxShadow: elevated ? t.shadowMd : t.shadow,
+        boxShadow: elevated ? t.shadowMd : t.shadowSm,
+        transition: 'all 220ms ease',
         ...style,
       }}
     >

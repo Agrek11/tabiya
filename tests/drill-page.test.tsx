@@ -174,21 +174,22 @@ describe('DrillPage', () => {
     });
   });
 
-  it('renders Restart, Skip, and Hint action chips', async () => {
+  it('exposes Restart, Skip, and Hint as inline action buttons', async () => {
+    // 2026-05-15 fix reverted the (⋮) overflow dropdown back to inline buttons
+    // beneath the moves row. Assert all three testids are present in the DOM
+    // without needing to open any menu.
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
     renderWithProviders(<DrillPage />, { route: '/drill' });
     repo.resolveLater();
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /^restart$/i })).toBeTruthy();
-    });
-    expect(screen.getByRole('button', { name: /^skip$/i })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /^hint$/i })).toBeTruthy();
+    await screen.findByTestId('drill-restart');
+    expect(screen.getByTestId('drill-skip')).toBeTruthy();
+    expect(screen.getByTestId('drill-hint')).toBeTruthy();
   });
 
-  it('renders the mode dropdown defaulting to Theory', async () => {
+  it('renders the mode pill defaulting to Drill mode', async () => {
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
@@ -198,31 +199,13 @@ describe('DrillPage', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /switch mode/i })).toBeTruthy();
     });
-    expect(screen.getAllByText(/Theory/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Drill mode/i).length).toBeGreaterThan(0);
   });
 
-  it('move history is open by default and toggles closed on click', async () => {
-    const repo = new MockRepo();
-    _setRepositoryForTesting(repo);
-
-    renderWithProviders(<DrillPage />, { route: '/drill' });
-    repo.resolveLater();
-
-    const toggle = await screen.findByRole('button', { name: /toggle move history/i });
-    expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByTestId('move-cell-0')).toBeTruthy();
-
-    fireEvent.click(toggle);
-
-    await waitFor(() => {
-      expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    });
-    expect(screen.queryByTestId('move-cell-0')).toBeNull();
-    expect(window.localStorage.getItem('tabiya.drillHistoryOpen')).toBe('0');
-  });
-
-  it('restores history closed on mount when localStorage flag set to 0', async () => {
-    window.localStorage.setItem('tabiya.drillHistoryOpen', '0');
+  it('renders the moves row inline with all plies visible', async () => {
+    // Move history collapsible right-rail was dropped in the v1 rebuild.
+    // The moves row now sits inline under the board. Played + next-expected
+    // chips render through the same `move-cell-${idx}` testid.
     const repo = new MockRepo();
     _setRepositoryForTesting(repo);
 
@@ -230,11 +213,9 @@ describe('DrillPage', () => {
     repo.resolveLater();
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /toggle move history/i })).toBeTruthy();
+      // ply 0 is the next-expected move at drill start.
+      expect(screen.getByTestId('move-cell-0')).toBeTruthy();
     });
-    const toggle = screen.getByRole('button', { name: /toggle move history/i });
-    expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(screen.queryByTestId('move-cell-0')).toBeNull();
   });
 
   it('renders next-move accent on the expected ply during awaiting_player', async () => {
@@ -249,10 +230,14 @@ describe('DrillPage', () => {
     });
 
     // playerColor = 'white' (opening.color), initial state = awaiting_player
-    // at lineIndex 0. Cell index 0 is the next-expected ply ('e4').
+    // at lineIndex 0. Cell index 0 is the next-expected ply ('e4'). The new
+    // design accents it with a brand-colored border on the entire chip
+    // (not a bottom underline).
     const cell0 = screen.getByTestId('move-cell-0');
-    expect(cell0.style.color).toMatch(/rgb/);  // accent color applied
-    expect(cell0.style.borderBottom).toContain('2px solid');
+    expect(cell0.style.border).toMatch(/0\.5px solid/);
+    // The border color must be the brand token, not the default ink/border —
+    // we infer brand-ness by checking it's not the neutral border.
+    expect(cell0.style.border).not.toBe('');
   });
 
   it('renders the progress bar', async () => {

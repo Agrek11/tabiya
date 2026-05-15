@@ -1,63 +1,71 @@
 /**
- * DrillPage — wireframe v1.3 layout (Tue May 2026 refactor #2).
+ * DrillPage — drill workspace matched to v1 preview.
  *
- * Layout:
- *   Desktop: 2-column CSS grid `1fr 300px` with gap 24px.
- *     ┌─ MAIN ────────────────────────────────────────┐ ┌─ HISTORY ────┐
- *     │ Header row                                    │ │ Move history │
- *     │   [Opening ▼] [Line ▼]            [Mode ▼]    │ │ (sticky)     │
- *     │ Progress bar (10px)                           │ │              │
- *     │ Hero board                                    │ │              │
- *     │ Inline coach line                             │ │              │
- *     │ Action chips (Restart / Skip / Hint)          │ │              │
- *     └───────────────────────────────────────────────┘ └──────────────┘
- *   Mobile (≤880px): single column. History falls below the action chips.
+ * Source: specs/wireframes/tabiya-v1-preview.html `data-page="drill"`.
  *
- * v1.3 deltas vs v1.2:
- *   - Move history moves from bottom collapsible → right-side panel
- *     (sticky on desktop, always visible). Toggle still available to collapse.
- *   - Default historyOpen = TRUE (right column has space).
- *   - Opening + Line dropdowns are now SIDE BY SIDE, both pill-styled.
- *   - "Slick" dropdown design: pill trigger, surfaceAlt fill, big-bold name,
- *     items have radio-circle indicator (○ / ●), current item in t.brand.
- *   - Items show name only (ECO + ply moved into trigger caption).
+ * Stack top to bottom:
+ *   Drill Toolbar (64px, surface): Opening pill | Variation pill | Mode pill | stats
+ *   Pills row    (queue chip + box chip)
+ *   Progress strip (eyebrow + counts + bar)
+ *   Workspace grid 1fr / 280px:
+ *     [Board shell + Moves row]  |  [Why This Move rail]
+ *
+ * Behavior preserved from the prior implementation:
+ *   - useDrill + ChessBoardPanel (untouched)
+ *   - useExplainContent + useLinePrefMode + ExplainView
+ *   - SRS write on completion + fire-and-forget guard
+ *   - Queue mode init from ?queue=due, advance on completion, exhausted state
+ *   - useEventEmitter telemetry (Phase 1.5 R7.5)
+ *   - Keyboard nav (← → R H Esc)
+ *   - Click-to-move
+ *   - Hint pulse tier 1 → tier 2 escalation
+ *   - End-of-line summary in non-queue mode
+ *   - Confetti on completion
+ *   - Effective repertoire pick filter
+ *
+ * Visual deltas vs v1.3:
+ *   - Strategic notes panel removed; rationale now lives in the Why This Move
+ *     rail (key squares included).
+ *   - Move history right rail dropped; the played-moves chip row sits inline
+ *     under the board.
+ *   - Restart / Skip / Hint moved into a (⋮) overflow dropdown on the moves row.
+ *   - Mode pill replaces the prior ModeToggle row.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import {
   AlertTriangle,
-  BookOpen,
-  ChevronDown,
-  Eye,
   Inbox,
-  Lightbulb,
-  RotateCcw,
-  Search,
-  SkipForward,
-  Sparkles,
-  Swords,
-  X,
+  Target,
 } from 'lucide-react';
 import { useClickOutside } from '../ui/use-click-outside';
 import { useDrill } from '../drill/useDrill';
 import { useSRS } from '../hooks/useSRS';
 import { useEventEmitter } from '../hooks/useEventEmitter';
 import { useEffectivePick } from '../hooks/useEffectivePick';
-import { useDrillHistoryOpen } from '../drill/use-drill-history-open';
 import { useExplainContent } from '../hooks/useExplainContent';
 import { useLinePrefMode } from '../hooks/useLinePrefMode';
-import { ModeToggle } from '../ui/ModeToggle';
 import { ExplainView } from '../ui/explain/ExplainView';
 import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
-import { fonts, radius } from '../theme/tokens';
+import { fonts } from '../theme/tokens';
 import { StateMessage } from '../ui/primitives/StateMessage';
-import { StrategicNotesPanel } from '../ui/StrategicNotesPanel';
 import { EndOfLineSummary } from '../ui/EndOfLineSummary';
+import { PillTrigger } from '../components/drill/PillTrigger';
+import { SlickMenu, type SlickMenuItem } from '../components/drill/SlickMenu';
+import { MovesRow, type OverflowItem } from '../components/drill/MovesRow';
+import { WhyThisMoveRail } from '../components/drill/WhyThisMoveRail';
 import { getRepository, getSrsRepository } from '../storage';
-import type { Family, ForkAnnotation, Line, Opening } from '../storage/types';
+import type { Family, Line, Opening } from '../storage/types';
 
 type CatalogState =
   | { kind: 'loading' }
@@ -69,24 +77,15 @@ type QueueState =
   | { kind: 'active'; lineIds: string[]; index: number }
   | { kind: 'exhausted'; total: number };
 
-type ModeId = 'theory' | 'coach' | 'visualizer' | 'engine';
+type ModeId = 'drill' | 'explain' | 'pattern-viz';
 
-type ModeOption = {
-  id: ModeId;
-  label: string;
-  icon: typeof BookOpen;
-  available: boolean;
+const MODE_LABELS: Record<ModeId, string> = {
+  drill: 'Drill mode',
+  explain: 'Explain',
+  'pattern-viz': 'Pattern Viz',
 };
 
-const MODES: ModeOption[] = [
-  { id: 'theory', label: 'Theory', icon: BookOpen, available: true },
-  { id: 'coach', label: 'AI Coach', icon: Sparkles, available: false },
-  { id: 'visualizer', label: 'Visualizer', icon: Eye, available: false },
-  { id: 'engine', label: 'Play it out', icon: Swords, available: false },
-];
-
-const PROGRESS_BAR_HEIGHT = 10;
-const HISTORY_RAIL_WIDTH = 300;
+const MODE_PILL_TARGET_RADIUS = 12;
 
 function fireGrandConfetti(): void {
   const colors = ['#F4A300', '#E25822', '#FFD166', '#06D6A0', '#118AB2', '#FFFFFF'];
@@ -136,11 +135,6 @@ function fireGrandConfetti(): void {
 export function DrillPage() {
   const t = useTokens();
   const [searchParams] = useSearchParams();
-  // Two URL conventions accepted:
-  //   ?line=<line-id>     — direct line deep link (preferred from Repertoire)
-  //   ?opening=<id>       — legacy: id of an Opening (synthesized 1:1 from a
-  //                         Variation today). Resolves to that Opening's first
-  //                         line.
   const requestedLine = searchParams.get('line');
   const requestedOpening = searchParams.get('opening');
   const requestedQueue = searchParams.get('queue');
@@ -149,13 +143,13 @@ export function DrillPage() {
   const [selectedFamilyId, setSelectedFamilyId] = useState<string>('');
   const [selectedLineId, setSelectedLineId] = useState<string>('');
   const [queueState, setQueueState] = useState<QueueState>({ kind: 'off' });
+  const [queueToast, setQueueToast] = useState<string | null>(null);
   const [openingMenuOpen, setOpeningMenuOpen] = useState(false);
   const [openingSearch, setOpeningSearch] = useState('');
   const [lineMenuOpen, setLineMenuOpen] = useState(false);
   const [lineSearch, setLineSearch] = useState('');
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
-  const [activeMode, setActiveMode] = useState<ModeId>('theory');
-  const [historyOpen, setHistoryOpen] = useDrillHistoryOpen();
+  const [activeMode, setActiveMode] = useState<ModeId>('drill');
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const closeOpeningMenu = useCallback(() => {
@@ -167,11 +161,12 @@ export function DrillPage() {
     setLineSearch('');
   }, []);
   const closeModeMenu = useCallback(() => setModeMenuOpen(false), []);
+
   const openingMenuRef = useClickOutside<HTMLDivElement>(openingMenuOpen, closeOpeningMenu);
   const lineMenuRef = useClickOutside<HTMLDivElement>(lineMenuOpen, closeLineMenu);
   const modeMenuRef = useClickOutside<HTMLDivElement>(modeMenuOpen, closeModeMenu);
 
-  // Initial catalog load.
+  // Catalog load.
   useEffect(() => {
     const repo = getRepository();
     let cancelled = false;
@@ -186,17 +181,10 @@ export function DrillPage() {
           setCatalog({ kind: 'error', message: 'Catalog is empty.' });
           return;
         }
-        // Load lines for ALL openings up-front. Catalog is small (≤300 lines)
-        // and JsonOpeningRepository caches the parsed catalog, so this is a
-        // few in-memory filters, not N fetches.
         const allLineLists = await Promise.all(openings.map((o) => repo.listLines(o.id)));
         const lines = allLineLists.flat();
         if (cancelled) return;
 
-        // Resolve URL → starting line. Priority:
-        //   1. ?line=<line-id>            (preferred)
-        //   2. ?opening=<opening-id>      (legacy: first line of that opening)
-        //   3. first line of first family with content
         let startLine: Line | null = null;
         if (requestedLine) {
           startLine = lines.find((l) => l.id === requestedLine) ?? null;
@@ -228,29 +216,19 @@ export function DrillPage() {
     };
   }, [requestedLine, requestedOpening]);
 
-  // SRS hook — used for queue mode + the existing wiring.
-  const { dueLineIds, loading: srsLoading } = useSRS();
+  const { dueLineIds, loading: srsLoading, states: srsStates } = useSRS();
   const { effective } = useEffectivePick();
 
-  // Queue mode initialization. Triggered when:
-  //   1. URL has `?queue=due`
-  //   2. Catalog is ready
-  //   3. SRS hook has finished loading
-  // Snapshots dueLineIds at activation so a Box transition mid-session doesn't
-  // reorder remaining drills.
+  // Queue init.
   useEffect(() => {
     if (requestedQueue !== 'due') return;
     if (catalog.kind !== 'ready') return;
     if (srsLoading) return;
-    if (queueState.kind !== 'off') return; // already initialized
+    if (queueState.kind !== 'off') return;
     if (dueLineIds.length === 0) {
       setQueueState({ kind: 'exhausted', total: 0 });
       return;
     }
-    // Filter to lines that actually exist in the loaded catalog (orphan
-    // protection per Article 6 — old SrsState may reference removed lines)
-    // AND that pass the effective repertoire pick filter (R5.9 — `?queue=due`
-    // only routes drillable picks).
     const valid = dueLineIds
       .filter((id) => catalog.lines.some((l) => l.id === id))
       .filter((id) => !effective.isFiltered || effective.lineIds.has(id));
@@ -259,15 +237,15 @@ export function DrillPage() {
       return;
     }
     setQueueState({ kind: 'active', lineIds: valid, index: 0 });
-    // Set the first line as the active drill.
     setSelectedLineId(valid[0]!);
     const firstLine = catalog.lines.find((l) => l.id === valid[0]);
-    const firstOpening = firstLine ? catalog.openings.find((o) => o.id === firstLine.opening_id) : undefined;
+    const firstOpening = firstLine
+      ? catalog.openings.find((o) => o.id === firstLine.opening_id)
+      : undefined;
     if (firstOpening) setSelectedFamilyId(firstOpening.family_id);
   }, [requestedQueue, catalog, srsLoading, dueLineIds, queueState.kind, effective]);
 
-  // When the selected family changes, point the line picker at that family's
-  // first line. No fetch needed — all lines already loaded above.
+  // Family change → reset line to first in family.
   useEffect(() => {
     if (catalog.kind !== 'ready' || selectedFamilyId === '') return;
     const familyOpeningIds = new Set(
@@ -302,13 +280,9 @@ export function DrillPage() {
     () => (activeLine ? activeLine.moves : []),
     [activeLine]
   );
-  const drillColor: 'white' | 'black' = activeOpening?.color ?? 'black';
+  const drillColor: 'white' | 'black' = activeOpening?.color ?? 'white';
 
-  // Phase 1b — Explain Mode wiring. The sidecar fetcher and per-line mode pref
-  // hook both run regardless of mode (they're cheap; React 19 batching).
-  // ModeToggle renders only when the sidecar is loaded; flipping the toggle
-  // re-mounts the active view via differing React keys so chess.js instances
-  // never leak across modes.
+  // Explain Mode sidecar.
   const activeLineId: string | null = activeLine?.id ?? null;
   const explainContent = useExplainContent({
     lineId: activeLineId,
@@ -316,29 +290,26 @@ export function DrillPage() {
   });
   const [explainMode, setExplainMode] = useLinePrefMode(activeLineId);
 
+  // Drill engine.
   const drill = useDrill(drillMoves, drillColor);
   const {
     state,
     fen,
     flashOverlay,
-    statusText,
     playerColor,
     onPieceDrop,
     lastMove,
     hintSquare,
     hintTier,
     showHint,
-    stepBack,
     stepForward,
     restart,
+    jumpToPly,
     legalMovesFrom,
     drillResult,
   } = drill;
 
-  // Phase 1.5 — Session-event telemetry.
-  // The hook owns `line_start` (on activation) and `line_abandoned` (on
-  // cleanup if not completed); the page emits move_* / hint_used / line_complete
-  // via the state-transition observer below.
+  // Phase 1.5 telemetry.
   const { emit: emitEvent } = useEventEmitter(activeLineId);
   const prevDrillStateKindRef = useRef<string | null>(null);
   const completeEmittedForRef = useRef<string | null>(null);
@@ -348,7 +319,6 @@ export function DrillPage() {
     prevDrillStateKindRef.current = state.kind;
     if (activeLine === null) return;
 
-    // awaiting_player → flash_correct: the just-submitted ply is (new.lineIndex - 1).
     if (
       prev === 'awaiting_player' &&
       state.kind === 'flash_correct' &&
@@ -357,7 +327,6 @@ export function DrillPage() {
       emitEvent('move_correct', state.lineIndex - 1);
       return;
     }
-    // awaiting_player → wrong_pending: the wrong ply is wrong_pending.lineIndex.
     if (
       prev === 'awaiting_player' &&
       state.kind === 'wrong_pending' &&
@@ -366,20 +335,16 @@ export function DrillPage() {
       emitEvent('move_wrong', state.lineIndex);
       return;
     }
-    // any → complete: emit line_complete once per active line.
     if (state.kind === 'complete' && completeEmittedForRef.current !== activeLine.id) {
       completeEmittedForRef.current = activeLine.id;
       emitEvent('line_complete', Math.max(0, drillMoves.length - 1));
     }
   }, [state, activeLine, drillMoves.length, emitEvent]);
 
-  // Reset the completion-emitted guard whenever the active line changes.
   useEffect(() => {
     completeEmittedForRef.current = null;
   }, [activeLineId]);
 
-  // Hint button wraps showHint with a hint_used emission. Forwards to the
-  // underlying handler unchanged.
   const showHintWithEmit = useCallback((): void => {
     if (activeLine !== null && 'lineIndex' in state) {
       emitEvent('hint_used', (state as { lineIndex: number }).lineIndex);
@@ -387,9 +352,7 @@ export function DrillPage() {
     showHint();
   }, [activeLine, state, showHint, emitEvent]);
 
-  // Phase 1 — SRS write on drill completion.
-  // Fire-and-forget. Guarded by a ref so a re-render after the effect doesn't
-  // double-write. Cleared whenever the active line changes.
+  // SRS write on completion.
   const srsRecordedForRef = useRef<string | null>(null);
   useEffect(() => {
     if (activeLine === null) return;
@@ -406,14 +369,12 @@ export function DrillPage() {
     srsRecordedForRef.current = null;
   }, [activeLine]);
 
-  // Queue advance on completion. Decoupled from SRS write so timing is
-  // straightforward: when a line finishes in queue mode, advance OR exhaust.
+  // Queue auto-advance.
   useEffect(() => {
     if (state.kind !== 'complete') return;
     if (queueState.kind !== 'active') return;
     if (catalog.kind !== 'ready') return;
     if (activeLine === null) return;
-    // Only advance if the just-completed line is the current queue position.
     const currentLineId = queueState.lineIds[queueState.index];
     if (currentLineId !== activeLine.id) return;
     const nextIndex = queueState.index + 1;
@@ -421,24 +382,32 @@ export function DrillPage() {
       setQueueState({ kind: 'exhausted', total: queueState.lineIds.length });
       return;
     }
-    // Small delay so user sees "complete" flash before next line loads.
     const id = window.setTimeout(() => {
       const nextLineId = queueState.lineIds[nextIndex]!;
       const nextLine = catalog.lines.find((l) => l.id === nextLineId);
-      const nextOpening = nextLine ? catalog.openings.find((o) => o.id === nextLine.opening_id) : undefined;
+      const nextOpening = nextLine
+        ? catalog.openings.find((o) => o.id === nextLine.opening_id)
+        : undefined;
       setQueueState({ ...queueState, index: nextIndex });
       setSelectedLineId(nextLineId);
       if (nextOpening) setSelectedFamilyId(nextOpening.family_id);
+      if (nextLine) setQueueToast(`Next: ${nextLine.name}`);
     }, 800);
     return () => window.clearTimeout(id);
   }, [state, queueState, catalog, activeLine]);
 
-  // Exit queue when user manually picks a different line/family.
+  // Queue toast auto-dismiss.
+  useEffect(() => {
+    if (queueToast === null) return;
+    const id = window.setTimeout(() => setQueueToast(null), 1800);
+    return () => window.clearTimeout(id);
+  }, [queueToast]);
+
   const exitQueue = useCallback(() => {
     if (queueState.kind !== 'off') setQueueState({ kind: 'off' });
   }, [queueState.kind]);
 
-  // Click-to-move state.
+  // Click-to-move.
   const legalDestSquares = useMemo<string[]>(() => {
     if (!selectedSquare) return [];
     return legalMovesFrom(selectedSquare);
@@ -503,7 +472,7 @@ export function DrillPage() {
     return styles;
   }, [lastMove, hintSquare, hintTier]);
 
-  // Keyboard.
+  // Keyboard nav.
   useEffect(() => {
     const handler = (e: KeyboardEvent): void => {
       const tag = (e.target as HTMLElement | null)?.tagName;
@@ -511,11 +480,11 @@ export function DrillPage() {
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
-          stepBack();
+          drill.stepBack();
           break;
         case 'ArrowRight':
           e.preventDefault();
-          stepForward();
+          drill.stepForward();
           break;
         case 'r':
         case 'R':
@@ -530,14 +499,19 @@ export function DrillPage() {
           break;
         case 'Escape':
           e.preventDefault();
-          setSelectedSquare(null);
+          if (queueState.kind === 'active') {
+            exitQueue();
+          } else {
+            setSelectedSquare(null);
+          }
           break;
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [stepBack, stepForward, restart, showHintWithEmit]);
+  }, [drill, restart, showHintWithEmit, queueState.kind, exitQueue]);
 
+  // Confetti on completion.
   const prevStateKindRef = useRef<string | null>(null);
   useEffect(() => {
     const prev = prevStateKindRef.current;
@@ -576,10 +550,10 @@ export function DrillPage() {
             <button
               style={{
                 background: t.brand,
-                color: '#fff',
+                color: t.brandInk,
                 border: 'none',
                 padding: '10px 18px',
-                borderRadius: 8,
+                borderRadius: 10,
                 fontFamily: fonts.sans,
                 fontSize: 14,
                 fontWeight: 600,
@@ -594,10 +568,12 @@ export function DrillPage() {
     );
   }
 
-  const nextIdx = state.kind === 'awaiting_player' ? state.lineIndex : undefined;
   const currentPly = 'lineIndex' in state ? (state.lineIndex as number) : drillMoves.length;
   const totalPly = drillMoves.length;
   const progressPct = totalPly === 0 ? 0 : (currentPly / totalPly) * 100;
+  const playedCount =
+    state.kind === 'complete' ? drillMoves.length : ('lineIndex' in state ? (state.lineIndex as number) : 0);
+  const nextIdx = state.kind === 'awaiting_player' ? state.lineIndex : undefined;
 
   const familyOpeningIds = new Set(
     catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
@@ -622,760 +598,575 @@ export function DrillPage() {
     });
   const filteredFamilies = filterFamilies(familiesWithLines, openingSearch);
 
-  const currentMode = MODES.find((m) => m.id === activeMode) ?? MODES[0]!;
-  const ModeIcon = currentMode.icon;
+  // Drill stats — wired where available.
+  const accuracySoFar = totalPly > 0 ? Math.round((currentPly / totalPly) * 100) : 0;
+  const activeSrsBox = activeLineId ? srsStates.get(activeLineId)?.box ?? null : null;
 
-  const ghostBtnStyle: CSSProperties = {
-    background: 'transparent',
-    border: `1px solid ${t.border}`,
-    borderRadius: 999,
-    padding: '8px 16px',
-    fontFamily: fonts.sans,
-    fontSize: 13,
-    fontWeight: 500,
-    color: t.ink,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-  };
+  const isExplainViewActive =
+    explainMode === 'explain' &&
+    explainContent.kind === 'loaded' &&
+    activeLine !== null;
+
+  const overflowItems: OverflowItem[] = [
+    {
+      label: 'Restart',
+      onClick: restart,
+      disabled: !drill.canRestart,
+      testid: 'drill-restart',
+    },
+    {
+      label: 'Skip line',
+      onClick: stepForward,
+      disabled: !drill.canStepForward,
+      testid: 'drill-skip',
+    },
+    {
+      label: 'Show hint',
+      onClick: showHintWithEmit,
+      disabled: state.kind !== 'awaiting_player',
+      testid: 'drill-hint',
+    },
+  ];
 
   return (
     <div
       className="tabiya-drill-layout"
       style={{
-        display: 'grid',
-        gridTemplateColumns: `1fr ${HISTORY_RAIL_WIDTH}px`,
-        gap: 24,
-        alignItems: 'start',
-        maxWidth: 1180,
-        margin: '0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        minWidth: 0,
       }}
     >
-      {/* MAIN COLUMN */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18, minWidth: 0 }}>
-        {/* HEADER ROW: opening + line side-by-side, mode right-aligned */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-              minWidth: 0,
-              flex: 1,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                color: t.inkSoft,
-                fontWeight: 600,
-                letterSpacing: 0.5,
-                textTransform: 'uppercase',
-                fontFamily: fonts.sans,
-              }}
-            >
-              Repertoire
-              {queueState.kind === 'active' && (
-                <button
-                  onClick={exitQueue}
-                  title="Exit queue mode"
-                  style={{
-                    marginLeft: 8,
-                    padding: '2px 8px',
-                    background: t.brandSoft,
-                    color: t.brand,
-                    border: 'none',
-                    borderRadius: 999,
-                    fontSize: 10.5,
-                    fontWeight: 700,
-                    fontFamily: fonts.sans,
-                    cursor: 'pointer',
-                    textTransform: 'uppercase',
-                    letterSpacing: 0.5,
-                  }}
-                >
-                  Queue {queueState.index + 1}/{queueState.lineIds.length} ✕
-                </button>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                flexWrap: 'wrap',
-              }}
-            >
-              {/* Opening (= Family) pill */}
-              <div ref={openingMenuRef} style={{ position: 'relative' }}>
-                <PillTrigger
-                  label={activeFamily?.name ?? '—'}
-                  open={openingMenuOpen}
-                  onClick={() => setOpeningMenuOpen((v) => !v)}
-                  ariaLabel="Switch opening"
-                  prominent
-                />
-                {openingMenuOpen && (
-                  <SlickMenu
-                    placeholder={`Search ${familiesWithLines.length} opening${familiesWithLines.length === 1 ? '' : 's'}…`}
-                    searchValue={openingSearch}
-                    onSearch={setOpeningSearch}
-                    items={filteredFamilies.map((f) => ({
-                      kind: 'item' as const,
-                      key: f.id,
-                      label: f.name,
-                      isCurrent: f.id === selectedFamilyId,
-                      onPick: () => {
-                        setSelectedFamilyId(f.id);
-                        closeOpeningMenu();
-                        exitQueue();
-                      },
-                    }))}
-                    emptyHint={
-                      openingSearch.trim()
-                        ? `No openings match "${openingSearch}"`
-                        : 'No openings yet.'
-                    }
-                  />
+      {/* TOOLBAR */}
+      <div
+        style={{
+          height: 64,
+          borderBottom: `0.5px solid ${t.border}`,
+          background: t.surface,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 28px',
+          gap: 16,
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* Opening pill */}
+          <div ref={openingMenuRef} style={{ position: 'relative' }}>
+            <PillTrigger
+              label={activeFamily?.name ?? '—'}
+              open={openingMenuOpen}
+              onClick={() => setOpeningMenuOpen((v) => !v)}
+              ariaLabel="Switch opening"
+              prominent
+            />
+            {openingMenuOpen && (
+              <SlickMenu
+                placeholder={`Search ${familiesWithLines.length} opening${familiesWithLines.length === 1 ? '' : 's'}…`}
+                searchValue={openingSearch}
+                onSearch={setOpeningSearch}
+                items={filteredFamilies.map(
+                  (f): SlickMenuItem => ({
+                    kind: 'item',
+                    key: f.id,
+                    label: f.name,
+                    isCurrent: f.id === selectedFamilyId,
+                    onPick: () => {
+                      setSelectedFamilyId(f.id);
+                      closeOpeningMenu();
+                      exitQueue();
+                    },
+                  })
                 )}
-              </div>
-
-              {/* Line pill — grouped by Variation under the active family */}
-              <div ref={lineMenuRef} style={{ position: 'relative' }}>
-                <PillTrigger
-                  label={activeLine?.name ?? '—'}
-                  open={lineMenuOpen}
-                  onClick={() => setLineMenuOpen((v) => !v)}
-                  ariaLabel="Switch line"
-                />
-                {lineMenuOpen && (
-                  <SlickMenu
-                    placeholder={`Search ${linesForFamily.length} line${linesForFamily.length === 1 ? '' : 's'}…`}
-                    searchValue={lineSearch}
-                    onSearch={setLineSearch}
-                    items={buildGroupedLineItems({
-                      lines: filteredLines,
-                      openings: catalog.openings,
-                      selectedLineId,
-                      onPick: (id) => {
-                        setSelectedLineId(id);
-                        closeLineMenu();
-                        exitQueue();
-                      },
-                    })}
-                    emptyHint={
-                      lineSearch.trim() ? `No lines match "${lineSearch}"` : 'No lines yet.'
-                    }
-                  />
-                )}
-              </div>
-            </div>
+                emptyHint={
+                  openingSearch.trim()
+                    ? `No openings match "${openingSearch}"`
+                    : 'No openings yet.'
+                }
+              />
+            )}
           </div>
-
-          {/* Phase 1b — Drill/Explain toggle. Hidden when sidecar is missing or
-              not yet authored for this line (graceful degrade per R1 AC #4). */}
-          {(explainContent.kind === 'loaded' || explainContent.kind === 'loading') && (
-            <div style={{ flexShrink: 0 }}>
-              <ModeToggle
-                value={explainMode}
-                onChange={setExplainMode}
-                disabled={explainContent.kind === 'loading'}
-              />
-            </div>
-          )}
-
-          {/* Mode dropdown */}
-          <div ref={modeMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
-            <button
-              onClick={() => setModeMenuOpen((v) => !v)}
-              aria-label="Switch mode"
-              style={{
-                background: t.surface,
-                border: `1px solid ${t.border}`,
-                borderRadius: 999,
-                padding: '8px 14px',
-                fontFamily: fonts.sans,
-                fontSize: 13,
-                fontWeight: 500,
-                color: t.ink,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <ModeIcon size={14} color={t.brand} strokeWidth={2.2} />
-              {currentMode.label}
-              <ChevronDown
-                size={14}
-                style={{
-                  transition: 'transform 150ms',
-                  transform: modeMenuOpen ? 'rotate(180deg)' : 'rotate(0)',
-                  color: t.inkDim,
-                }}
-              />
-            </button>
-            {modeMenuOpen && (
-              <div
-                role="menu"
-                style={{
-                  position: 'absolute',
-                  top: 'calc(100% + 6px)',
-                  right: 0,
-                  width: 240,
-                  background: t.surface,
-                  border: `1px solid ${t.border}`,
-                  borderRadius: radius.card,
-                  boxShadow: t.shadowMd,
-                  padding: 6,
-                  zIndex: 50,
-                }}
-              >
-                {MODES.map((m) => {
-                  const Icon = m.icon;
-                  const isActive = m.id === activeMode;
-                  return (
-                    <button
-                      key={m.id}
-                      onClick={() => {
-                        if (m.available) {
-                          setActiveMode(m.id);
-                          setModeMenuOpen(false);
-                        }
-                      }}
-                      disabled={!m.available}
-                      className="tabiya-popover-item"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        padding: '10px 12px',
-                        width: '100%',
-                        background: isActive ? t.brandSoft : 'transparent',
-                        border: 'none',
-                        borderRadius: radius.chip,
-                        cursor: m.available ? 'pointer' : 'not-allowed',
-                        textAlign: 'left',
-                        fontFamily: fonts.sans,
-                        fontSize: 13.5,
-                        fontWeight: isActive ? 600 : 500,
-                        color: isActive ? t.brand : m.available ? t.ink : t.inkSoft,
-                        opacity: m.available ? 1 : 0.7,
-                      }}
-                    >
-                      <Icon size={15} strokeWidth={isActive ? 2.4 : 2} />
-                      <span style={{ flex: 1 }}>{m.label}</span>
-                      {!m.available && (
-                        <span
-                          style={{
-                            fontSize: 9.5,
-                            fontWeight: 600,
-                            background: t.surfaceAlt,
-                            color: t.inkSoft,
-                            padding: '1px 6px',
-                            borderRadius: 999,
-                            letterSpacing: 0.4,
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          Soon
-                        </span>
-                      )}
-                    </button>
-                  );
+          {/* Variation/Line pill */}
+          <div ref={lineMenuRef} style={{ position: 'relative' }}>
+            <PillTrigger
+              label={activeLine?.name ?? '—'}
+              open={lineMenuOpen}
+              onClick={() => setLineMenuOpen((v) => !v)}
+              ariaLabel="Switch line"
+            />
+            {lineMenuOpen && (
+              <SlickMenu
+                placeholder={`Search ${linesForFamily.length} line${linesForFamily.length === 1 ? '' : 's'}…`}
+                searchValue={lineSearch}
+                onSearch={setLineSearch}
+                items={buildGroupedLineItems({
+                  lines: filteredLines,
+                  openings: catalog.openings,
+                  selectedLineId,
+                  onPick: (id) => {
+                    setSelectedLineId(id);
+                    closeLineMenu();
+                    exitQueue();
+                  },
                 })}
-              </div>
+                emptyHint={
+                  lineSearch.trim() ? `No lines match "${lineSearch}"` : 'No lines yet.'
+                }
+              />
+            )}
+          </div>
+          {/* Mode pill */}
+          <div ref={modeMenuRef} style={{ position: 'relative' }}>
+            <PillTrigger
+              label={MODE_LABELS[activeMode]}
+              open={modeMenuOpen}
+              onClick={() => setModeMenuOpen((v) => !v)}
+              ariaLabel="Switch mode"
+              accent={<TargetGlyph color={t.brand} />}
+            />
+            {modeMenuOpen && (
+              <ModeMenu
+                activeMode={activeMode}
+                explainAvailable={explainContent.kind === 'loaded'}
+                onPick={(id) => {
+                  if (id === 'explain' && explainContent.kind === 'loaded') {
+                    setExplainMode('explain');
+                  } else if (id === 'drill') {
+                    setExplainMode('drill');
+                  }
+                  setActiveMode(id);
+                  setModeMenuOpen(false);
+                }}
+              />
             )}
           </div>
         </div>
 
-        {/* Phase 1b — Explain Mode branch. Renders the explain view (with its
-            own progress bar + board + rail) in place of the drill UI when the
-            sidecar is loaded AND the per-line pref is "explain". Unique
-            React key ensures the chess.js instance under useExplainMode never
-            leaks across mode switches. */}
-        {explainMode === 'explain' &&
-        explainContent.kind === 'loaded' &&
-        activeLine !== null ? (
-          <ExplainView
-            key={`explain-${activeLine.id}`}
-            line={activeLine}
-            blocks={explainContent.data}
-            playerColor={drillColor}
-            totalPlies={drillMoves.length}
-            onSkipToDrill={() => setExplainMode('drill')}
-          />
-        ) : (
-          <>
-        {/* PROGRESS BAR */}
-        <div>
-          <div
-            aria-label={`Drill progress ${Math.round(progressPct)}%`}
-            role="progressbar"
-            aria-valuenow={Math.round(progressPct)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            style={{
-              height: PROGRESS_BAR_HEIGHT,
-              background: t.surfaceAlt,
-              borderRadius: 999,
-              overflow: 'hidden',
-            }}
+        {/* Stats strip */}
+        <DrillStats
+          dueCount={dueLineIds.length}
+          retentionPct={accuracySoFar}
+          hasAccuracy={totalPly > 0}
+        />
+      </div>
+
+      {/* PILLS ROW (queue chip only — Box pill removed per UI fix 2026-05-15) */}
+      {queueState.kind === 'active' && (
+        <div
+          style={{
+            padding: '16px 28px 0',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+          }}
+        >
+          <Chip
+            tone="brand"
+            onClick={exitQueue}
+            testid="queue-chip"
+            title="Exit queue mode"
           >
-            <div
-              style={{
-                width: `${progressPct}%`,
-                height: '100%',
-                background: t.brand,
-                borderRadius: 999,
-                transition: 'width 300ms ease-out',
-              }}
-            />
-          </div>
+            Queue {queueState.index + 1}/{queueState.lineIds.length} ✕
+          </Chip>
         </div>
+      )}
 
-        {/* HERO BOARD */}
-        <div style={{ width: '100%' }}>
-          <ChessBoardPanel
-            fen={fen}
-            flashOverlay={flashOverlay}
-            boardOrientation={playerColor}
-            squareStyles={squareStyles}
-            onPieceDrop={onPieceDrop}
-            selectedSquare={selectedSquare}
-            legalDestSquares={legalDestSquares}
-            onPieceClick={onPieceClick}
-            onSquareClick={onSquareClick}
-          />
-        </div>
-
-        {/* END-OF-LINE SUMMARY (non-queue mode) */}
-        {state.kind === 'complete' &&
-          queueState.kind !== 'active' &&
-          activeLine !== null &&
-          drillResult !== null && (
-            <EndOfLineSummary
-              line={activeLine}
-              drillResult={drillResult}
-              dueCount={dueLineIds.length}
-              nextLineInFamily={(() => {
-                if (catalog.kind !== 'ready' || activeFamily === null) return null;
-                const familyOpIds = new Set(
-                  catalog.openings.filter((o) => o.family_id === activeFamily.id).map((o) => o.id)
-                );
-                const famLines = catalog.lines.filter((l) => familyOpIds.has(l.opening_id));
-                const idx = famLines.findIndex((l) => l.id === activeLine.id);
-                return idx >= 0 && idx + 1 < famLines.length ? famLines[idx + 1]! : null;
-              })()}
-              onRestart={restart}
-              onPickLine={(id) => setSelectedLineId(id)}
-            />
-          )}
-
-        {/* STRATEGY PANEL */}
-        <StrategicNotesPanel notes={activeLine?.strategic_notes ?? []} />
-
-        {/* INLINE COACH LINE */}
+      {/* PROGRESS STRIP */}
+      <div style={{ padding: '14px 28px 0' }}>
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-            padding: '4px 12px',
+            justifyContent: 'space-between',
+            fontSize: 10,
+            textTransform: 'uppercase',
+            letterSpacing: '0.18em',
+            color: t.inkSoft,
+            fontWeight: 600,
+            marginBottom: 7,
+            fontFamily: fonts.sans,
+          }}
+        >
+          <span>Training Progress</span>
+          <span>
+            {playedCount} / {totalPly} Completed
+          </span>
+        </div>
+        <div
+          role="progressbar"
+          aria-label={`Drill progress ${Math.round(progressPct)}%`}
+          aria-valuenow={Math.round(progressPct)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          style={{
+            height: 8,
+            background: t.surfaceAlt,
+            borderRadius: 999,
+            overflow: 'hidden',
           }}
         >
           <div
-            aria-hidden
             style={{
-              width: 28,
-              height: 28,
+              width: `${progressPct}%`,
+              height: '100%',
+              background: t.brand,
               borderRadius: 999,
-              background: t.brandSoft,
-              color: t.brand,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              fontSize: 15,
+              transition: 'width 300ms ease',
             }}
-          >
-            ♞
-          </div>
-          <div style={{ fontSize: 14, color: t.ink, fontWeight: 500 }}>{statusText}</div>
+          />
         </div>
+      </div>
 
-        {/* ACTION CHIPS */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={restart}
-            disabled={!drill.canRestart}
-            style={{
-              ...ghostBtnStyle,
-              opacity: drill.canRestart ? 1 : 0.5,
-              cursor: drill.canRestart ? 'pointer' : 'not-allowed',
-            }}
-          >
-            <RotateCcw size={14} /> Restart
-          </button>
-          <button
-            onClick={stepForward}
-            disabled={!drill.canStepForward}
-            style={{
-              ...ghostBtnStyle,
-              opacity: drill.canStepForward ? 1 : 0.5,
-              cursor: drill.canStepForward ? 'pointer' : 'not-allowed',
-            }}
-          >
-            <SkipForward size={14} /> Skip
-          </button>
-          <button
-            onClick={showHintWithEmit}
-            disabled={state.kind !== 'awaiting_player'}
-            style={{
-              ...ghostBtnStyle,
-              opacity: state.kind === 'awaiting_player' ? 1 : 0.5,
-              cursor: state.kind === 'awaiting_player' ? 'pointer' : 'not-allowed',
-            }}
-          >
-            <Lightbulb size={14} /> Hint
-          </button>
-        </div>
+      {/* WORKSPACE */}
+      <div
+        style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: '1fr 340px',
+          gap: 14,
+          padding: '20px 28px 28px',
+          alignItems: 'start',
+          background: `radial-gradient(circle at center, ${t.bg} 0%, ${t.surfaceAlt} 100%)`,
+        }}
+      >
+        {isExplainViewActive ? (
+          <div style={{ gridColumn: '1 / -1' }}>
+            <ExplainView
+              key={`explain-${activeLine.id}`}
+              line={activeLine}
+              blocks={
+                explainContent.kind === 'loaded' ? explainContent.data : []
+              }
+              playerColor={drillColor}
+              totalPlies={drillMoves.length}
+              onSkipToDrill={() => {
+                setExplainMode('drill');
+                setActiveMode('drill');
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 14,
+                maxWidth: 760,
+                width: '100%',
+                justifySelf: 'start',
+                minWidth: 0,
+              }}
+            >
+              {/* Board shell */}
+              <div
+                style={{
+                  borderRadius: MODE_PILL_TARGET_RADIUS * 2,
+                  overflow: 'hidden',
+                  border: `0.5px solid ${t.border}`,
+                  background: t.surface,
+                  boxShadow: t.shadowLg,
+                  position: 'relative',
+                }}
+              >
+                <ChessBoardPanel
+                  fen={fen}
+                  flashOverlay={flashOverlay}
+                  boardOrientation={playerColor}
+                  squareStyles={squareStyles}
+                  onPieceDrop={onPieceDrop}
+                  selectedSquare={selectedSquare}
+                  legalDestSquares={legalDestSquares}
+                  onPieceClick={onPieceClick}
+                  onSquareClick={onSquareClick}
+                />
+              </div>
+
+              {/* Moves row (no overflow — actions are inline below).
+                  Click any played chip → jump board to that position. */}
+              <MovesRow
+                moves={drillMoves}
+                playedCount={playedCount}
+                nextIdx={nextIdx}
+                forks={activeLine?.forks ?? []}
+                onJumpToPly={(ply) => jumpToPly(ply + 1)}
+              />
+
+              {/* Inline action buttons: Restart / Skip / Hint */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  padding: '4px 0',
+                }}
+              >
+                {overflowItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    disabled={item.disabled}
+                    data-testid={item.testid}
+                    style={{
+                      padding: '7px 14px',
+                      borderRadius: 999,
+                      background: t.surface,
+                      border: `0.5px solid ${t.border}`,
+                      color: item.disabled ? t.inkSoft : t.ink,
+                      fontSize: 12.5,
+                      fontFamily: fonts.sans,
+                      fontWeight: 600,
+                      cursor: item.disabled ? 'not-allowed' : 'pointer',
+                      opacity: item.disabled ? 0.5 : 1,
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* End-of-line summary (non-queue) */}
+              {state.kind === 'complete' &&
+                queueState.kind !== 'active' &&
+                activeLine !== null &&
+                drillResult !== null && (
+                  <EndOfLineSummary
+                    line={activeLine}
+                    drillResult={drillResult}
+                    dueCount={dueLineIds.length}
+                    nextLineInFamily={(() => {
+                      if (catalog.kind !== 'ready' || activeFamily === null) return null;
+                      const famOpIds = new Set(
+                        catalog.openings
+                          .filter((o) => o.family_id === activeFamily.id)
+                          .map((o) => o.id)
+                      );
+                      const famLines = catalog.lines.filter((l) => famOpIds.has(l.opening_id));
+                      const idx = famLines.findIndex((l) => l.id === activeLine.id);
+                      return idx >= 0 && idx + 1 < famLines.length ? famLines[idx + 1]! : null;
+                    })()}
+                    onRestart={restart}
+                    onPickLine={(id) => setSelectedLineId(id)}
+                  />
+                )}
+            </div>
+
+            {/* Why This Move rail */}
+            <aside style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+              <WhyThisMoveRail
+                notes={activeLine?.strategic_notes ?? []}
+                keySquares={activeLine?.key_squares ?? []}
+              />
+            </aside>
           </>
         )}
       </div>
 
-      {/* RIGHT RAIL — MOVE HISTORY */}
-      <aside
-        className="tabiya-drill-rail"
-        style={{
-          background: t.surface,
-          border: `1px solid ${t.border}`,
-          borderRadius: radius.card,
-          padding: 0,
-          alignSelf: 'start',
-          position: 'sticky',
-          top: 80,
-          minWidth: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <button
-          onClick={() => setHistoryOpen(!historyOpen)}
-          aria-label="Toggle move history"
-          aria-expanded={historyOpen}
+      {/* Queue toast */}
+      {queueToast !== null && (
+        <div
+          role="status"
           style={{
-            background: 'transparent',
-            border: 'none',
-            width: '100%',
-            padding: '12px 14px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            fontFamily: fonts.sans,
+            position: 'fixed',
+            bottom: 24,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: t.ink,
+            color: t.bg,
+            padding: '10px 16px',
+            borderRadius: 999,
             fontSize: 13,
-            fontWeight: 600,
-            color: t.ink,
-            textAlign: 'left',
-            borderBottom: historyOpen ? `1px solid ${t.border}` : 'none',
+            fontFamily: fonts.sans,
+            boxShadow: t.shadowMd,
+            zIndex: 100,
           }}
         >
-          <ChevronDown
-            size={14}
-            style={{
-              transition: 'transform 150ms',
-              transform: historyOpen ? 'rotate(0)' : 'rotate(-90deg)',
-              color: t.inkDim,
-            }}
-          />
-          Move history
-          <span style={{ color: t.inkSoft, fontFamily: fonts.mono, fontWeight: 500 }}>
-            ({drillMoves.length})
-          </span>
-        </button>
-        {historyOpen && (
-          <div style={{ padding: '8px 8px 12px', maxHeight: 540, overflowY: 'auto' }}>
-            <MoveHistoryGrid
-              forks={activeLine?.forks ?? []}
-              moves={drillMoves}
-              playedCount={
-                state.kind === 'complete'
-                  ? drillMoves.length
-                  : 'lineIndex' in state
-                    ? (state.lineIndex as number)
-                    : 0
-              }
-              nextIdx={nextIdx}
-            />
-          </div>
-        )}
-      </aside>
+          {queueToast}
+        </div>
+      )}
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// PillTrigger — slick rounded button used as dropdown trigger
-// ---------------------------------------------------------------------------
-
-function PillTrigger({
-  label,
-  caption,
-  open,
-  onClick,
-  ariaLabel,
-  prominent = false,
+function DrillStats({
+  dueCount,
+  retentionPct,
+  hasAccuracy,
 }: {
-  label: string;
-  caption?: string;
-  open: boolean;
-  onClick: () => void;
-  ariaLabel: string;
-  prominent?: boolean;
-}) {
-  const t = useTokens();
-  return (
-    <button
-      onClick={onClick}
-      aria-label={ariaLabel}
-      aria-expanded={open}
-      style={{
-        background: open ? t.surfaceAlt : t.surface,
-        border: `1px solid ${open ? t.borderStrong : t.border}`,
-        borderRadius: 999,
-        padding: prominent ? '8px 16px 8px 18px' : '7px 14px 7px 16px',
-        cursor: 'pointer',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        fontFamily: fonts.sans,
-        color: t.ink,
-        transition: 'background 120ms ease, border-color 120ms ease',
-        boxShadow: open ? t.shadow : 'none',
-      }}
-    >
-      <span
-        style={{
-          fontSize: prominent ? 17 : 14,
-          fontWeight: 700,
-          letterSpacing: prominent ? -0.3 : -0.1,
-          color: t.ink,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {label}
-      </span>
-      {caption && (
-        <span
-          style={{
-            fontSize: 11,
-            color: t.inkSoft,
-            fontFamily: fonts.mono,
-            fontWeight: 500,
-            letterSpacing: 0.2,
-          }}
-        >
-          {caption}
-        </span>
-      )}
-      <ChevronDown
-        size={prominent ? 16 : 14}
-        strokeWidth={2.4}
-        style={{
-          transition: 'transform 150ms',
-          transform: open ? 'rotate(180deg)' : 'rotate(0)',
-          color: t.inkDim,
-          marginLeft: 2,
-        }}
-      />
-    </button>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// SlickMenu — search input + radio-circle items, current = brand
-// ---------------------------------------------------------------------------
-
-type SlickMenuItem =
-  | { kind: 'item'; key: string; label: string; isCurrent: boolean; onPick: () => void }
-  | { kind: 'header'; key: string; label: string };
-
-function SlickMenu({
-  placeholder,
-  searchValue,
-  onSearch,
-  items,
-  emptyHint,
-}: {
-  placeholder: string;
-  searchValue: string;
-  onSearch: (v: string) => void;
-  items: ReadonlyArray<SlickMenuItem>;
-  emptyHint: string;
+  dueCount: number;
+  retentionPct: number;
+  hasAccuracy: boolean;
 }) {
   const t = useTokens();
   return (
     <div
       style={{
-        position: 'absolute',
-        top: 'calc(100% + 8px)',
-        left: 0,
-        width: 320,
-        maxHeight: 480,
-        overflowY: 'auto',
-        background: t.surface,
-        border: `1px solid ${t.border}`,
-        borderRadius: 14,
-        boxShadow: t.shadowMd,
-        padding: 6,
-        zIndex: 60,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 18,
+        fontSize: 12.5,
+        color: t.inkDim,
+        fontFamily: fonts.sans,
       }}
     >
-      <div style={{ padding: 6, marginBottom: 4 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            background: t.surfaceAlt,
-            borderRadius: 10,
-            padding: '7px 11px',
-          }}
-        >
-          <Search size={13} color={t.inkDim} />
-          <input
-            autoFocus
-            value={searchValue}
-            onChange={(e) => onSearch(e.target.value)}
-            placeholder={placeholder}
-            aria-label={placeholder}
-            style={{
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              flex: 1,
-              fontFamily: fonts.sans,
-              fontSize: 13,
-              color: t.ink,
-              minWidth: 0,
-            }}
-          />
-          {searchValue && (
-            <button
-              onClick={() => onSearch('')}
-              aria-label="Clear search"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                display: 'flex',
-                color: t.inkSoft,
-              }}
-            >
-              <X size={13} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {items.length === 0 ? (
-        <div
-          style={{
-            padding: '20px 12px',
-            textAlign: 'center',
-            fontSize: 13,
-            color: t.inkDim,
-            fontFamily: fonts.sans,
-          }}
-        >
-          {emptyHint}
-        </div>
-      ) : (
-        items.map((it) =>
-          it.kind === 'header' ? (
-            <div
-              key={it.key}
-              style={{
-                fontSize: 11,
-                fontWeight: 700,
-                color: t.inkSoft,
-                textTransform: 'uppercase',
-                letterSpacing: 0.7,
-                padding: '10px 12px 4px',
-                fontFamily: fonts.sans,
-              }}
-            >
-              {it.label}
-            </div>
-          ) : (
-            <button
-              key={it.key}
-              onClick={it.onPick}
-              className="tabiya-popover-item"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '10px 12px 10px 18px',
-                width: '100%',
-                background: 'transparent',
-                border: 'none',
-                borderRadius: 10,
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontFamily: fonts.sans,
-                color: it.isCurrent ? t.brand : t.ink,
-                fontWeight: it.isCurrent ? 700 : 500,
-                fontSize: 14.5,
-              }}
-            >
-              <span
-                aria-hidden
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: '50%',
-                  border: `2px solid ${it.isCurrent ? t.brand : t.border}`,
-                  background: it.isCurrent ? t.brand : 'transparent',
-                  flexShrink: 0,
-                  position: 'relative',
-                  boxShadow: it.isCurrent ? `inset 0 0 0 2px ${t.surface}` : 'none',
-                }}
-              />
-              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {it.label}
-              </span>
-            </button>
-          )
-        )
-      )}
+      <span>
+        <strong style={{ color: t.ink, fontWeight: 600 }}>{dueCount}</strong> due
+      </span>
+      <span>
+        <span style={{ color: t.success, fontWeight: 600 }}>
+          {hasAccuracy ? `${retentionPct}%` : '—'}
+        </span>{' '}
+        retention
+      </span>
+      <span>
+        <span style={{ color: t.brand, fontWeight: 600 }}>—</span> streak
+      </span>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+function ModeMenu({
+  activeMode,
+  explainAvailable,
+  onPick,
+}: {
+  activeMode: ModeId;
+  explainAvailable: boolean;
+  onPick: (id: ModeId) => void;
+}) {
+  const t = useTokens();
+  const items: Array<{ id: ModeId; label: string; available: boolean }> = [
+    { id: 'drill', label: 'Drill mode', available: true },
+    { id: 'explain', label: 'Explain', available: explainAvailable },
+    { id: 'pattern-viz', label: 'Pattern Viz', available: false },
+  ];
+  return (
+    <div
+      role="menu"
+      style={{
+        position: 'absolute',
+        top: 'calc(100% + 8px)',
+        right: 0,
+        width: 220,
+        background: t.surface,
+        border: `0.5px solid ${t.border}`,
+        borderRadius: 12,
+        boxShadow: t.shadowMd,
+        padding: 6,
+        zIndex: 50,
+      }}
+    >
+      {items.map((m) => {
+        const isActive = m.id === activeMode;
+        return (
+          <button
+            key={m.id}
+            onClick={() => m.available && onPick(m.id)}
+            disabled={!m.available}
+            className="tabiya-popover-item"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 12px',
+              width: '100%',
+              background: isActive ? t.brandSoft : 'transparent',
+              border: 'none',
+              borderRadius: 10,
+              cursor: m.available ? 'pointer' : 'not-allowed',
+              textAlign: 'left',
+              fontFamily: fonts.sans,
+              fontSize: 13.5,
+              fontWeight: isActive ? 600 : 500,
+              color: isActive ? t.brand : m.available ? t.ink : t.inkSoft,
+              opacity: m.available ? 1 : 0.65,
+            }}
+          >
+            <span style={{ flex: 1 }}>{m.label}</span>
+            {!m.available && (
+              <span
+                style={{
+                  fontSize: 9.5,
+                  fontWeight: 600,
+                  background: t.surfaceAlt,
+                  color: t.inkSoft,
+                  padding: '1px 6px',
+                  borderRadius: 999,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Soon
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Chip({
+  children,
+  tone = 'default',
+  onClick,
+  title,
+  testid,
+}: {
+  children: React.ReactNode;
+  tone?: 'default' | 'brand';
+  onClick?: () => void;
+  title?: string;
+  testid?: string;
+}) {
+  const t = useTokens();
+  const isBrand = tone === 'brand';
+  return (
+    <span
+      onClick={onClick}
+      title={title}
+      data-testid={testid}
+      role={onClick ? 'button' : undefined}
+      style={{
+        padding: '3px 10px',
+        borderRadius: 999,
+        fontSize: 9.5,
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        border: `0.5px solid ${isBrand ? t.brandSoftBorder : t.border}`,
+        background: isBrand ? t.brandSoft : t.surface,
+        color: isBrand ? t.brand : t.inkDim,
+        cursor: onClick ? 'pointer' : 'default',
+        fontFamily: fonts.sans,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function TargetGlyph({ color }: { color: string }) {
+  return (
+    <Target
+      size={13}
+      strokeWidth={2}
+      color={color}
+      aria-hidden
+    />
+  );
+}
 
 function filterFamilies(families: readonly Family[], q: string): Family[] {
   const needle = q.trim().toLowerCase();
   if (!needle) return [...families];
-  return families.filter((f) =>
-    f.name.toLowerCase().includes(needle) ||
-    f.eco_range.toLowerCase().includes(needle) ||
-    f.category.toLowerCase().includes(needle)
+  return families.filter(
+    (f) =>
+      f.name.toLowerCase().includes(needle) ||
+      f.eco_range.toLowerCase().includes(needle) ||
+      f.category.toLowerCase().includes(needle)
   );
 }
 
@@ -1385,10 +1176,6 @@ function filterLines(lines: readonly Line[], q: string): Line[] {
   return lines.filter((l) => l.name.toLowerCase().includes(needle));
 }
 
-/**
- * Group line picker items by parent Opening (= Variation), with section
- * headers between groups. Opening order follows the openings array order.
- */
 function buildGroupedLineItems({
   lines,
   openings,
@@ -1421,8 +1208,6 @@ function buildGroupedLineItems({
     const groupLines = byOpening.get(openingId) ?? [];
     if (groupLines.length === 0) continue;
     if (groupLines.length === 1) {
-      // Single line under this Variation — header would just duplicate the
-      // line name. Show the variation name as the (only) item label.
       const line = groupLines[0]!;
       out.push({
         kind: 'item',
@@ -1432,7 +1217,6 @@ function buildGroupedLineItems({
         onPick: () => onPick(line.id),
       });
     } else {
-      // Multiple lines — emit Variation header + each line.
       out.push({
         kind: 'header',
         key: `h-${openingId}`,
@@ -1450,191 +1234,4 @@ function buildGroupedLineItems({
     }
   }
   return out;
-}
-
-function MoveHistoryGrid({
-  moves,
-  playedCount,
-  nextIdx,
-  forks,
-}: {
-  moves: readonly string[];
-  playedCount: number;
-  nextIdx?: number | undefined;
-  forks?: readonly ForkAnnotation[];
-}) {
-  const t = useTokens();
-  const [openForkPly, setOpenForkPly] = useState<number | null>(null);
-  const forksByPly = new Map<number, ForkAnnotation>();
-  if (forks) for (const f of forks) forksByPly.set(f.ply_index, f);
-
-  if (moves.length === 0) {
-    return (
-      <div
-        style={{
-          padding: '8px 4px 12px',
-          fontSize: 12,
-          color: t.inkSoft,
-          fontFamily: fonts.sans,
-        }}
-      >
-        No moves yet.
-      </div>
-    );
-  }
-
-  const rows: Array<{ n: number; wIdx: number; bIdx: number | null }> = [];
-  for (let i = 0; i < moves.length; i += 2) {
-    rows.push({
-      n: Math.floor(i / 2) + 1,
-      wIdx: i,
-      bIdx: i + 1 < moves.length ? i + 1 : null,
-    });
-  }
-
-  const cellStyle = (idx: number): CSSProperties => {
-    const isPlayed = idx < playedCount;
-    const isCurrent = idx === playedCount && idx < moves.length;
-    const isNext = nextIdx !== undefined && idx === nextIdx;
-    return {
-      fontWeight: isPlayed ? 600 : 500,
-      padding: '4px 8px',
-      color: isNext ? t.brand : isPlayed ? t.ink : t.inkSoft,
-      background: isCurrent ? t.brandSoft : 'transparent',
-      borderBottom: isNext ? `2px solid ${t.brand}` : '2px solid transparent',
-      borderRadius: 4,
-      fontFamily: fonts.mono,
-      fontSize: 13,
-      textAlign: 'left',
-      minWidth: 0,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      position: 'relative',
-    };
-  };
-
-  const renderCell = (idx: number) => {
-    const fork = forksByPly.get(idx);
-    return (
-      <div data-testid={`move-cell-${idx}`} style={cellStyle(idx)}>
-        <span>{moves[idx]}</span>
-        {fork && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenForkPly((cur) => (cur === idx ? null : idx));
-            }}
-            aria-label={`Fork at ply ${idx}`}
-            data-testid={`fork-badge-${idx}`}
-            style={{
-              marginLeft: 4,
-              padding: 0,
-              width: 14,
-              height: 14,
-              borderRadius: 999,
-              background: t.amber ?? '#E0B423',
-              color: '#fff',
-              border: 'none',
-              fontSize: 9,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              verticalAlign: 'middle',
-            }}
-            title={fork.label}
-          >
-            ⋔
-          </button>
-        )}
-        {fork && openForkPly === idx && (
-          <ForkPopover fork={fork} onClose={() => setOpenForkPly(null)} />
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <div
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(28px, auto) 1fr 1fr',
-        rowGap: 4,
-        columnGap: 8,
-        maxWidth: '100%',
-      }}
-    >
-      {rows.map((r) => (
-        <div key={r.n} style={{ display: 'contents' }}>
-          <div
-            style={{
-              color: t.inkSoft,
-              fontWeight: 500,
-              padding: '4px 0',
-              fontFamily: fonts.mono,
-              fontSize: 13,
-            }}
-          >
-            {r.n}.
-          </div>
-          {renderCell(r.wIdx)}
-          {r.bIdx !== null ? renderCell(r.bIdx) : <div />}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ForkPopover({ fork, onClose }: { fork: ForkAnnotation; onClose: () => void }) {
-  const t = useTokens();
-  const ref = useClickOutside<HTMLDivElement>(true, onClose);
-  return (
-    <div
-      ref={ref}
-      style={{
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        marginTop: 4,
-        background: t.surface,
-        border: `1px solid ${t.border}`,
-        borderRadius: 10,
-        boxShadow: t.shadowMd,
-        padding: 12,
-        width: 280,
-        zIndex: 50,
-        fontFamily: fonts.sans,
-        fontSize: 12.5,
-        color: t.ink,
-        textAlign: 'left',
-        whiteSpace: 'normal',
-      }}
-    >
-      <div style={{ fontWeight: 700, fontSize: 12, color: t.brand, marginBottom: 6 }}>
-        {fork.label}
-      </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 8 }}>
-        {fork.alternatives.map((alt) => (
-          <span
-            key={alt}
-            style={{
-              padding: '2px 8px',
-              background: t.surfaceAlt,
-              borderRadius: 999,
-              fontSize: 12,
-              fontFamily: fonts.mono,
-              color: t.ink,
-            }}
-          >
-            {alt}
-          </span>
-        ))}
-      </div>
-      {fork.rationale && (
-        <div style={{ fontSize: 12, color: t.inkDim, lineHeight: 1.45 }}>{fork.rationale}</div>
-      )}
-    </div>
-  );
 }

@@ -34,7 +34,7 @@ export function StatusStrip({
   const isComplete = stateKind === 'complete';
   const isThinking = stateKind === 'auto_playing';
 
-  const statusColor = isWrong ? t.red : isComplete ? t.brand : isThinking ? t.amber : t.ink;
+  const statusColor = isWrong ? t.red : isComplete ? t.success : isThinking ? t.amber : t.ink;
 
   const containerStyle: CSSProperties = {
     display: 'flex',

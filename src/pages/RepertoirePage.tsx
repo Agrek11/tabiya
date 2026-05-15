@@ -1,39 +1,61 @@
 /**
- * RepertoirePage — family-grouped opening browser (Phase 0d.3).
+ * RepertoirePage — opening browser matched to v1 preview.
  *
- * Top-level: family cards (collapsed by default). Click family card to expand
- * and reveal child openings. Search bar across family + opening names + ECO.
- * Filter chips for color (All / White / Black) and category (open / semi-open /
- * closed / indian / flank / gambit / all).
+ * Source: specs/wireframes/tabiya-v1-preview.html `data-page="repertoire"`.
  *
- * Mastery aggregation deferred — gates on Phase 1 SRS.
+ * Layout:
+ *   PageHeader
+ *   Controls row: search + Due First select + Tier filter select
+ *   Color tabs: All / As White / As Black (underline-active, count badges)
+ *   Category chips: All / Open / Semi-Open / Closed / Indian / Flank / Gambits
+ *   Grid 1.8:1:  opening rows (grouped by family section header) | Context card
  *
- * Gambits get their own dedicated surface at /repertoire/gambits.
+ * Section header  = family name (a one-line opener for the category cluster).
+ * Opening row     = a single Opening from the catalog, drills to its first
+ *                   line on click.
+ *
+ * Preserves:
+ *   - search across family + opening + ECO (live filter)
+ *   - color filter (white/black/all)
+ *   - category filter (chip selection)
+ *   - effective repertoire pick (`useEffectivePick`)
+ *   - two-step SRS reset per opening's first line (existing reset semantics)
+ *   - keyboard tab/enter navigation via native button semantics
+ *
+ * Removed (per v1 preview):
+ *   - family expand/collapse — rows are always flat, openings always visible
+ *   - opening → line drill-down popover — single-click row navigates straight
+ *     to that opening's first line
+ *   - inline line list under each opening
+ *
+ * Multi-line openings still drill to their first line by default; switching
+ * lines within an opening happens from the Drill toolbar's slick menu.
  */
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Inbox, RotateCcw, Search, Swords } from 'lucide-react';
+import { Inbox, RotateCcw, Search, Swords } from 'lucide-react';
 import { useTokens } from '../theme/ThemeContext';
-import { fonts, radius } from '../theme/tokens';
-import { Card } from '../ui/primitives/Card';
+import { fonts } from '../theme/tokens';
+import { PageBody } from '../ui/primitives/PageBody';
 import { PageHeader } from '../ui/primitives/PageHeader';
+import { Card } from '../ui/primitives/Card';
+import { CardTitle } from '../ui/primitives/CardTitle';
+import { Insight, InsightStack } from '../ui/primitives/Insight';
 import { StateMessage } from '../ui/primitives/StateMessage';
 import { getRepository, getSrsRepository } from '../storage';
 import { useSRS } from '../hooks/useSRS';
 import { useEffectivePick } from '../hooks/useEffectivePick';
-import { useLineAccuracy } from '../hooks/useAccuracy';
 import { EventsContextProvider } from '../state/EventsContext';
-import { AccuracyBadge } from '../components/repertoire/AccuracyBadge';
 import { RepertoirePicker } from '../components/repertoire/RepertoirePicker';
 import {
-  aggregateMasteryByFamily,
   aggregateMasteryByOpening,
 } from '../storage/srs/scheduler';
 import type { Family, FamilyCategory, Line, Opening } from '../storage/types';
 
 type ColorFilter = 'all' | 'white' | 'black';
 type CategoryFilter = 'all' | FamilyCategory;
+type SortOption = 'due-first' | 'a-z' | 'by-tier';
 
 const CATEGORY_LABELS: Record<CategoryFilter, string> = {
   all: 'All',
@@ -64,14 +86,18 @@ function RepertoirePageBody() {
   const [color, setColor] = useState<ColorFilter>('all');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [search, setSearch] = useState('');
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [sort, setSort] = useState<SortOption>('due-first');
+  const [tier, setTier] = useState<'all' | '1' | '2' | '3'>('all');
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [resetConfirmFor, setResetConfirmFor] = useState<string | null>(null);
 
-  const { states: srsStates, refresh: refreshSrs } = useSRS();
+  const { states: srsStates, dueLineIds, refresh: refreshSrs } = useSRS();
   const { effective } = useEffectivePick();
+  const dueLineIdSet = useMemo(() => new Set(dueLineIds), [dueLineIds]);
 
   const onResetLine = async (lineId: string): Promise<void> => {
     await getSrsRepository().resetState(lineId);
+    setResetConfirmFor(null);
     await refreshSrs();
   };
 
@@ -100,94 +126,144 @@ function RepertoirePageBody() {
     return aggregateMasteryByOpening(srsStates, lines);
   }, [srsStates, lines]);
 
-  const masteryByFamily = useMemo(() => {
-    if (families === null) return new Map<string, number>();
-    return aggregateMasteryByFamily(masteryByOpening, families);
-  }, [masteryByOpening, families]);
-
-  const openingsById = useMemo(() => {
-    const m = new Map<string, Opening>();
-    if (openings !== null) for (const o of openings) m.set(o.id, o);
+  const linesByOpening = useMemo(() => {
+    const m = new Map<string, Line[]>();
+    if (lines === null) return m;
+    for (const ln of lines) {
+      const list = m.get(ln.opening_id) ?? [];
+      list.push(ln);
+      m.set(ln.opening_id, list);
+    }
     return m;
-  }, [openings]);
+  }, [lines]);
+
+  const dueCountByOpening = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const [opId, opLines] of linesByOpening.entries()) {
+      m.set(opId, opLines.filter((l) => dueLineIdSet.has(l.id)).length);
+    }
+    return m;
+  }, [linesByOpening, dueLineIdSet]);
 
   const filtered = useMemo(() => {
     if (families === null || openings === null) return null;
     const q = search.trim().toLowerCase();
-    return families
-      .filter((f) => {
-        if (!effective.isFiltered) return true;
-        // Family passes if at least one of its lines is in the effective pick.
-        const opIds = new Set(f.opening_ids);
-        return (lines ?? []).some(
-          (l) => opIds.has(l.opening_id) && effective.lineIds.has(l.id)
-        );
-      })
-      .filter((f) => category === 'all' || f.category === category)
-      .map((f) => {
-        const ids = f.opening_ids
-          .map((id) => openingsById.get(id))
-          .filter((o): o is Opening => o !== undefined)
-          .filter((o) => color === 'all' || o.color === color)
-          .filter((o) => {
-            if (q.length === 0) return true;
-            return (
-              o.name.toLowerCase().includes(q) ||
-              o.eco.toLowerCase().includes(q) ||
-              f.name.toLowerCase().includes(q)
-            );
-          });
-        return { family: f, ops: ids };
-      })
-      .filter((row) => row.ops.length > 0);
-  }, [families, openings, openingsById, color, category, search, effective, lines]);
+    const familyMap = new Map(families.map((f) => [f.id, f]));
 
-  function toggleFamily(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+    // Start: all openings that match every filter.
+    let filteredOps = openings.filter((o) => {
+      // Effective pick — opening passes if at least one of its lines is in the
+      // pick.
+      if (effective.isFiltered) {
+        const opLines = linesByOpening.get(o.id) ?? [];
+        if (!opLines.some((l) => effective.lineIds.has(l.id))) return false;
+      }
+      if (color !== 'all' && o.color !== color) return false;
+      const fam = familyMap.get(o.family_id);
+      if (category !== 'all' && fam?.category !== category) return false;
+      if (q.length > 0) {
+        const matchesOpening =
+          o.name.toLowerCase().includes(q) || o.eco.toLowerCase().includes(q);
+        const matchesFamily = fam?.name.toLowerCase().includes(q) ?? false;
+        if (!matchesOpening && !matchesFamily) return false;
+      }
+      // Tier filter — opening tier inferred from its first line's tier tag
+      // (e.g. "tier:1"). Lines without a tier tag pass when "all".
+      if (tier !== 'all') {
+        const opLines = linesByOpening.get(o.id) ?? [];
+        const hasTier = opLines.some((l) =>
+          (l.tags ?? []).some((tag) => tag === `tier:${tier}`)
+        );
+        if (!hasTier) return false;
+      }
+      return true;
     });
-  }
+
+    if (sort === 'a-z') {
+      filteredOps = [...filteredOps].sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sort === 'by-tier') {
+      filteredOps = [...filteredOps].sort((a, b) => tierOf(a, linesByOpening) - tierOf(b, linesByOpening));
+    } else {
+      // due-first: openings with due lines first, then by name.
+      filteredOps = [...filteredOps].sort((a, b) => {
+        const aDue = dueCountByOpening.get(a.id) ?? 0;
+        const bDue = dueCountByOpening.get(b.id) ?? 0;
+        if (aDue !== bDue) return bDue - aDue;
+        return a.name.localeCompare(b.name);
+      });
+    }
+
+    return filteredOps;
+  }, [families, openings, search, color, category, tier, sort, effective, linesByOpening, dueCountByOpening]);
+
+  const onRowClick = (op: Opening): void => {
+    const opLines = linesByOpening.get(op.id) ?? [];
+    const first = opLines[0];
+    if (first) {
+      navigate(`/drill?line=${first.id}`);
+    }
+  };
 
   if (error) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <PageBody>
         <PageHeader title="Repertoire" />
         <StateMessage icon={Inbox} title="Couldn't load catalog" body={error} iconColor={t.red} />
-      </div>
+      </PageBody>
     );
   }
 
   if (filtered === null || families === null || openings === null) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <PageBody>
         <PageHeader title="Repertoire" subtitle="Loading…" />
-      </div>
+      </PageBody>
     );
   }
 
   const totalOpenings = openings.length;
+  const totalVariations = openings.length; // legacy approximation
+  const totalLines = lines?.length ?? 0;
+  const subtitle = `${families.length} families · ${totalVariations} variations · ${totalLines} lines. Click any opening to drill.`;
+  const whiteCount = openings.filter((o) => o.color === 'white').length;
+  const blackCount = openings.filter((o) => o.color === 'black').length;
+  const filteredCount = filtered.length;
   const gambitCount = openings.filter((o) => o.is_gambit).length;
+  const familyMap = new Map(families.map((f) => [f.id, f]));
+
+  // Group filtered openings under family section headers, preserving the
+  // sort order of `filtered` so "Due First" still works across families.
+  const rowGroups: Array<{ family: Family; ops: Opening[] }> = [];
+  const groupIndex = new Map<string, number>();
+  for (const op of filtered) {
+    const fam = familyMap.get(op.family_id);
+    if (!fam) continue;
+    let idx = groupIndex.get(fam.id);
+    if (idx === undefined) {
+      idx = rowGroups.length;
+      groupIndex.set(fam.id, idx);
+      rowGroups.push({ family: fam, ops: [] });
+    }
+    rowGroups[idx]!.ops.push(op);
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <PageBody>
       <PageHeader
         title="Repertoire"
-        subtitle={`${families.length} families · ${totalOpenings} openings · click a family to expand.`}
+        subtitle={subtitle}
         actions={
           <button
             onClick={() => setPickerOpen((v) => !v)}
             style={{
-              padding: '8px 12px',
+              padding: '8px 14px',
               fontFamily: fonts.sans,
-              fontSize: 13,
-              fontWeight: 600,
+              fontSize: 12.5,
+              fontWeight: 500,
               background: pickerOpen ? t.brandSoft : t.surface,
-              border: `1px solid ${pickerOpen ? t.brand : t.border}`,
+              border: `0.5px solid ${pickerOpen ? t.brand : t.border}`,
               color: pickerOpen ? t.brand : t.ink,
-              borderRadius: radius.chip,
+              borderRadius: 12,
               cursor: 'pointer',
             }}
           >
@@ -198,9 +274,10 @@ function RepertoirePageBody() {
                   marginLeft: 6,
                   fontSize: 11,
                   background: t.brand,
-                  color: '#fff',
-                  borderRadius: radius.full,
+                  color: t.brandInk,
+                  borderRadius: 999,
                   padding: '1px 7px',
+                  fontWeight: 600,
                 }}
               >
                 {effective.lineIds.size}
@@ -210,26 +287,32 @@ function RepertoirePageBody() {
         }
       />
 
-      {pickerOpen && <RepertoirePicker onClose={() => setPickerOpen(false)} />}
+      {pickerOpen && (
+        <div style={{ marginBottom: 18 }}>
+          <RepertoirePicker onClose={() => setPickerOpen(false)} />
+        </div>
+      )}
 
+      {/* CONTROLS ROW */}
       <div
         style={{
           display: 'flex',
-          flexWrap: 'wrap',
-          gap: 12,
           alignItems: 'center',
-          justifyContent: 'space-between',
+          gap: 12,
+          marginBottom: 18,
+          flexWrap: 'wrap',
         }}
       >
-        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 200 }}>
+        <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 220 }}>
           <Search
             size={14}
             style={{
               position: 'absolute',
-              left: 10,
+              left: 14,
               top: '50%',
               transform: 'translateY(-50%)',
               color: t.inkSoft,
+              pointerEvents: 'none',
             }}
           />
           <input
@@ -239,35 +322,56 @@ function RepertoirePageBody() {
             placeholder="Search families, openings, ECO…"
             style={{
               width: '100%',
-              padding: '8px 10px 8px 30px',
-              fontFamily: fonts.sans,
-              fontSize: 13,
+              padding: '10px 14px 10px 34px',
               background: t.surface,
-              border: `1px solid ${t.border}`,
-              borderRadius: radius.chip,
+              border: `0.5px solid ${t.border}`,
               color: t.ink,
+              borderRadius: 12,
+              fontSize: 13,
+              fontFamily: fonts.sans,
               outline: 'none',
             }}
           />
         </div>
+        <select
+          aria-label="Sort"
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortOption)}
+          style={selectPillStyle(t)}
+        >
+          <option value="due-first">Due First</option>
+          <option value="a-z">A-Z</option>
+          <option value="by-tier">By Tier</option>
+        </select>
+        <select
+          aria-label="Tier filter"
+          value={tier}
+          onChange={(e) => setTier(e.target.value as typeof tier)}
+          style={selectPillStyle(t)}
+        >
+          <option value="all">All Levels</option>
+          <option value="1">Tier 1</option>
+          <option value="2">Tier 2</option>
+          <option value="3">Tier 3</option>
+        </select>
         <Link
           to="/repertoire/gambits"
           style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 6,
-            padding: '8px 12px',
+            padding: '9px 14px',
             background: t.surface,
-            border: `1px solid ${t.border}`,
-            borderRadius: radius.chip,
+            border: `0.5px solid ${t.border}`,
+            borderRadius: 12,
             fontFamily: fonts.sans,
-            fontSize: 13,
-            fontWeight: 600,
+            fontSize: 12.5,
+            fontWeight: 500,
             color: t.ink,
             textDecoration: 'none',
           }}
         >
-          <Swords size={14} />
+          <Swords size={13} />
           Gambits
           <span
             style={{
@@ -276,8 +380,7 @@ function RepertoirePageBody() {
               fontSize: 11,
               fontWeight: 600,
               padding: '1px 7px',
-              borderRadius: radius.full,
-              fontFamily: fonts.sans,
+              borderRadius: 999,
             }}
           >
             {gambitCount}
@@ -285,17 +388,15 @@ function RepertoirePageBody() {
         </Link>
       </div>
 
+      {/* COLOR TABS */}
       <ColorTabs
         color={color}
         onChange={setColor}
-        counts={{
-          all: totalOpenings,
-          white: openings.filter((o) => o.color === 'white').length,
-          black: openings.filter((o) => o.color === 'black').length,
-        }}
+        counts={{ all: totalOpenings, white: whiteCount, black: blackCount }}
       />
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+      {/* CATEGORY CHIPS */}
+      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 22 }}>
         {(Object.keys(CATEGORY_LABELS) as CategoryFilter[]).map((cat) => {
           const isActive = category === cat;
           return (
@@ -303,15 +404,16 @@ function RepertoirePageBody() {
               key={cat}
               onClick={() => setCategory(cat)}
               style={{
-                padding: '5px 11px',
-                fontFamily: fonts.sans,
-                fontSize: 12,
-                fontWeight: 600,
+                padding: '6px 12px',
                 background: isActive ? t.brandSoft : 'transparent',
+                border: `0.5px solid ${isActive ? t.brandSoftBorder : t.border}`,
+                borderRadius: 999,
                 color: isActive ? t.brand : t.inkDim,
-                border: `1px solid ${isActive ? t.brand : t.border}`,
-                borderRadius: radius.full,
+                fontSize: 11.5,
+                fontWeight: 600,
+                fontFamily: fonts.sans,
                 cursor: 'pointer',
+                transition: 'all 150ms ease',
               }}
             >
               {CATEGORY_LABELS[cat]}
@@ -320,7 +422,7 @@ function RepertoirePageBody() {
         })}
       </div>
 
-      {filtered.length === 0 ? (
+      {filteredCount === 0 ? (
         <StateMessage
           icon={Inbox}
           title="No matches"
@@ -328,27 +430,104 @@ function RepertoirePageBody() {
           iconColor={t.inkDim}
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {filtered.map(({ family, ops }) => (
-            <FamilyCard
-              key={family.id}
-              family={family}
-              openings={ops}
-              lines={lines ?? []}
-              expanded={expanded.has(family.id)}
-              onToggle={() => toggleFamily(family.id)}
-              onLineClick={(line) => navigate(`/drill?line=${line.id}`)}
-              onOpeningClick={(op) => navigate(`/drill?opening=${op.id}`)}
-              onResetLine={(lineId) => void onResetLine(lineId)}
-              hasSrsState={(lineId) => srsStates.has(lineId)}
-              familyMastery={masteryByFamily.get(family.id) ?? 0}
-              openingMastery={masteryByOpening}
-            />
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 18 }}>
+          {/* LEFT: opening rows grouped under family section headers */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
+            {rowGroups.map((group) => (
+              <div key={group.family.id}>
+                <CardTitle style={{ marginBottom: 14 }}>{group.family.name}</CardTitle>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {group.ops.map((op) => {
+                    const opLines = linesByOpening.get(op.id) ?? [];
+                    const firstLine = opLines[0];
+                    const masteryPct = Math.round(masteryByOpening.get(op.id) ?? 0);
+                    const dueCount = dueCountByOpening.get(op.id) ?? 0;
+                    const tierLabel = formatTier(opLines);
+                    const canReset = firstLine ? srsStates.has(firstLine.id) : false;
+                    const isResetPending = firstLine ? resetConfirmFor === firstLine.id : false;
+                    return (
+                      <OpeningRow
+                        key={op.id}
+                        opening={op}
+                        family={group.family}
+                        masteryPct={masteryPct}
+                        dueCount={dueCount}
+                        tierLabel={tierLabel}
+                        onClick={() => onRowClick(op)}
+                        canReset={canReset}
+                        resetPending={isResetPending}
+                        onResetRequest={() => firstLine && setResetConfirmFor(firstLine.id)}
+                        onResetConfirm={() => firstLine && void onResetLine(firstLine.id)}
+                        onResetCancel={() => setResetConfirmFor(null)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* RIGHT: Opening Context card */}
+          <div>
+            <Card>
+              <CardTitle>Opening Context</CardTitle>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: t.ink,
+                  lineHeight: 1.65,
+                  marginBottom: 16,
+                  fontFamily: fonts.sans,
+                }}
+              >
+                Showing <strong>{filteredCount}</strong>{' '}
+                {filteredCount === 1 ? 'opening' : 'openings'} across{' '}
+                <strong>{rowGroups.length}</strong>{' '}
+                {rowGroups.length === 1 ? 'family' : 'families'}.
+              </div>
+              <InsightStack>
+                <Insight>Click any opening to drill its first line.</Insight>
+                <Insight>Switch lines within an opening from the Drill toolbar.</Insight>
+                <Insight>The ↺ button resets SRS state for that opening.</Insight>
+              </InsightStack>
+            </Card>
+          </div>
         </div>
       )}
-    </div>
+    </PageBody>
   );
+}
+
+function tierOf(op: Opening, byOpening: Map<string, Line[]>): number {
+  const opLines = byOpening.get(op.id) ?? [];
+  for (const ln of opLines) {
+    for (const tag of ln.tags ?? []) {
+      if (tag.startsWith('tier:')) return Number(tag.slice(5)) || 9;
+    }
+  }
+  return 9;
+}
+
+function formatTier(opLines: Line[]): string | null {
+  for (const ln of opLines) {
+    for (const tag of ln.tags ?? []) {
+      if (tag.startsWith('tier:')) return `T${tag.slice(5)}`;
+    }
+  }
+  return null;
+}
+
+function selectPillStyle(t: ReturnType<typeof useTokens>): React.CSSProperties {
+  return {
+    background: t.surface,
+    border: `0.5px solid ${t.border}`,
+    color: t.ink,
+    padding: '9px 14px',
+    borderRadius: 12,
+    fontSize: 12.5,
+    fontFamily: fonts.sans,
+    cursor: 'pointer',
+  };
 }
 
 function ColorTabs({
@@ -361,44 +540,53 @@ function ColorTabs({
   counts: Record<ColorFilter, number>;
 }) {
   const t = useTokens();
+  const items: Array<{ key: ColorFilter; label: string }> = [
+    { key: 'all', label: 'All' },
+    { key: 'white', label: 'As White' },
+    { key: 'black', label: 'As Black' },
+  ];
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderBottom: `1px solid ${t.border}` }}>
-      {(['all', 'white', 'black'] as ColorFilter[]).map((c) => {
-        const isActive = color === c;
-        const label = c === 'all' ? 'All' : c === 'white' ? 'As White' : 'As Black';
+    <div
+      style={{
+        display: 'flex',
+        borderBottom: `0.5px solid ${t.border}`,
+        marginBottom: 16,
+      }}
+    >
+      {items.map((item) => {
+        const isActive = color === item.key;
         return (
           <button
-            key={c}
-            onClick={() => onChange(c)}
+            key={item.key}
+            onClick={() => onChange(item.key)}
             style={{
               background: 'transparent',
               border: 'none',
-              padding: '10px 14px',
-              fontFamily: fonts.sans,
-              fontSize: 13.5,
+              padding: '11px 18px',
+              fontSize: 13,
               fontWeight: isActive ? 600 : 500,
-              color: isActive ? t.ink : t.inkDim,
+              color: isActive ? t.brand : t.inkDim,
+              fontFamily: fonts.sans,
               cursor: 'pointer',
               borderBottom: `2px solid ${isActive ? t.brand : 'transparent'}`,
               marginBottom: -1,
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 6,
+              gap: 7,
             }}
           >
-            {label}
+            {item.label}
             <span
               style={{
                 background: isActive ? t.brandSoft : t.surfaceAlt,
-                color: isActive ? t.brand : t.inkDim,
+                color: isActive ? t.brand : t.inkSoft,
                 fontSize: 11,
-                fontWeight: 600,
                 padding: '1px 7px',
-                borderRadius: radius.full,
-                fontFamily: fonts.sans,
+                borderRadius: 999,
+                fontWeight: 600,
               }}
             >
-              {counts[c]}
+              {counts[item.key]}
             </span>
           </button>
         );
@@ -407,299 +595,239 @@ function ColorTabs({
   );
 }
 
-function FamilyCard({
+function OpeningRow({
+  opening,
   family,
-  openings,
-  lines,
-  expanded,
-  onToggle,
-  onOpeningClick,
-  onLineClick,
-  onResetLine,
-  hasSrsState,
-  familyMastery,
-  openingMastery,
+  masteryPct,
+  dueCount,
+  tierLabel,
+  onClick,
+  canReset,
+  resetPending,
+  onResetRequest,
+  onResetConfirm,
+  onResetCancel,
 }: {
+  opening: Opening;
   family: Family;
-  openings: Opening[];
-  lines: Line[];
-  expanded: boolean;
-  onToggle: () => void;
-  onOpeningClick: (o: Opening) => void;
-  onLineClick: (l: Line) => void;
-  onResetLine: (lineId: string) => void;
-  hasSrsState: (lineId: string) => boolean;
-  familyMastery: number;
-  openingMastery: Map<string, number>;
+  masteryPct: number;
+  dueCount: number;
+  tierLabel: string | null;
+  onClick: () => void;
+  canReset: boolean;
+  resetPending: boolean;
+  onResetRequest: () => void;
+  onResetConfirm: () => void;
+  onResetCancel: () => void;
 }) {
   const t = useTokens();
-  const masteryPct = Math.round(familyMastery);
-  const linesByOpening = new Map<string, Line[]>();
-  for (const ln of lines) {
-    if (!ln.opening_id) continue;
-    const list = linesByOpening.get(ln.opening_id) ?? [];
-    list.push(ln);
-    linesByOpening.set(ln.opening_id, list);
-  }
-  const totalLines = openings.reduce(
-    (sum, o) => sum + (linesByOpening.get(o.id)?.length ?? 0),
-    0
-  );
+  const meta = [
+    masteryPct > 0 ? `${masteryPct}% mastery` : 'Drill to track',
+    dueCount > 0 ? `${dueCount} due` : null,
+    family.category !== 'uncategorized' ? family.category : null,
+  ]
+    .filter((x) => x !== null)
+    .join(' · ');
+
   return (
-    <Card padding={0}>
-      <button
-        onClick={onToggle}
-        style={{
-          width: '100%',
-          padding: 16,
-          background: 'transparent',
-          border: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
-        {expanded ? <ChevronDown size={16} color={t.inkDim} /> : <ChevronRight size={16} color={t.inkDim} />}
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: fonts.mono, fontSize: 11, color: t.inkSoft, fontWeight: 600, marginBottom: 4 }}>
-            {family.eco_range || '—'} · {family.category.toUpperCase()}
-          </div>
-          <h3 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: t.ink, fontFamily: fonts.sans }}>
-            {family.name}
-          </h3>
-          <MasteryBar percent={masteryPct} caption={masteryPct > 0 ? `${masteryPct}% mastery` : 'Drill to track'} />
-        </div>
-        <span style={{ fontSize: 12, color: t.inkDim, fontFamily: fonts.sans, textAlign: 'right' }}>
-          {openings.length} {openings.length === 1 ? 'opening' : 'openings'}
-          <br />
-          <span style={{ fontSize: 11, color: t.inkSoft }}>
-            {totalLines} {totalLines === 1 ? 'line' : 'lines'}
-          </span>
-        </span>
-      </button>
-
-      {expanded && (
-        <div style={{ borderTop: `1px solid ${t.border}`, padding: '6px 0' }}>
-          {openings.map((o) => {
-            const opPct = Math.round(openingMastery.get(o.id) ?? 0);
-            const opLines = linesByOpening.get(o.id) ?? [];
-
-            // Single-line variation: collapse — render one row that drills directly.
-            if (opLines.length === 1) {
-              const line = opLines[0]!;
-              const canReset = hasSrsState(line.id);
-              return (
-                <div
-                  key={o.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'stretch',
-                    width: '100%',
-                  }}
-                >
-                  <button
-                    onClick={() => onLineClick(line)}
-                    className="tabiya-popover-item"
-                    style={{
-                      flex: 1,
-                      padding: '10px 8px 10px 44px',
-                      background: 'transparent',
-                      border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      fontFamily: fonts.sans,
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: t.inkSoft, fontWeight: 600, marginBottom: 2 }}>
-                        {o.eco} · {o.color === 'white' ? 'WHITE' : 'BLACK'}
-                        {o.is_gambit ? ' · GAMBIT' : ''}
-                      </div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: t.ink, display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span>{o.name}</span>
-                        <LineAccuracyChip lineId={line.id} />
-                      </div>
-                      <MasteryBar percent={opPct} caption={opPct > 0 ? `${opPct}% mastery` : 'Not started'} compact />
-                    </div>
-                    <ChevronRight size={14} color={t.brand} />
-                  </button>
-                  <ResetIconButton
-                    enabled={canReset}
-                    onReset={() => onResetLine(line.id)}
-                    label={`Reset SRS for ${line.name}`}
-                  />
-                </div>
-              );
-            }
-
-            // Multi-line variation: opening header + line rows beneath.
-            return (
-              <div key={o.id}>
-                <button
-                  onClick={() => onOpeningClick(o)}
-                  className="tabiya-popover-item"
-                  style={{
-                    width: '100%',
-                    padding: '10px 16px 6px 44px',
-                    background: 'transparent',
-                    border: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    fontFamily: fonts.sans,
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontFamily: fonts.mono, fontSize: 10.5, color: t.inkSoft, fontWeight: 600, marginBottom: 2 }}>
-                      {o.eco} · {o.color === 'white' ? 'WHITE' : 'BLACK'}
-                      {o.is_gambit ? ' · GAMBIT' : ''}
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: t.ink }}>{o.name}</div>
-                    <MasteryBar percent={opPct} caption={opPct > 0 ? `${opPct}% mastery` : 'Not started'} compact />
-                  </div>
-                  <span style={{ fontSize: 11.5, color: t.inkDim }}>
-                    {opLines.length} lines
-                  </span>
-                </button>
-                <div style={{ paddingBottom: 6 }}>
-                  {opLines.map((line) => {
-                    const canReset = hasSrsState(line.id);
-                    return (
-                      <div
-                        key={line.id}
-                        style={{ display: 'flex', alignItems: 'stretch', width: '100%' }}
-                      >
-                        <button
-                          onClick={() => onLineClick(line)}
-                          className="tabiya-popover-item"
-                          style={{
-                            flex: 1,
-                            padding: '7px 8px 7px 64px',
-                            background: 'transparent',
-                            border: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            cursor: 'pointer',
-                            textAlign: 'left',
-                            fontFamily: fonts.sans,
-                            fontSize: 13,
-                            color: t.ink,
-                          }}
-                        >
-                          <span style={{ width: 4, height: 4, borderRadius: 999, background: t.inkSoft }} />
-                          <span style={{ flex: 1 }}>{line.name}</span>
-                          <LineAccuracyChip lineId={line.id} />
-                          <span style={{ fontSize: 11, color: t.inkSoft }}>{line.depth} ply</span>
-                          <ChevronRight size={12} color={t.brand} />
-                        </button>
-                        <ResetIconButton
-                          enabled={canReset}
-                          onReset={() => onResetLine(line.id)}
-                          label={`Reset SRS for ${line.name}`}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </Card>
-  );
-}
-
-function ResetIconButton({
-  enabled,
-  onReset,
-  label,
-}: {
-  enabled: boolean;
-  onReset: () => void;
-  label: string;
-}) {
-  const t = useTokens();
-  return (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        if (enabled) onReset();
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
       }}
-      disabled={!enabled}
-      aria-label={label}
-      title={enabled ? label : 'No SRS state to reset'}
+      data-testid={`opening-row-${opening.id}`}
       style={{
-        width: 36,
-        background: 'transparent',
-        border: 'none',
-        cursor: enabled ? 'pointer' : 'not-allowed',
         display: 'flex',
+        gap: 14,
         alignItems: 'center',
-        justifyContent: 'center',
-        color: enabled ? t.inkDim : t.inkSoft,
-        opacity: enabled ? 1 : 0.3,
-        padding: 0,
+        padding: 14,
+        borderRadius: 14,
+        background: t.surface,
+        border: `0.5px solid ${t.border}`,
+        cursor: 'pointer',
+        transition: 'all 150ms ease',
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = t.brandSoftBorder;
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLDivElement).style.borderColor = t.border;
       }}
     >
-      <RotateCcw size={13} />
-    </button>
+      <BoardThumb />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: t.ink,
+            marginBottom: 4,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 7,
+            fontFamily: fonts.sans,
+          }}
+        >
+          <span>{opening.name}</span>
+          {tierLabel && (
+            <span
+              style={{
+                fontSize: 9.5,
+                fontWeight: 600,
+                padding: '1px 6px',
+                borderRadius: 5,
+                background: t.surfaceAlt,
+                color: t.inkDim,
+                letterSpacing: '0.05em',
+              }}
+            >
+              {tierLabel}
+            </span>
+          )}
+        </div>
+        <div
+          style={{
+            fontSize: 11.5,
+            color: t.inkSoft,
+            marginBottom: 9,
+            fontFamily: fonts.sans,
+          }}
+        >
+          {meta || 'No data yet'}
+        </div>
+        <div
+          data-testid="mastery-bar"
+          data-percent={masteryPct}
+          style={{
+            height: 5,
+            background: t.surfaceAlt,
+            borderRadius: 999,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              width: `${masteryPct}%`,
+              height: '100%',
+              background: t.success,
+              borderRadius: 999,
+            }}
+          />
+        </div>
+      </div>
+      {resetPending ? (
+        <div style={{ display: 'flex', gap: 4 }} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onResetConfirm();
+            }}
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              padding: '4px 10px',
+              borderRadius: 8,
+              background: t.red,
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: fonts.sans,
+            }}
+          >
+            Confirm
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onResetCancel();
+            }}
+            style={{
+              fontSize: 11,
+              fontWeight: 500,
+              padding: '4px 10px',
+              borderRadius: 8,
+              background: t.surfaceAlt,
+              color: t.ink,
+              border: `0.5px solid ${t.border}`,
+              cursor: 'pointer',
+              fontFamily: fonts.sans,
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (canReset) onResetRequest();
+          }}
+          disabled={!canReset}
+          aria-label={`Reset SRS for ${opening.name}`}
+          title={canReset ? `Reset SRS for ${opening.name}` : 'No SRS state to reset'}
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            background: 'transparent',
+            border: `0.5px solid ${t.border}`,
+            color: canReset ? t.success : t.inkSoft,
+            cursor: canReset ? 'pointer' : 'not-allowed',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            opacity: canReset ? 1 : 0.4,
+          }}
+        >
+          <RotateCcw size={14} />
+        </button>
+      )}
+    </div>
   );
 }
 
-function LineAccuracyChip({ lineId }: { lineId: string }) {
-  const { accuracy, moves } = useLineAccuracy(lineId);
-  return <AccuracyBadge accuracy={accuracy} moves={moves} />;
-}
-
-function MasteryBar({
-  percent,
-  caption,
-  compact = false,
-}: {
-  percent: number;
-  caption: string;
-  compact?: boolean;
-}) {
+/**
+ * 4×4 abstract wood-pattern thumbnail. Pure CSS; theme tokens drive colors so
+ * it tracks light/dark + the active board theme.
+ */
+function BoardThumb() {
   const t = useTokens();
-  const safe = Math.max(0, Math.min(100, percent));
+  // Standard 4×4 checker pattern.
+  const cells = [
+    'l', 'd', 'l', 'd',
+    'd', 'l', 'd', 'l',
+    'l', 'd', 'l', 'd',
+    'd', 'l', 'd', 'l',
+  ];
   return (
-    <div data-testid="mastery-bar" data-percent={safe} style={{ marginTop: compact ? 4 : 8 }}>
-      <div
-        style={{
-          height: compact ? 4 : 6,
-          background: t.surfaceAlt,
-          borderRadius: radius.full,
-          overflow: 'hidden',
-        }}
-      >
+    <div
+      aria-hidden
+      style={{
+        width: 64,
+        height: 64,
+        borderRadius: 12,
+        overflow: 'hidden',
+        background: t.surfaceAlt,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateRows: 'repeat(4, 1fr)',
+        flexShrink: 0,
+      }}
+    >
+      {cells.map((c, i) => (
         <div
+          key={i}
           style={{
-            width: `${safe}%`,
-            height: '100%',
-            background: safe >= 80 ? t.brand : safe > 0 ? t.brandSoft : 'transparent',
+            background: c === 'l' ? t.boardLight : t.boardDark,
           }}
         />
-      </div>
-      <span
-        style={{
-          fontSize: compact ? 10.5 : 11,
-          color: t.inkSoft,
-          fontFamily: fonts.sans,
-          marginTop: 3,
-          display: 'block',
-        }}
-      >
-        {caption}
-      </span>
+      ))}
     </div>
   );
 }

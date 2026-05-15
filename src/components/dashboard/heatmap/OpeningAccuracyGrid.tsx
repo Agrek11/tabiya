@@ -206,7 +206,7 @@ function FamilyRow({
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: radius.chip,
-              background: c === 0 ? 'transparent' : t.brand,
+              background: c === 0 ? 'transparent' : t.success,
               opacity: c === 0 ? 0.6 : intensity,
               border: `1px solid ${c === 0 ? t.border : 'transparent'}`,
               fontSize: 11,

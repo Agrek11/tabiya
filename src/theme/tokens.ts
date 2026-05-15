@@ -1,11 +1,15 @@
 /**
  * Design tokens — the v1 design system.
  *
- * Source of truth: `wireframe.jsx` (locked v1 mockup).
+ * Source of truth: `specs/wireframes/tabiya-v1-preview.html` (locked v1 mockup).
  * Both light and dark themes share the same shape so a single theme switch
  * swaps every token together.
  *
  * Constitution Article 1: tokens are pure data, OSS-clean by definition.
+ *
+ * Brand vs success split (introduced 2026-05-15 with v1-preview rebuild):
+ *   brand   = identity + primary action (aubergine light / gold dark)
+ *   success = mastery / correctness / completion (green both themes)
  */
 
 export type ThemeTokens = {
@@ -21,83 +25,90 @@ export type ThemeTokens = {
   inkDim: string;
   inkSoft: string;
 
-  // Brand (primary green)
+  // Brand (identity + primary CTA — NOT correctness)
   brand: string;
   brandSoft: string;
+  brandSoftBorder: string;
+  brandInk: string;
   brandHover: string;
 
+  // Success (correctness + mastery + completion)
+  success: string;
+  successSoft: string;
+
   // Semantic accents
-  amber: string;
-  amberSoft: string;
   red: string;
   redSoft: string;
-  blue: string;
-  blueSoft: string;
-  pink: string;
-  pinkSoft: string;
-  violet: string;
-  violetSoft: string;
+  amber: string;
+  amberSoft: string;
+
+  // Board defaults (overridable by Settings board theme picker)
+  boardLight: string;
+  boardDark: string;
 
   // Shadows
-  shadow: string;
+  shadowSm: string;
   shadowMd: string;
+  shadowLg: string;
 };
 
 export const lightTheme: ThemeTokens = {
-  bg: '#FAF8F2',
-  surface: '#FFFFFF',
-  surfaceAlt: '#F4F1E8',
-  border: '#E9E4D6',
-  borderStrong: '#D6CFB9',
-  ink: '#1C1917',
-  inkDim: '#78716C',
-  inkSoft: '#A8A29E',
-  brand: '#047857',
-  brandSoft: '#D1FAE5',
-  brandHover: '#065F46',
-  amber: '#D97706',
-  amberSoft: '#FEF3C7',
+  bg: '#FAF7F4',
+  surface: '#FFFEFB',
+  surfaceAlt: '#F1E8E3',
+  border: '#E8DFD9',
+  borderStrong: '#D6CBC2',
+  ink: '#1F1418',
+  inkDim: '#5C5063',
+  inkSoft: '#998F84',
+  brand: '#6D2E5C',
+  brandSoft: '#F5E8F0',
+  brandSoftBorder: 'rgba(109, 46, 92, 0.22)',
+  brandInk: '#FFFFFF',
+  brandHover: '#5A2549',
+  success: '#047857',
+  successSoft: '#D1FAE5',
   red: '#DC2626',
   redSoft: '#FEE2E2',
-  blue: '#2563EB',
-  blueSoft: '#DBEAFE',
-  pink: '#DB2777',
-  pinkSoft: '#FCE7F3',
-  violet: '#7C3AED',
-  violetSoft: '#EDE9FE',
-  shadow: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05)',
+  amber: '#D97706',
+  amberSoft: '#FEF3C7',
+  boardLight: '#F0D9B5',
+  boardDark: '#B58863',
+  shadowSm: '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.05)',
   shadowMd: '0 4px 16px rgba(0,0,0,0.08)',
+  shadowLg: '0 20px 50px rgba(0,0,0,0.12)',
 };
 
 export const darkTheme: ThemeTokens = {
-  bg: '#0F0F11',
-  surface: '#18181B',
-  surfaceAlt: '#27272A',
-  border: '#2A2A2E',
-  borderStrong: '#3F3F46',
-  ink: '#FAFAFA',
-  inkDim: '#A1A1AA',
-  inkSoft: '#71717A',
-  brand: '#10B981',
-  brandSoft: '#064E3B',
-  brandHover: '#34D399',
-  amber: '#F59E0B',
-  amberSoft: '#451A03',
+  bg: '#0F1113',
+  surface: '#15181B',
+  surfaceAlt: '#1A1D20',
+  border: 'rgba(255,255,255,0.08)',
+  borderStrong: 'rgba(255,255,255,0.15)',
+  ink: '#ECE7DD',
+  inkDim: '#9B9488',
+  inkSoft: '#6E6759',
+  brand: '#C9A96A',
+  brandSoft: 'rgba(201,169,106,0.12)',
+  brandSoftBorder: 'rgba(201,169,106,0.3)',
+  brandInk: '#111111',
+  brandHover: '#D8BC83',
+  success: '#10B981',
+  successSoft: 'rgba(16,185,129,0.16)',
   red: '#EF4444',
-  redSoft: '#450A0A',
-  blue: '#3B82F6',
-  blueSoft: '#172554',
-  pink: '#EC4899',
-  pinkSoft: '#500724',
-  violet: '#A78BFA',
-  violetSoft: '#2E1065',
-  shadow: '0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3)',
-  shadowMd: '0 4px 16px rgba(0,0,0,0.5)',
+  redSoft: 'rgba(239,68,68,0.16)',
+  amber: '#F59E0B',
+  amberSoft: 'rgba(245,158,11,0.16)',
+  boardLight: '#D9C2A1',
+  boardDark: '#7B5B43',
+  shadowSm: '0 1px 2px rgba(0,0,0,0.20), 0 4px 12px rgba(0,0,0,0.30)',
+  shadowMd: '0 4px 16px rgba(0,0,0,0.35)',
+  shadowLg: '0 30px 80px rgba(0,0,0,0.50)',
 };
 
 // Typography stack
 export const fonts = {
-  sans: `'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`,
+  sans: `Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif`,
   mono: `'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace`,
 };
 

@@ -1,31 +1,40 @@
 /**
- * DashboardPage — Phase 1 wires real SRS stats.
+ * DashboardPage — "Continue Your Training" home, matched to v1 preview.
  *
- * "Lines mastered" = count(SrsState where box >= 4) / catalog.lines.length.
- * "Due for review" = dueLineIds.length from useSRS.
- * "Drill" CTA points to /drill?queue=due when due lines exist; else
- * Repertoire (the existing default).
+ * Source: specs/wireframes/tabiya-v1-preview.html `data-page="home"`.
  *
- * Empty state when no lines have ever been drilled (states.size === 0):
- * guide the user to the Repertoire to pick a first line.
+ * Layout:
+ *   PageHeader
+ *   Hero row (2:1):     Up Next  |  Recent Improvement
+ *   KPI grid (×4):      Streak / Due Today / Accuracy / Mastered
+ *   Secondary (×3):     Current Focus / Weak Structures / Quick Actions
+ *
+ * Wiring:
+ *   - Streak  = useStreaks().drillDayStreak (Phase 1.5)
+ *   - Due     = useSRS().dueLineIds.length
+ *   - Accuracy = useAccuracy().allTime (Phase 1.5)
+ *   - Mastered = count(SrsState.box >= 4) / catalog.lines.length
+ *
+ * Unwired surfaces (Current Focus, Weak Structures, hero subtitle) show static
+ * v1 copy. They light up post-Phase 3/4 with detected weaknesses and saved
+ * focus state.
  */
 
 import { useEffect, useState } from 'react';
-import { LineChart, Target, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { PageHeader } from '../ui/primitives/PageHeader';
-import { StateMessage } from '../ui/primitives/StateMessage';
-import { Button } from '../ui/primitives/Button';
-import { Card } from '../ui/primitives/Card';
+import { Play } from 'lucide-react';
 import { useTokens } from '../theme/ThemeContext';
-import { fonts, radius } from '../theme/tokens';
+import { fonts } from '../theme/tokens';
+import { PageBody } from '../ui/primitives/PageBody';
+import { PageHeader } from '../ui/primitives/PageHeader';
+import { Card } from '../ui/primitives/Card';
+import { CardTitle } from '../ui/primitives/CardTitle';
+import { Insight } from '../ui/primitives/Insight';
 import { useSRS } from '../hooks/useSRS';
+import { useStreaks } from '../hooks/useStreaks';
+import { useAccuracy } from '../hooks/useAccuracy';
 import { getRepository } from '../storage';
-import type { Line } from '../storage/types';
 import { EventsContextProvider } from '../state/EventsContext';
-import { StreaksRow } from '../components/dashboard/StreaksRow';
-import { AccuracyRow } from '../components/dashboard/AccuracyRow';
-import { HeatmapTabs } from '../components/dashboard/HeatmapTabs';
 
 export function DashboardPage() {
   return (
@@ -38,6 +47,8 @@ export function DashboardPage() {
 function DashboardBody() {
   const t = useTokens();
   const { states, dueLineIds, loading } = useSRS();
+  const streaks = useStreaks();
+  const accuracy = useAccuracy();
   const [totalLines, setTotalLines] = useState<number | null>(null);
 
   useEffect(() => {
@@ -47,7 +58,7 @@ function DashboardBody() {
       try {
         const ops = await repo.listOpenings();
         const lineLists = await Promise.all(ops.map((o) => repo.listLines(o.id)));
-        if (!cancelled) setTotalLines(lineLists.flat().length as Line[]['length']);
+        if (!cancelled) setTotalLines(lineLists.flat().length);
       } catch {
         if (!cancelled) setTotalLines(0);
       }
@@ -57,132 +68,265 @@ function DashboardBody() {
     };
   }, []);
 
+  const masteredCount = Array.from(states.values()).filter((s) => s.box >= 4).length;
+  const dueCount = dueLineIds.length;
+  const totalLinesValue = totalLines ?? 0;
+  const drillHref = dueCount > 0 ? '/drill?queue=due' : '/drill';
+
+  const accAllTime = accuracy.allTime.accuracy;
+  const accuracyText = accAllTime !== null ? `${(accAllTime * 100).toFixed(1)}%` : null;
+  const accuracyCaption =
+    accuracy.deltaPp !== null
+      ? `${accuracy.deltaPp >= 0 ? '+' : ''}${accuracy.deltaPp.toFixed(1)}pp vs last week`
+      : 'No data yet';
+
+  const streakText = streaks.drillDayStreak > 0 ? String(streaks.drillDayStreak) : null;
+  const streakCaption =
+    streaks.lineMasteryStreak > 0
+      ? `${streaks.lineMasteryStreak} clean line streak`
+      : 'Drill daily to build a streak';
+
   if (loading || totalLines === null) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <PageHeader title="Dashboard" subtitle="Loading…" />
-      </div>
+      <PageBody>
+        <PageHeader title="Continue Your Training" subtitle="Loading…" />
+      </PageBody>
     );
   }
-
-  if (states.size === 0) {
-    // Even before the first drill, render streaks + accuracy + heatmap (all
-    // empty-state) so the user can see the shape of what's coming.
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <PageHeader title="Dashboard" subtitle="Pick a line and complete one drill to start tracking." />
-        <StreaksRow />
-        <AccuracyRow />
-        <StateMessage
-          icon={LineChart}
-          title="No drills yet"
-          body="Browse the Repertoire and pick an opening. The first drill seeds your SRS history; mastery, accuracy, and the activity heatmap fill in as you progress."
-          action={
-            <Link to="/repertoire" style={{ textDecoration: 'none' }}>
-              <Button variant="primary">Browse repertoire →</Button>
-            </Link>
-          }
-        />
-        <HeatmapTabs />
-      </div>
-    );
-  }
-
-  const masteredCount = Array.from(states.values()).filter((s) => s.box >= 4).length;
-  const masteredPct =
-    totalLines === 0 ? 0 : Math.round((masteredCount / totalLines) * 100);
-  const dueCount = dueLineIds.length;
-  const drillHref = dueCount > 0 ? '/drill?queue=due' : '/repertoire';
-  const drillLabel = dueCount > 0 ? `Drill ${dueCount} due` : 'Browse repertoire';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <PageBody>
       <PageHeader
-        title="Dashboard"
-        subtitle="Your spaced-repetition snapshot."
-        actions={
-          <Link to={drillHref} style={{ textDecoration: 'none' }}>
-            <Button variant="primary">{drillLabel} →</Button>
-          </Link>
-        }
+        title="Continue Your Training"
+        subtitle="Focused, long-term chess improvement through guided learning."
       />
 
+      {/* Hero row 2:1 — Up Next + Recent Improvement */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 14,
+          gridTemplateColumns: '2fr 1fr',
+          gap: 18,
+          marginBottom: 18,
         }}
       >
-        <StatCard
-          icon={<Target size={16} color={t.brand} />}
-          label="Lines mastered"
-          value={`${masteredPct}%`}
-          sub={`${masteredCount} of ${totalLines}`}
+        <Card>
+          <CardTitle>Up Next</CardTitle>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 26,
+              fontWeight: 700,
+              color: t.ink,
+              letterSpacing: '-0.02em',
+              marginBottom: 10,
+              fontFamily: fonts.sans,
+            }}
+          >
+            {dueCount > 0
+              ? `${dueCount} lines due for review`
+              : states.size === 0
+                ? 'Pick your first opening'
+                : 'All caught up'}
+          </h3>
+          <div
+            style={{
+              fontSize: 13,
+              color: t.inkDim,
+              lineHeight: 1.6,
+              marginBottom: 22,
+              fontFamily: fonts.sans,
+            }}
+          >
+            {dueCount > 0
+              ? 'Resume the spaced-repetition queue. We pick the order — you focus on accuracy.'
+              : states.size === 0
+                ? 'Browse the repertoire and drill any line to seed your SRS history.'
+                : 'No reviews due. Drill any line to deepen mastery, or come back tomorrow.'}
+          </div>
+          <Link to={drillHref} style={{ textDecoration: 'none' }}>
+            <button
+              data-testid="resume-session-cta"
+              style={{
+                background: t.brand,
+                color: t.brandInk,
+                border: 'none',
+                padding: '10px 18px',
+                borderRadius: 10,
+                fontSize: 13,
+                fontWeight: 600,
+                fontFamily: fonts.sans,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <Play size={14} fill="currentColor" stroke="none" />
+              {states.size === 0 ? 'Start Drilling' : 'Resume Session'}
+            </button>
+          </Link>
+        </Card>
+        <Card>
+          <CardTitle>Recent Improvement</CardTitle>
+          <div style={{ fontSize: 13, color: t.ink, lineHeight: 1.65, fontFamily: fonts.sans }}>
+            {accuracy.deltaPp !== null && accuracy.deltaPp > 0 ? (
+              <>
+                Your retention improved by{' '}
+                <strong style={{ color: t.success }}>+{accuracy.deltaPp.toFixed(1)}pp</strong> this week.
+              </>
+            ) : (
+              <span style={{ color: t.inkDim, fontStyle: 'italic' }}>
+                Drill a few lines this week to see retention trends.
+              </span>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* KPI grid ×4 */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: 14,
+          marginBottom: 18,
+        }}
+      >
+        <KpiCard
+          title="Streak"
+          tone="brand"
+          value={
+            streakText !== null ? (
+              <>
+                {streakText}{' '}
+                <span style={{ fontSize: 14, color: t.inkSoft, fontWeight: 500 }}>days</span>
+              </>
+            ) : (
+              '—'
+            )
+          }
+          caption={streakCaption}
+          pending={streakText === null}
         />
-        <StatCard
-          icon={<Calendar size={16} color={t.brand} />}
-          label="Due for review"
+        <KpiCard
+          title="Due Today"
           value={String(dueCount)}
-          sub={dueCount === 0 ? 'All caught up' : 'Lines past their interval'}
+          caption={dueCount === 0 ? 'All caught up' : 'Lines past their interval'}
         />
-        <StatCard
-          icon={<LineChart size={16} color={t.brand} />}
-          label="Drilled lines"
-          value={String(states.size)}
-          sub={`out of ${totalLines}`}
+        <KpiCard
+          title="Accuracy"
+          tone="success"
+          value={accuracyText ?? '—'}
+          caption={accuracyCaption}
+          pending={accuracyText === null}
+        />
+        <KpiCard
+          title="Mastered"
+          value={
+            <>
+              {masteredCount}
+              <span style={{ fontSize: 18, color: t.inkSoft, fontWeight: 500 }}>
+                /{totalLinesValue}
+              </span>
+            </>
+          }
+          caption={masteredCount === 0 ? 'Drill to start mastering' : 'Box 4+'}
         />
       </div>
 
-      <StreaksRow />
-      <AccuracyRow />
-      <HeatmapTabs />
-    </div>
+      {/* Secondary row ×3 — static v1 placeholders */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+        <Card>
+          <CardTitle>Current Focus</CardTitle>
+          <div style={{ fontSize: 13, color: t.ink, lineHeight: 1.65, fontFamily: fonts.sans }}>
+            {/* Wire in Phase 3/4 — drives off detected weakness + saved focus state */}
+            Pick a study focus to spotlight specific patterns in your drilling.
+          </div>
+        </Card>
+        <Card>
+          <CardTitle>Weak Structures</CardTitle>
+          <Insight>
+            {/* Wire in Phase 3/4 — feeds from detected pattern analysis */}
+            Connect a game source under Games to detect recurring structural weaknesses.
+          </Insight>
+        </Card>
+        <Card>
+          <CardTitle>Quick Actions</CardTitle>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+            <QuickAction to={drillHref} label="Drill due" />
+            <QuickAction to="/repertoire" label="Browse" />
+            <QuickAction to="/insights" label="Insights" />
+          </div>
+        </Card>
+      </div>
+    </PageBody>
   );
 }
 
-function StatCard({
-  icon,
-  label,
+function KpiCard({
+  title,
   value,
-  sub,
+  caption,
+  tone = 'default',
+  pending = false,
 }: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  sub: string;
+  title: string;
+  value: React.ReactNode;
+  caption: string;
+  tone?: 'default' | 'brand' | 'success';
+  pending?: boolean;
 }) {
   const t = useTokens();
+  const color = pending ? t.inkSoft : tone === 'brand' ? t.brand : tone === 'success' ? t.success : t.ink;
   return (
-    <Card padding={16}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        {icon}
-        <div style={{ fontSize: 12, color: t.inkDim, fontFamily: fonts.sans, fontWeight: 600 }}>
-          {label}
-        </div>
-      </div>
+    <Card>
+      <CardTitle>{title}</CardTitle>
       <div
         style={{
-          fontSize: 28,
+          fontSize: 32,
           fontWeight: 700,
-          color: t.ink,
+          color,
+          letterSpacing: '-0.02em',
           fontFamily: fonts.sans,
-          letterSpacing: -0.5,
-          marginBottom: 4,
         }}
       >
         {value}
       </div>
-      <div style={{ fontSize: 12, color: t.inkSoft, fontFamily: fonts.sans }}>{sub}</div>
       <div
         style={{
-          height: 4,
-          background: t.surfaceAlt,
-          borderRadius: radius.full,
-          marginTop: 10,
-          overflow: 'hidden',
+          fontSize: 12,
+          color: t.inkSoft,
+          marginTop: 6,
+          fontFamily: fonts.sans,
+          fontStyle: pending ? 'italic' : 'normal',
         }}
-      />
+      >
+        {caption}
+      </div>
     </Card>
+  );
+}
+
+function QuickAction({ to, label }: { to: string; label: string }) {
+  const t = useTokens();
+  return (
+    <Link
+      to={to}
+      style={{
+        padding: '7px 12px',
+        background: t.surfaceAlt,
+        border: `0.5px solid ${t.border}`,
+        borderRadius: 10,
+        fontSize: 12,
+        color: t.ink,
+        fontWeight: 500,
+        fontFamily: fonts.sans,
+        textDecoration: 'none',
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </Link>
   );
 }

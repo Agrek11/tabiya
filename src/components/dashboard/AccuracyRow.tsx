@@ -85,7 +85,7 @@ function AccuracyCard({
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            color: isNull ? t.inkSoft : t.brand,
+            color: isNull ? t.inkSoft : t.success,
           }}
         >
           <Icon size={16} />
@@ -110,13 +110,13 @@ function AccuracyCard({
               borderRadius: radius.full,
               background:
                 deltaInfo.tone === 'up'
-                  ? t.brandSoft
+                  ? t.successSoft
                   : deltaInfo.tone === 'down'
-                  ? 'rgba(226, 88, 34, 0.15)'
+                  ? t.redSoft
                   : t.surfaceAlt,
               color:
                 deltaInfo.tone === 'up'
-                  ? t.brand
+                  ? t.success
                   : deltaInfo.tone === 'down'
                   ? t.red
                   : t.inkDim,

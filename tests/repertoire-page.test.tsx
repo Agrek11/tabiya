@@ -122,14 +122,15 @@ describe('RepertoirePage', () => {
     });
   });
 
-  it('child openings hidden until family card clicked', async () => {
+  it('renders all openings flat under their family heading (v1 preview)', async () => {
+    // v1 preview shows openings as flat rows grouped under family section
+    // headers — no expand/collapse. All three openings should be visible
+    // immediately after the catalog loads.
     renderWithProviders(<RepertoirePage />);
     await waitFor(() => screen.getByText('Open Games'));
-    expect(screen.queryByText('Ruy Lopez')).toBeNull();
-
-    fireEvent.click(screen.getByText('Open Games'));
     expect(screen.getByText('Ruy Lopez')).toBeTruthy();
     expect(screen.getByText('Italian Game')).toBeTruthy();
+    expect(screen.getByText("Queen's Gambit")).toBeTruthy();
   });
 
   it('search filters families by opening name', async () => {

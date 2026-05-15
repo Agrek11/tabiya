@@ -202,6 +202,12 @@ export type UseDrillReturn = {
   stepBack: () => void;
   stepForward: () => void;
   restart: () => void;
+  /** Jump board to the position AFTER `targetPly` moves of the canonical line
+   *  have been played. `targetPly === 0` resets to the start position;
+   *  `targetPly === line.length` jumps to the complete state.
+   *  Used by clickable move-history chips. No-op if drill is in wrong_pending
+   *  or auto_playing — only legal during awaiting_player or complete. */
+  jumpToPly: (targetPly: number) => void;
   /** Legal destination squares for a piece on `square`. Empty if it's not the
    *  player's turn to move that piece. Used by click-to-move UI to render
    *  green dots on legal squares after the user clicks one of their pieces. */
@@ -407,6 +413,28 @@ export function useDrill(
     resetCounters();
   }, [canRestart, chess, resetCounters]);
 
+  const jumpToPly = useCallback(
+    (targetPly: number): void => {
+      // Only legal during awaiting_player or complete — never during
+      // wrong_pending (would clobber the wrong-move flash) or auto_playing
+      // (would race the timer).
+      if (state.kind !== 'awaiting_player' && state.kind !== 'complete') return;
+      const clamped = Math.max(0, Math.min(targetPly, line.length));
+      chess.reset();
+      for (let i = 0; i < clamped; i++) {
+        const san = line[i];
+        if (san === undefined) break;
+        chess.move(san);
+      }
+      dispatch({
+        type: 'STEP_BACK_DONE',
+        newLineIndex: clamped,
+        chessHistoryLen: clamped,
+      });
+    },
+    [chess, line, state.kind]
+  );
+
   // -------------------------------------------------------------------------
   // Hint (one-shot)
   // -------------------------------------------------------------------------
@@ -498,6 +526,7 @@ export function useDrill(
     stepBack,
     stepForward,
     restart,
+    jumpToPly,
     legalMovesFrom,
     drillResult,
   };

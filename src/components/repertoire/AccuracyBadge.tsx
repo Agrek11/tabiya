@@ -20,8 +20,8 @@ export function AccuracyBadge({
   const pct = (accuracy * 100).toFixed(1);
   const tone = accuracy >= 0.85 ? 'good' : accuracy >= 0.7 ? 'mid' : 'low';
   const bg =
-    tone === 'good' ? t.brandSoft : tone === 'mid' ? t.surfaceAlt : 'rgba(226, 88, 34, 0.15)';
-  const fg = tone === 'good' ? t.brand : tone === 'mid' ? t.inkDim : t.red;
+    tone === 'good' ? t.successSoft : tone === 'mid' ? t.surfaceAlt : t.redSoft;
+  const fg = tone === 'good' ? t.success : tone === 'mid' ? t.inkDim : t.red;
   return (
     <span
       title={`${pct}% over ${moves} move${moves === 1 ? '' : 's'}`}
