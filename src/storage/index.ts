@@ -58,5 +58,11 @@ export type {
   SrsState,
   DrillResult,
   SrsRepository,
+  // Phase 1b — Explain Mode
+  Arrow,
+  ArrowColor,
+  HighlightSquare,
+  HighlightIntent,
+  ExplainBlock,
 } from './types';
 export { BOX_INTERVALS_DAYS } from './types';

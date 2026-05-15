@@ -1,0 +1,104 @@
+{
+  "line_id": "italian-giuoco-pianissimo-main",
+  "schema_version": 2,
+  "_choice_note": "CHOICE: Spec called for ~10-12 ply Italian main; the cataloged line is 19 ply (italian-giuoco-pianissimo-main). Validator requires len(blocks)==len(moves), so 19 hand-authored blocks were written. Underscore-prefixed key is ignored by pydantic — kept here as a future-archeology comment.",
+  "blocks": [
+    {
+      "rationale": "1. e4 — King's pawn opens lines for the king's bishop and queen and stakes a claim to the central squares d5 and f5.",
+      "arrows": [{ "from": "e2", "to": "e4", "color": "green" }],
+      "highlights": [{ "square": "d5", "intent": "focus" }, { "square": "e4", "intent": "support" }]
+    },
+    {
+      "rationale": "1...e5 — Black mirrors the central claim. Both pawns now lock horns; whoever can support a knight or bishop into the center first will win the opening.",
+      "arrows": [{ "from": "e7", "to": "e5", "color": "green" }],
+      "highlights": [{ "square": "e5", "intent": "focus" }, { "square": "d4", "intent": "focus" }]
+    },
+    {
+      "rationale": "2. Nf3 — Develops the king's knight to its best square, attacks the e5 pawn, and clears the f-file for kingside castling. Classic 'attack while developing'.",
+      "arrows": [{ "from": "g1", "to": "f3", "color": "green" }, { "from": "f3", "to": "e5", "color": "red" }],
+      "highlights": [{ "square": "e5", "intent": "threat" }]
+    },
+    {
+      "rationale": "2...Nc6 — Defends e5 and develops a piece. The queen's knight covers the attacked pawn and points at the d4 square.",
+      "arrows": [{ "from": "b8", "to": "c6", "color": "green" }, { "from": "c6", "to": "e5", "color": "blue" }],
+      "highlights": [{ "square": "e5", "intent": "support" }]
+    },
+    {
+      "rationale": "3. Bc4 — The Italian bishop. White's king-bishop swings to its most active diagonal, eyeing the f7 square — Black's weakest pawn since only the king defends it.",
+      "arrows": [{ "from": "f1", "to": "c4", "color": "green" }, { "from": "c4", "to": "f7", "color": "red" }],
+      "highlights": [{ "square": "f7", "intent": "threat" }]
+    },
+    {
+      "rationale": "3...Bc5 — Black mirrors with the Giuoco Piano ('quiet game'). Each bishop now aims at the opposing f-pawn. Symmetry is fine here; Black is one tempo behind but the position is solid.",
+      "arrows": [{ "from": "f8", "to": "c5", "color": "green" }, { "from": "c5", "to": "f2", "color": "red" }],
+      "highlights": [{ "square": "f2", "intent": "threat" }, { "square": "f7", "intent": "threat" }]
+    },
+    {
+      "rationale": "4. c3 — Prepares the d4 break. Without this pawn first, ...exd4 cxd4 would lose the c-pawn; with c3 already played, White can recapture with the pawn and build a broad center.",
+      "arrows": [{ "from": "c2", "to": "c3", "color": "green" }, { "from": "d2", "to": "d4", "color": "blue" }],
+      "highlights": [{ "square": "d4", "intent": "support" }]
+    },
+    {
+      "rationale": "4...Nf6 — Develops the king's knight, attacks e4, and prepares kingside castling. Black accepts a slightly slower plan but keeps the position elastic.",
+      "arrows": [{ "from": "g8", "to": "f6", "color": "green" }, { "from": "f6", "to": "e4", "color": "red" }],
+      "highlights": [{ "square": "e4", "intent": "threat" }]
+    },
+    {
+      "rationale": "5. d3 — The Pianissimo ('very quiet'). Instead of the sharp d4 push, White takes a slow squeeze plan: defend e4, finish development, and only break the position open after every piece has a home.",
+      "arrows": [{ "from": "d2", "to": "d3", "color": "green" }],
+      "highlights": [{ "square": "e4", "intent": "support" }],
+      "threats": "If 5. d4 instead, then 5...exd4 6. cxd4 Bb4+ pins something — manageable but messy. d3 keeps it calm."
+    },
+    {
+      "rationale": "5...d6 — Black returns the favor: defend e5, free up the queen's bishop, and prepare ...Be6 or ...Bg4 in time. Both sides will now slowly maneuver.",
+      "arrows": [{ "from": "d7", "to": "d6", "color": "green" }],
+      "highlights": [{ "square": "e5", "intent": "support" }]
+    },
+    {
+      "rationale": "6. O-O — King castles short, putting the king in the corner and connecting the rooks. In quiet positions this is non-negotiable before any breaks.",
+      "arrows": [{ "from": "e1", "to": "g1", "color": "green" }],
+      "highlights": [{ "square": "g1", "intent": "support" }]
+    },
+    {
+      "rationale": "6...O-O — Black mirrors. Both kings are safe; both rooks are connected. The middlegame now starts in earnest.",
+      "arrows": [{ "from": "e8", "to": "g8", "color": "green" }],
+      "highlights": [{ "square": "g8", "intent": "support" }]
+    },
+    {
+      "rationale": "7. h3 — The luft. Prevents any future ...Bg4 pin against the f3 knight and gives the king a flight square on h2. Tiny but useful in slow positions.",
+      "arrows": [{ "from": "h2", "to": "h3", "color": "green" }],
+      "highlights": [{ "square": "g4", "intent": "threat" }]
+    },
+    {
+      "rationale": "7...a6 — Black's mirror prophylaxis. Prevents Bb5 ideas, prepares ...Ba7 to reroute the king-bishop, and gains queenside space. Patient chess.",
+      "arrows": [{ "from": "a7", "to": "a6", "color": "green" }],
+      "highlights": [{ "square": "b5", "intent": "threat" }]
+    },
+    {
+      "rationale": "8. Re1 — Rook to e1, where it eyes the e-file. Even in a closed position, this rook will become important the moment the center opens.",
+      "arrows": [{ "from": "f1", "to": "e1", "color": "green" }],
+      "highlights": [{ "square": "e5", "intent": "focus" }]
+    },
+    {
+      "rationale": "8...Ba7 — Black tucks the king-bishop behind the a6 pawn. From a7 the bishop still bites on the a7-g1 diagonal but is out of the way of any future ...c6 / ...d5 break.",
+      "arrows": [{ "from": "c5", "to": "a7", "color": "green" }],
+      "highlights": [{ "square": "a7", "intent": "support" }]
+    },
+    {
+      "rationale": "9. Nbd2 — The maneuvering knight. White's queen's knight starts the route Nbd2-f1-g3, eventually landing on f5 or h5 once the kingside opens.",
+      "arrows": [{ "from": "b1", "to": "d2", "color": "green" }, { "from": "d2", "to": "f1", "color": "blue" }],
+      "highlights": [{ "square": "f1", "intent": "support" }]
+    },
+    {
+      "rationale": "9...h6 — Black's matching luft. Same idea: deny White's pieces the g5 square and give the king an escape on h7.",
+      "arrows": [{ "from": "h7", "to": "h6", "color": "green" }],
+      "highlights": [{ "square": "g5", "intent": "threat" }]
+    },
+    {
+      "rationale": "10. Nf1 — Knight steps off the bishop's diagonal and heads for g3. From g3 it threatens Nf5 or Nh5 — the slow Italian build-up is now fully primed. From here the games can go in many directions; the opening is done.",
+      "arrows": [{ "from": "d2", "to": "f1", "color": "green" }, { "from": "f1", "to": "g3", "color": "blue" }],
+      "highlights": [{ "square": "g3", "intent": "support" }, { "square": "f5", "intent": "focus" }],
+      "pauseMs": 3500
+    }
+  ]
+}

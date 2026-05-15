@@ -10,6 +10,10 @@ dependencies = [
   "tenacity>=8.4",
   "PyYAML>=6.0",
   "truststore>=0.10",
+  # Phase 1b — Explain Mode authoring pipeline (Article 1: permissive licenses).
+  # Build-time only; never ship in the frontend bundle (Article 16).
+  "anthropic>=0.40",   # MIT — direct SDK call, no LangChain (Article 3)
+  "jinja2>=3.1",       # BSD-3 — prompt templating
 ]
 
 [project.optional-dependencies]

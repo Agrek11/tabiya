@@ -29,6 +29,38 @@ export type ForkAnnotation = {
   rationale?: string;
 };
 
+// ---------------------------------------------------------------------------
+// Phase 1b — Explain Mode types (R2)
+// ---------------------------------------------------------------------------
+
+export type ArrowColor = 'green' | 'red' | 'blue';
+
+export type Arrow = {
+  from: string; // algebraic square e.g. "e2"
+  to: string; // algebraic square e.g. "e4"
+  color?: ArrowColor; // default 'green'
+};
+
+export type HighlightIntent = 'focus' | 'threat' | 'support';
+
+export type HighlightSquare = {
+  square: string; // e.g. "d5"
+  intent?: HighlightIntent; // styling hint
+};
+
+/**
+ * Per-ply "why this move" payload. Loaded as a sidecar from
+ * `public/explain/<lineId>.json` on Explain Mode entry. When attached to a
+ * `Line.explain` array, `explain.length === moves.length` (one block per ply).
+ */
+export type ExplainBlock = {
+  rationale: string; // 1-3 sentence "why this move"
+  arrows?: Arrow[];
+  highlights?: HighlightSquare[];
+  threats?: string; // optional 2nd-pass deeper note (e.g., "If ...Nxe4 then Re1 pins")
+  pauseMs?: number; // default 2500; per-move override
+};
+
 export type Line = {
   id: string;
   opening_id: string;
@@ -42,6 +74,13 @@ export type Line = {
   strategic_notes: string[];
   key_squares: KeySquare[];
   forks: ForkAnnotation[];
+  /**
+   * Phase 1b — optional per-ply explain blocks, hydrated from sidecar on
+   * Explain Mode entry. When present, length matches `moves`. The sidecar
+   * itself lives at `public/explain/<id>.json` and is fetched lazily by
+   * `useExplainContent` — this field on `Line` is the in-memory landing zone.
+   */
+  explain?: ExplainBlock[];
 };
 
 export type Opening = {
@@ -84,6 +123,13 @@ export type Preset = {
 
 export type Catalog = {
   version: string;
+  /**
+   * Phase 1b — content/schema generation marker. Bumped 1 → 2 when the
+   * `explain` sidecar feature lands. Optional in TS so older catalogs still
+   * parse (graceful degrade per Article 5); the loader logs a warning on
+   * mismatch but never throws.
+   */
+  schema_version?: number;
   families: Family[];
   variations: Variation[];
   openings: Opening[];

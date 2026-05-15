@@ -45,6 +45,10 @@ import { useDrill } from '../drill/useDrill';
 import { useSRS } from '../hooks/useSRS';
 import { familyPassesPreset, usePreset } from '../hooks/usePreset';
 import { useDrillHistoryOpen } from '../drill/use-drill-history-open';
+import { useExplainContent } from '../hooks/useExplainContent';
+import { useLinePrefMode } from '../hooks/useLinePrefMode';
+import { ModeToggle } from '../ui/ModeToggle';
+import { ExplainView } from '../ui/explain/ExplainView';
 import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts, radius } from '../theme/tokens';
@@ -294,6 +298,18 @@ export function DrillPage() {
     [activeLine]
   );
   const drillColor: 'white' | 'black' = activeOpening?.color ?? 'black';
+
+  // Phase 1b — Explain Mode wiring. The sidecar fetcher and per-line mode pref
+  // hook both run regardless of mode (they're cheap; React 19 batching).
+  // ModeToggle renders only when the sidecar is loaded; flipping the toggle
+  // re-mounts the active view via differing React keys so chess.js instances
+  // never leak across modes.
+  const activeLineId: string | null = activeLine?.id ?? null;
+  const explainContent = useExplainContent({
+    lineId: activeLineId,
+    expectedLength: drillMoves.length,
+  });
+  const [explainMode, setExplainMode] = useLinePrefMode(activeLineId);
 
   const drill = useDrill(drillMoves, drillColor);
   const {
@@ -701,6 +717,18 @@ export function DrillPage() {
             </div>
           </div>
 
+          {/* Phase 1b — Drill/Explain toggle. Hidden when sidecar is missing or
+              not yet authored for this line (graceful degrade per R1 AC #4). */}
+          {(explainContent.kind === 'loaded' || explainContent.kind === 'loading') && (
+            <div style={{ flexShrink: 0 }}>
+              <ModeToggle
+                value={explainMode}
+                onChange={setExplainMode}
+                disabled={explainContent.kind === 'loading'}
+              />
+            </div>
+          )}
+
           {/* Mode dropdown */}
           <div ref={modeMenuRef} style={{ position: 'relative', flexShrink: 0 }}>
             <button
@@ -806,6 +834,24 @@ export function DrillPage() {
           </div>
         </div>
 
+        {/* Phase 1b — Explain Mode branch. Renders the explain view (with its
+            own progress bar + board + rail) in place of the drill UI when the
+            sidecar is loaded AND the per-line pref is "explain". Unique
+            React key ensures the chess.js instance under useExplainMode never
+            leaks across mode switches. */}
+        {explainMode === 'explain' &&
+        explainContent.kind === 'loaded' &&
+        activeLine !== null ? (
+          <ExplainView
+            key={`explain-${activeLine.id}`}
+            line={activeLine}
+            blocks={explainContent.data}
+            playerColor={drillColor}
+            totalPlies={drillMoves.length}
+            onSkipToDrill={() => setExplainMode('drill')}
+          />
+        ) : (
+          <>
         {/* PROGRESS BAR */}
         <div>
           <div
@@ -940,6 +986,8 @@ export function DrillPage() {
             <Lightbulb size={14} /> Hint
           </button>
         </div>
+          </>
+        )}
       </div>
 
       {/* RIGHT RAIL — MOVE HISTORY */}

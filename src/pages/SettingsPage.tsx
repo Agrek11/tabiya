@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Moon, Sun, Volume2, VolumeX } from 'lucide-react';
+import { AlertTriangle, Moon, Sparkles, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useTheme, useTokens } from '../theme/ThemeContext';
 import { useBoardTheme } from '../theme/BoardThemeContext';
 import { usePieceSet } from '../theme/PieceSetContext';
@@ -13,6 +13,7 @@ import { Button } from '../ui/primitives/Button';
 import { fonts, radius } from '../theme/tokens';
 import { getSettings, playMove, writeSettings, type SoundSettings } from '../sound/sounds';
 import { getSrsRepository } from '../storage';
+import { getExplainTtsFlag, setExplainTtsFlag } from '../storage/featureFlags';
 import { usePreset } from '../hooks/usePreset';
 
 export function SettingsPage() {
@@ -21,6 +22,11 @@ export function SettingsPage() {
   const { themeId: boardThemeId, setThemeId: setBoardThemeId, options: boardThemeOptions } = useBoardTheme();
   const { id: pieceSetId, setId: setPieceSetId, options: pieceSetOptions } = usePieceSet();
   const [sound, setSoundState] = useState<SoundSettings>(() => getSettings());
+  const [explainTtsOn, setExplainTtsOn] = useState<boolean>(() => getExplainTtsFlag());
+  const speechAvailable =
+    typeof window !== 'undefined' &&
+    typeof window.speechSynthesis !== 'undefined' &&
+    typeof window.SpeechSynthesisUtterance !== 'undefined';
   const { preset: activePreset, presets, setPresetId } = usePreset();
   const [srsCount, setSrsCount] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
@@ -407,6 +413,73 @@ export function SettingsPage() {
               </button>
             );
           })}
+        </div>
+      </Card>
+
+      <Card>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            gap: 16,
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                fontWeight: 600,
+                fontSize: 14,
+                color: t.ink,
+                fontFamily: fonts.sans,
+              }}
+            >
+              <Sparkles size={15} color={t.brand} />
+              Explain Mode
+            </div>
+            <div
+              style={{
+                fontSize: 13,
+                color: t.inkDim,
+                marginTop: 4,
+                fontFamily: fonts.sans,
+                lineHeight: 1.5,
+              }}
+            >
+              {speechAvailable
+                ? "Speak each move's rationale aloud during Explain Mode. Uses your browser's built-in voice. No network."
+                : 'Your browser does not support speech synthesis.'}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            <Button
+              variant={explainTtsOn && speechAvailable ? 'primary' : 'secondary'}
+              onClick={() => {
+                if (!speechAvailable) return;
+                setExplainTtsOn(true);
+                setExplainTtsFlag(true);
+              }}
+              disabled={!speechAvailable}
+              aria-label="Enable rationale TTS"
+            >
+              <Volume2 size={14} /> On
+            </Button>
+            <Button
+              variant={!explainTtsOn || !speechAvailable ? 'primary' : 'secondary'}
+              onClick={() => {
+                if (!speechAvailable) return;
+                setExplainTtsOn(false);
+                setExplainTtsFlag(false);
+              }}
+              disabled={!speechAvailable}
+              aria-label="Disable rationale TTS"
+            >
+              <VolumeX size={14} /> Off
+            </Button>
+          </div>
         </div>
       </Card>
 

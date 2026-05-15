@@ -42,6 +42,11 @@ from .tabiya_build.whitelist import (
     OpeningSpec,
     filter_openings,
 )
+from .tabiya_build.validate_explain import (
+    ExplainValidationError,
+    copy_explain_to_public,
+    validate_all_explain_sidecars,
+)
 from .tabiya_build.writer import build_version, print_summary, write_catalog
 
 logger = logging.getLogger("tabiya.build")
@@ -55,6 +60,8 @@ DEFAULT_FAMILIES = REPO_ROOT / "scripts" / "curated" / "families.yml"
 DEFAULT_VARIATIONS = REPO_ROOT / "scripts" / "curated" / "variations.yml"
 DEFAULT_LINES = REPO_ROOT / "scripts" / "curated" / "lines.yml"
 DEFAULT_PRESETS = REPO_ROOT / "scripts" / "curated" / "presets.yml"
+DEFAULT_EXPLAIN_SRC = REPO_ROOT / "data" / "explain"
+DEFAULT_EXPLAIN_DST = REPO_ROOT / "public" / "explain"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -80,7 +87,45 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--variations", type=Path, default=DEFAULT_VARIATIONS)
     p.add_argument("--lines", type=Path, default=DEFAULT_LINES)
     p.add_argument("--presets", type=Path, default=DEFAULT_PRESETS)
+    p.add_argument(
+        "--skip-explain",
+        action="store_true",
+        help="Skip Phase 1b explain sidecar validate + copy step.",
+    )
+    p.add_argument(
+        "--explain-src",
+        type=Path,
+        default=DEFAULT_EXPLAIN_SRC,
+        help="Source dir for explain sidecars (default: data/explain).",
+    )
+    p.add_argument(
+        "--explain-dst",
+        type=Path,
+        default=DEFAULT_EXPLAIN_DST,
+        help="Destination dir for explain sidecars (default: public/explain).",
+    )
     return p.parse_args(argv)
+
+
+def _process_explain_sidecars(catalog: Catalog, args: argparse.Namespace) -> int:
+    """Validate + copy explain sidecars. Returns 0 on success, 1 on failure."""
+    if args.skip_explain:
+        logger.info("Skipping explain sidecar validate + copy (--skip-explain)")
+        return 0
+    try:
+        sidecars = validate_all_explain_sidecars(args.explain_src, catalog)
+    except ExplainValidationError as e:
+        logger.error("Explain sidecar validation failed: %s", e)
+        return 1
+    if sidecars:
+        copied = copy_explain_to_public(args.explain_src, args.explain_dst)
+        logger.info(
+            "Validated %d explain sidecar(s); copied %d to %s",
+            len(sidecars),
+            copied,
+            args.explain_dst,
+        )
+    return 0
 
 
 def build_for_spec(
@@ -195,6 +240,8 @@ def main(argv: list[str] | None = None) -> int:
         )
         size = write_catalog(catalog, args.out)
         print_summary(catalog, size)
+        if _process_explain_sidecars(catalog, args) != 0:
+            return 1
         return 0
     if args.source == "flat-tsv":
         # Bulk path — every TSV row becomes one Opening + one Line. No
@@ -243,6 +290,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     size = write_catalog(catalog, args.out)
     print_summary(catalog, size)
+    if _process_explain_sidecars(catalog, args) != 0:
+        return 1
     return 0
 
 

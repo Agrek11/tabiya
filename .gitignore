@@ -30,6 +30,9 @@ htmlcov/
 # Catalog build cache
 scripts/.cache/
 
+# Phase 1b — Explain Mode sidecar build output (regenerated from data/explain/)
+public/explain/
+
 # Design screenshots — kept locally for reference, not in repo
 Screenshot*.png
 Screenshot*.jpg

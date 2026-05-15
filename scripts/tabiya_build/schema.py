@@ -120,8 +120,67 @@ class Catalog(BaseModel):
     """The full bundled catalog written to public/catalog.json."""
 
     version: str = Field(..., description="Build date in YYYY-MM-DD UTC")
+    schema_version: int = Field(
+        default=2,
+        ge=1,
+        description=(
+            "Catalog schema generation. Bumped 1 → 2 in Phase 1b when explain "
+            "sidecars landed. Frontend logs a warning on mismatch but does not "
+            "fail to load (Article 5 — graceful degrade)."
+        ),
+    )
     families: list[Family] = Field(default_factory=list)
     variations: list[Variation] = Field(default_factory=list)
     openings: list[Opening] = Field(default_factory=list)
     lines: list[Line] = Field(default_factory=list)
     presets: list[Preset] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Phase 1b — Explain Mode (R2)
+#
+# Sidecar shape lives in data/explain/<line_id>.json and is build-validated
+# against a Catalog before being copied to public/explain/. Frontend lazy-
+# loads these on Explain Mode entry; bundle stays lean.
+# ---------------------------------------------------------------------------
+
+# Single algebraic square, e.g. "e2", "d5". Strict lowercase a-h + 1-8.
+SQUARE_PATTERN = r"^[a-h][1-8]$"
+
+
+class Arrow(BaseModel):
+    """Overlay arrow from one square to another."""
+
+    model_config = {"populate_by_name": True}
+
+    # `from` is a Python keyword — use `from_` and accept JSON key "from".
+    from_: str = Field(..., alias="from", pattern=SQUARE_PATTERN)
+    to: str = Field(..., pattern=SQUARE_PATTERN)
+    color: Literal["green", "red", "blue"] | None = Field(default=None)
+
+
+class HighlightSquare(BaseModel):
+    """Square highlight overlay, styled by `intent`."""
+
+    square: str = Field(..., pattern=SQUARE_PATTERN)
+    intent: Literal["focus", "threat", "support"] | None = Field(default=None)
+
+
+class ExplainBlock(BaseModel):
+    """Per-ply rationale + overlay payload (one per move in a line)."""
+
+    rationale: str = Field(..., min_length=1)  # no upper bound (R7 — UI truncates)
+    arrows: list[Arrow] | None = Field(default=None)
+    highlights: list[HighlightSquare] | None = Field(default=None)
+    threats: str | None = Field(default=None)
+    pause_ms: int | None = Field(default=None, ge=500, le=20_000, alias="pauseMs")
+
+    model_config = {"populate_by_name": True}
+
+
+class ExplainSidecar(BaseModel):
+    """Sidecar file shape — one per line that has explain content."""
+
+    line_id: str
+    schema_version: int = Field(..., ge=1)
+    blocks: list[ExplainBlock]
