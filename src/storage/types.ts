@@ -118,6 +118,12 @@ export type Preset = {
   description: string;
   tier_band: number[];
   family_ids: string[];
+  /**
+   * Phase 1.5 — optional explicit member line IDs. When non-empty, authoritative.
+   * When empty/absent, legacy `tier_band` + `family_ids` derivation is used.
+   * Optional in TS so older catalogs (schema_version 2) still parse.
+   */
+  lines?: string[];
   recommended_color: 'white-only' | 'black-only' | 'both';
 };
 

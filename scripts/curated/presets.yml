@@ -1,8 +1,18 @@
 # Curated repertoire presets — one-click loadouts.
 #
-# Filter applied to RepertoirePage and DrillPage when active. 'custom' (no
-# preset) shows everything. tier_band and family_ids combine inclusively
-# (a family is shown if it matches EITHER its tier OR is explicitly listed).
+# Phase 1.5 schema: each preset now declares an explicit `lines:` array.
+# When `lines` is non-empty, the Phase 1.5 `computeEffectivePick` resolver
+# treats it as authoritative. When `lines` is empty, the legacy tier/family
+# derivation is used (R5.1 fallback).
+#
+# `tier_band` + `family_ids` are retained — older versions of the catalog
+# loader (and the `usePreset` migration path) still read them.
+#
+# `id: off` is a synthetic preset id with `lines: []` meaning "no filter"
+# (R5.9). It is NOT shipped in this YAML; it is constructed in code.
+#
+# `scripts/validate_presets.py` asserts every line ID listed below exists
+# in `public/catalog.json`.
 
 presets:
   - id: beginner
@@ -13,6 +23,12 @@ presets:
       - london
       - caro-kann
       - italian
+    lines:
+      - london-modern-main
+      - london-anti-kid-main
+      - caro-kann-classical-main
+      - caro-kann-advance-main
+      - italian-giuoco-pianissimo-main
     recommended_color: both
 
   - id: intermediate
@@ -20,6 +36,23 @@ presets:
     description: Classical mainlines covering ~70% of club games.
     tier_band: [1, 2]
     family_ids: []
+    lines:
+      - spanish-closed-main
+      - spanish-berlin-main
+      - italian-giuoco-pianissimo-main
+      - italian-two-knights-main
+      - sicilian-najdorf-classical
+      - sicilian-alapin-main
+      - french-classical-main
+      - french-advance-main
+      - caro-kann-classical-main
+      - caro-kann-advance-main
+      - qgd-orthodox-main
+      - qgd-exchange-main
+      - kid-mar-del-plata-main
+      - london-modern-main
+      - slav-main-line
+      - scandinavian-qa5-main
     recommended_color: both
 
   - id: advanced
@@ -27,4 +60,56 @@ presets:
     description: Full theory including sharp tactical lines.
     tier_band: [1, 2, 3]
     family_ids: []
+    lines:
+      - spanish-closed-main
+      - spanish-closed-chigorin
+      - spanish-berlin-main
+      - spanish-berlin-anti
+      - spanish-marshall-main
+      - spanish-marshall-anti-a4
+      - italian-giuoco-pianissimo-main
+      - italian-modern-d4
+      - italian-two-knights-main
+      - italian-fried-liver
+      - italian-evans-gambit-main
+      - sicilian-najdorf-english-attack
+      - sicilian-najdorf-classical
+      - sicilian-najdorf-poisoned-pawn
+      - sicilian-dragon-yugoslav
+      - sicilian-dragon-classical
+      - sicilian-sveshnikov-main
+      - sicilian-alapin-main
+      - french-winawer-main
+      - french-winawer-positional
+      - french-classical-main
+      - french-advance-main
+      - caro-kann-classical-main
+      - caro-kann-karpov
+      - caro-kann-advance-main
+      - caro-kann-exchange-main
+      - qgd-orthodox-main
+      - qgd-orthodox-modern
+      - qgd-tartakower-main
+      - qgd-exchange-main
+      - kid-mar-del-plata-main
+      - kid-bayonet
+      - kid-saemisch-main
+      - kid-fianchetto-main
+      - london-modern-main
+      - london-anti-kid-main
+      - london-jobava-main
+      - scotch-classical-main
+      - vienna-gambit-main
+      - scandinavian-qa5-main
+      - pirc-classical-main
+      - alekhine-modern-main
+      - slav-main-line
+      - semi-slav-meran-main
+      - nimzo-rubinstein-main
+      - queens-indian-petrosian-main
+      - grunfeld-exchange-main
+      - catalan-open-main
+      - english-symmetrical-main
+      - kia-main-line
+      - dutch-stonewall-main
     recommended_color: both

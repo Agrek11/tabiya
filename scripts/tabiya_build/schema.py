@@ -104,7 +104,12 @@ class Variation(BaseModel):
 
 
 class Preset(BaseModel):
-    """A one-click repertoire loadout (Phase 1c)."""
+    """A one-click repertoire loadout (Phase 1c → Phase 1.5).
+
+    Phase 1.5 adds the optional `lines:` array — when non-empty it is the
+    authoritative member list used by `computeEffectivePick`. When empty
+    the legacy `tier_band` + `family_ids` derivation is used (R5.1 fallback).
+    """
 
     id: str
     name: str
@@ -112,6 +117,10 @@ class Preset(BaseModel):
     tier_band: list[int] = Field(default_factory=list, description="1/2/3 tiers included")
     family_ids: list[str] = Field(
         default_factory=list, description="Explicit additions outside tier_band"
+    )
+    lines: list[str] = Field(
+        default_factory=list,
+        description="Phase 1.5 — explicit member line IDs; empty = legacy fallback",
     )
     recommended_color: Literal["white-only", "black-only", "both"] = "both"
 

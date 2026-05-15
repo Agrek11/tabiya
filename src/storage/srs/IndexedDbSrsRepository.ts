@@ -13,10 +13,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 import { nextSrsState } from './scheduler';
 import type { DrillResult, SrsBox, SrsRepository, SrsState } from '../types';
-
-const DB_NAME = 'tabiya';
-const DB_VERSION = 1;
-const STORE = 'srs_state';
+import { DB_NAME, DB_VERSION, STORE_SRS as STORE, runMigrations } from '../db/schema';
 
 export class IndexedDbSrsRepository implements SrsRepository {
   private dbPromise: Promise<IDBPDatabase> | null = null;
@@ -24,12 +21,7 @@ export class IndexedDbSrsRepository implements SrsRepository {
   private getDb(): Promise<IDBPDatabase> {
     if (this.dbPromise === null) {
       this.dbPromise = openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
-          if (!db.objectStoreNames.contains(STORE)) {
-            const store = db.createObjectStore(STORE, { keyPath: 'line_id' });
-            store.createIndex('box', 'box', { unique: false });
-          }
-        },
+        upgrade: runMigrations,
       });
     }
     return this.dbPromise;

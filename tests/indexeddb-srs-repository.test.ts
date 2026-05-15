@@ -109,7 +109,10 @@ describe('IndexedDbSrsRepository', () => {
     await repo.recordDrillResult('valid', baseResult);
     // Inject a corrupt record through the underlying IDB.
     await new Promise<void>((resolve, reject) => {
-      const req = indexedDB.open('tabiya', 1);
+      // Open at current DB_VERSION (2) — opening below the existing version
+      // would raise VersionError under fake-indexeddb. The repo has already
+      // created the v2 schema in `recordDrillResult` above.
+      const req = indexedDB.open('tabiya', 2);
       req.onsuccess = () => {
         const tx = req.result.transaction('srs_state', 'readwrite');
         tx.objectStore('srs_state').put({

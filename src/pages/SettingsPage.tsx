@@ -15,6 +15,7 @@ import { getSettings, playMove, writeSettings, type SoundSettings } from '../sou
 import { getSrsRepository } from '../storage';
 import { getExplainTtsFlag, setExplainTtsFlag } from '../storage/featureFlags';
 import { usePreset } from '../hooks/usePreset';
+import { ResetTelemetryButton } from '../components/settings/ResetTelemetryButton';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -482,6 +483,8 @@ export function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      <ResetTelemetryButton />
 
       <Card style={{ border: `1px solid ${t.red}` }}>
         <div

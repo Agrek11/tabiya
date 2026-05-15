@@ -21,7 +21,11 @@ import { PageHeader } from '../ui/primitives/PageHeader';
 import { StateMessage } from '../ui/primitives/StateMessage';
 import { getRepository, getSrsRepository } from '../storage';
 import { useSRS } from '../hooks/useSRS';
-import { familyPassesPreset, usePreset } from '../hooks/usePreset';
+import { useEffectivePick } from '../hooks/useEffectivePick';
+import { useLineAccuracy } from '../hooks/useAccuracy';
+import { EventsContextProvider } from '../state/EventsContext';
+import { AccuracyBadge } from '../components/repertoire/AccuracyBadge';
+import { RepertoirePicker } from '../components/repertoire/RepertoirePicker';
 import {
   aggregateMasteryByFamily,
   aggregateMasteryByOpening,
@@ -43,6 +47,14 @@ const CATEGORY_LABELS: Record<CategoryFilter, string> = {
 };
 
 export function RepertoirePage() {
+  return (
+    <EventsContextProvider>
+      <RepertoirePageBody />
+    </EventsContextProvider>
+  );
+}
+
+function RepertoirePageBody() {
   const t = useTokens();
   const navigate = useNavigate();
   const [families, setFamilies] = useState<Family[] | null>(null);
@@ -53,9 +65,10 @@ export function RepertoirePage() {
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const { states: srsStates, refresh: refreshSrs } = useSRS();
-  const { preset } = usePreset();
+  const { effective } = useEffectivePick();
 
   const onResetLine = async (lineId: string): Promise<void> => {
     await getSrsRepository().resetState(lineId);
@@ -102,7 +115,14 @@ export function RepertoirePage() {
     if (families === null || openings === null) return null;
     const q = search.trim().toLowerCase();
     return families
-      .filter((f) => familyPassesPreset(f.id, f.tier, preset))
+      .filter((f) => {
+        if (!effective.isFiltered) return true;
+        // Family passes if at least one of its lines is in the effective pick.
+        const opIds = new Set(f.opening_ids);
+        return (lines ?? []).some(
+          (l) => opIds.has(l.opening_id) && effective.lineIds.has(l.id)
+        );
+      })
       .filter((f) => category === 'all' || f.category === category)
       .map((f) => {
         const ids = f.opening_ids
@@ -120,7 +140,7 @@ export function RepertoirePage() {
         return { family: f, ops: ids };
       })
       .filter((row) => row.ops.length > 0);
-  }, [families, openings, openingsById, color, category, search]);
+  }, [families, openings, openingsById, color, category, search, effective, lines]);
 
   function toggleFamily(id: string) {
     setExpanded((prev) => {
@@ -156,7 +176,41 @@ export function RepertoirePage() {
       <PageHeader
         title="Repertoire"
         subtitle={`${families.length} families · ${totalOpenings} openings · click a family to expand.`}
+        actions={
+          <button
+            onClick={() => setPickerOpen((v) => !v)}
+            style={{
+              padding: '8px 12px',
+              fontFamily: fonts.sans,
+              fontSize: 13,
+              fontWeight: 600,
+              background: pickerOpen ? t.brandSoft : t.surface,
+              border: `1px solid ${pickerOpen ? t.brand : t.border}`,
+              color: pickerOpen ? t.brand : t.ink,
+              borderRadius: radius.chip,
+              cursor: 'pointer',
+            }}
+          >
+            {pickerOpen ? 'Close picker' : 'Pick repertoire'}
+            {effective.isFiltered && (
+              <span
+                style={{
+                  marginLeft: 6,
+                  fontSize: 11,
+                  background: t.brand,
+                  color: '#fff',
+                  borderRadius: radius.full,
+                  padding: '1px 7px',
+                }}
+              >
+                {effective.lineIds.size}
+              </span>
+            )}
+          </button>
+        }
       />
+
+      {pickerOpen && <RepertoirePicker onClose={() => setPickerOpen(false)} />}
 
       <div
         style={{
@@ -466,7 +520,10 @@ function FamilyCard({
                         {o.eco} · {o.color === 'white' ? 'WHITE' : 'BLACK'}
                         {o.is_gambit ? ' · GAMBIT' : ''}
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: t.ink }}>{o.name}</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: t.ink, display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span>{o.name}</span>
+                        <LineAccuracyChip lineId={line.id} />
+                      </div>
                       <MasteryBar percent={opPct} caption={opPct > 0 ? `${opPct}% mastery` : 'Not started'} compact />
                     </div>
                     <ChevronRight size={14} color={t.brand} />
@@ -539,6 +596,7 @@ function FamilyCard({
                         >
                           <span style={{ width: 4, height: 4, borderRadius: 999, background: t.inkSoft }} />
                           <span style={{ flex: 1 }}>{line.name}</span>
+                          <LineAccuracyChip lineId={line.id} />
                           <span style={{ fontSize: 11, color: t.inkSoft }}>{line.depth} ply</span>
                           <ChevronRight size={12} color={t.brand} />
                         </button>
@@ -595,6 +653,11 @@ function ResetIconButton({
       <RotateCcw size={13} />
     </button>
   );
+}
+
+function LineAccuracyChip({ lineId }: { lineId: string }) {
+  const { accuracy, moves } = useLineAccuracy(lineId);
+  return <AccuracyBadge accuracy={accuracy} moves={moves} />;
 }
 
 function MasteryBar({

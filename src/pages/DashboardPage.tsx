@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Inbox, LineChart, Target, Calendar } from 'lucide-react';
+import { LineChart, Target, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PageHeader } from '../ui/primitives/PageHeader';
 import { StateMessage } from '../ui/primitives/StateMessage';
@@ -22,8 +22,20 @@ import { fonts, radius } from '../theme/tokens';
 import { useSRS } from '../hooks/useSRS';
 import { getRepository } from '../storage';
 import type { Line } from '../storage/types';
+import { EventsContextProvider } from '../state/EventsContext';
+import { StreaksRow } from '../components/dashboard/StreaksRow';
+import { AccuracyRow } from '../components/dashboard/AccuracyRow';
+import { HeatmapTabs } from '../components/dashboard/HeatmapTabs';
 
 export function DashboardPage() {
+  return (
+    <EventsContextProvider>
+      <DashboardBody />
+    </EventsContextProvider>
+  );
+}
+
+function DashboardBody() {
   const t = useTokens();
   const { states, dueLineIds, loading } = useSRS();
   const [totalLines, setTotalLines] = useState<number | null>(null);
@@ -54,19 +66,24 @@ export function DashboardPage() {
   }
 
   if (states.size === 0) {
+    // Even before the first drill, render streaks + accuracy + heatmap (all
+    // empty-state) so the user can see the shape of what's coming.
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
         <PageHeader title="Dashboard" subtitle="Pick a line and complete one drill to start tracking." />
+        <StreaksRow />
+        <AccuracyRow />
         <StateMessage
           icon={LineChart}
           title="No drills yet"
-          body="Browse the Repertoire and pick an opening. The first drill seeds your SRS history; mastery and due-for-review numbers appear here as you progress."
+          body="Browse the Repertoire and pick an opening. The first drill seeds your SRS history; mastery, accuracy, and the activity heatmap fill in as you progress."
           action={
             <Link to="/repertoire" style={{ textDecoration: 'none' }}>
               <Button variant="primary">Browse repertoire →</Button>
             </Link>
           }
         />
+        <HeatmapTabs />
       </div>
     );
   }
@@ -117,17 +134,9 @@ export function DashboardPage() {
         />
       </div>
 
-      <Card>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <Inbox size={15} color={t.inkDim} />
-          <div style={{ fontWeight: 600, fontFamily: fonts.sans, fontSize: 14, color: t.ink }}>
-            Activity feed
-          </div>
-        </div>
-        <div style={{ fontSize: 13, color: t.inkDim, fontFamily: fonts.sans }}>
-          Detailed activity, accuracy trends, and the practice-rhythm heatmap activate after Phase 1.5 ships the session event log.
-        </div>
-      </Card>
+      <StreaksRow />
+      <AccuracyRow />
+      <HeatmapTabs />
     </div>
   );
 }

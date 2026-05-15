@@ -118,6 +118,7 @@ def load_presets(path: Path) -> list[Preset]:
                 description=entry.get("description", ""),
                 tier_band=list(entry.get("tier_band", [])),
                 family_ids=list(entry.get("family_ids", [])),
+                lines=list(entry.get("lines", [])),
                 recommended_color=entry.get("recommended_color", "both"),
             )
         )

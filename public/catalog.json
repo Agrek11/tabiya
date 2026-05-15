@@ -3487,6 +3487,13 @@
         "caro-kann",
         "italian"
       ],
+      "lines": [
+        "london-modern-main",
+        "london-anti-kid-main",
+        "caro-kann-classical-main",
+        "caro-kann-advance-main",
+        "italian-giuoco-pianissimo-main"
+      ],
       "recommended_color": "both"
     },
     {
@@ -3498,6 +3505,24 @@
         2
       ],
       "family_ids": [],
+      "lines": [
+        "spanish-closed-main",
+        "spanish-berlin-main",
+        "italian-giuoco-pianissimo-main",
+        "italian-two-knights-main",
+        "sicilian-najdorf-classical",
+        "sicilian-alapin-main",
+        "french-classical-main",
+        "french-advance-main",
+        "caro-kann-classical-main",
+        "caro-kann-advance-main",
+        "qgd-orthodox-main",
+        "qgd-exchange-main",
+        "kid-mar-del-plata-main",
+        "london-modern-main",
+        "slav-main-line",
+        "scandinavian-qa5-main"
+      ],
       "recommended_color": "both"
     },
     {
@@ -3510,6 +3535,59 @@
         3
       ],
       "family_ids": [],
+      "lines": [
+        "spanish-closed-main",
+        "spanish-closed-chigorin",
+        "spanish-berlin-main",
+        "spanish-berlin-anti",
+        "spanish-marshall-main",
+        "spanish-marshall-anti-a4",
+        "italian-giuoco-pianissimo-main",
+        "italian-modern-d4",
+        "italian-two-knights-main",
+        "italian-fried-liver",
+        "italian-evans-gambit-main",
+        "sicilian-najdorf-english-attack",
+        "sicilian-najdorf-classical",
+        "sicilian-najdorf-poisoned-pawn",
+        "sicilian-dragon-yugoslav",
+        "sicilian-dragon-classical",
+        "sicilian-sveshnikov-main",
+        "sicilian-alapin-main",
+        "french-winawer-main",
+        "french-winawer-positional",
+        "french-classical-main",
+        "french-advance-main",
+        "caro-kann-classical-main",
+        "caro-kann-karpov",
+        "caro-kann-advance-main",
+        "caro-kann-exchange-main",
+        "qgd-orthodox-main",
+        "qgd-orthodox-modern",
+        "qgd-tartakower-main",
+        "qgd-exchange-main",
+        "kid-mar-del-plata-main",
+        "kid-bayonet",
+        "kid-saemisch-main",
+        "kid-fianchetto-main",
+        "london-modern-main",
+        "london-anti-kid-main",
+        "london-jobava-main",
+        "scotch-classical-main",
+        "vienna-gambit-main",
+        "scandinavian-qa5-main",
+        "pirc-classical-main",
+        "alekhine-modern-main",
+        "slav-main-line",
+        "semi-slav-meran-main",
+        "nimzo-rubinstein-main",
+        "queens-indian-petrosian-main",
+        "grunfeld-exchange-main",
+        "catalan-open-main",
+        "english-symmetrical-main",
+        "kia-main-line",
+        "dutch-stonewall-main"
+      ],
       "recommended_color": "both"
     }
   ]

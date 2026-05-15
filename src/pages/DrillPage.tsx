@@ -43,7 +43,8 @@ import {
 import { useClickOutside } from '../ui/use-click-outside';
 import { useDrill } from '../drill/useDrill';
 import { useSRS } from '../hooks/useSRS';
-import { familyPassesPreset, usePreset } from '../hooks/usePreset';
+import { useEventEmitter } from '../hooks/useEventEmitter';
+import { useEffectivePick } from '../hooks/useEffectivePick';
 import { useDrillHistoryOpen } from '../drill/use-drill-history-open';
 import { useExplainContent } from '../hooks/useExplainContent';
 import { useLinePrefMode } from '../hooks/useLinePrefMode';
@@ -229,7 +230,7 @@ export function DrillPage() {
 
   // SRS hook — used for queue mode + the existing wiring.
   const { dueLineIds, loading: srsLoading } = useSRS();
-  const { preset } = usePreset();
+  const { effective } = useEffectivePick();
 
   // Queue mode initialization. Triggered when:
   //   1. URL has `?queue=due`
@@ -247,8 +248,12 @@ export function DrillPage() {
       return;
     }
     // Filter to lines that actually exist in the loaded catalog (orphan
-    // protection per Article 6 — old SrsState may reference removed lines).
-    const valid = dueLineIds.filter((id) => catalog.lines.some((l) => l.id === id));
+    // protection per Article 6 — old SrsState may reference removed lines)
+    // AND that pass the effective repertoire pick filter (R5.9 — `?queue=due`
+    // only routes drillable picks).
+    const valid = dueLineIds
+      .filter((id) => catalog.lines.some((l) => l.id === id))
+      .filter((id) => !effective.isFiltered || effective.lineIds.has(id));
     if (valid.length === 0) {
       setQueueState({ kind: 'exhausted', total: 0 });
       return;
@@ -259,7 +264,7 @@ export function DrillPage() {
     const firstLine = catalog.lines.find((l) => l.id === valid[0]);
     const firstOpening = firstLine ? catalog.openings.find((o) => o.id === firstLine.opening_id) : undefined;
     if (firstOpening) setSelectedFamilyId(firstOpening.family_id);
-  }, [requestedQueue, catalog, srsLoading, dueLineIds, queueState.kind]);
+  }, [requestedQueue, catalog, srsLoading, dueLineIds, queueState.kind, effective]);
 
   // When the selected family changes, point the line picker at that family's
   // first line. No fetch needed — all lines already loaded above.
@@ -329,6 +334,58 @@ export function DrillPage() {
     legalMovesFrom,
     drillResult,
   } = drill;
+
+  // Phase 1.5 — Session-event telemetry.
+  // The hook owns `line_start` (on activation) and `line_abandoned` (on
+  // cleanup if not completed); the page emits move_* / hint_used / line_complete
+  // via the state-transition observer below.
+  const { emit: emitEvent } = useEventEmitter(activeLineId);
+  const prevDrillStateKindRef = useRef<string | null>(null);
+  const completeEmittedForRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const prev = prevDrillStateKindRef.current;
+    prevDrillStateKindRef.current = state.kind;
+    if (activeLine === null) return;
+
+    // awaiting_player → flash_correct: the just-submitted ply is (new.lineIndex - 1).
+    if (
+      prev === 'awaiting_player' &&
+      state.kind === 'flash_correct' &&
+      'lineIndex' in state
+    ) {
+      emitEvent('move_correct', state.lineIndex - 1);
+      return;
+    }
+    // awaiting_player → wrong_pending: the wrong ply is wrong_pending.lineIndex.
+    if (
+      prev === 'awaiting_player' &&
+      state.kind === 'wrong_pending' &&
+      'lineIndex' in state
+    ) {
+      emitEvent('move_wrong', state.lineIndex);
+      return;
+    }
+    // any → complete: emit line_complete once per active line.
+    if (state.kind === 'complete' && completeEmittedForRef.current !== activeLine.id) {
+      completeEmittedForRef.current = activeLine.id;
+      emitEvent('line_complete', Math.max(0, drillMoves.length - 1));
+    }
+  }, [state, activeLine, drillMoves.length, emitEvent]);
+
+  // Reset the completion-emitted guard whenever the active line changes.
+  useEffect(() => {
+    completeEmittedForRef.current = null;
+  }, [activeLineId]);
+
+  // Hint button wraps showHint with a hint_used emission. Forwards to the
+  // underlying handler unchanged.
+  const showHintWithEmit = useCallback((): void => {
+    if (activeLine !== null && 'lineIndex' in state) {
+      emitEvent('hint_used', (state as { lineIndex: number }).lineIndex);
+    }
+    showHint();
+  }, [activeLine, state, showHint, emitEvent]);
 
   // Phase 1 — SRS write on drill completion.
   // Fire-and-forget. Guarded by a ref so a re-render after the effect doesn't
@@ -469,7 +526,7 @@ export function DrillPage() {
         case 'h':
         case 'H':
           e.preventDefault();
-          showHint();
+          showHintWithEmit();
           break;
         case 'Escape':
           e.preventDefault();
@@ -479,7 +536,7 @@ export function DrillPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [stepBack, stepForward, restart, showHint]);
+  }, [stepBack, stepForward, restart, showHintWithEmit]);
 
   const prevStateKindRef = useRef<string | null>(null);
   useEffect(() => {
@@ -545,7 +602,9 @@ export function DrillPage() {
   const familyOpeningIds = new Set(
     catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
   );
-  const linesForFamily = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
+  const linesForFamily = catalog.lines
+    .filter((l) => familyOpeningIds.has(l.opening_id))
+    .filter((l) => !effective.isFiltered || effective.lineIds.has(l.id));
   const filteredLines = filterLines(linesForFamily, lineSearch);
   const familiesWithLines = catalog.families
     .filter((f) =>
@@ -554,7 +613,13 @@ export function DrillPage() {
         return op?.family_id === f.id;
       })
     )
-    .filter((f) => familyPassesPreset(f.id, f.tier, preset));
+    .filter((f) => {
+      if (!effective.isFiltered) return true;
+      return catalog.lines.some((l) => {
+        const op = catalog.openings.find((o) => o.id === l.opening_id);
+        return op?.family_id === f.id && effective.lineIds.has(l.id);
+      });
+    });
   const filteredFamilies = filterFamilies(familiesWithLines, openingSearch);
 
   const currentMode = MODES.find((m) => m.id === activeMode) ?? MODES[0]!;
@@ -975,7 +1040,7 @@ export function DrillPage() {
             <SkipForward size={14} /> Skip
           </button>
           <button
-            onClick={showHint}
+            onClick={showHintWithEmit}
             disabled={state.kind !== 'awaiting_player'}
             style={{
               ...ghostBtnStyle,
