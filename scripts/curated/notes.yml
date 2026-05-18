@@ -5,17 +5,437 @@
 #     strategic_notes:
 #       - "Short sentence about the plan / structure / key idea"
 #     key_squares:
-#       - { square: d5, note: "central light-square fight", side: both }
-#       - { square: f5, note: "kingside lever for Black", side: black }
+#       - { square: d5, note: "...", side: white | black | both, role: outpost | weak | target | break | tension | control | pivot }
+#
+# Roles drive spotlight color (Phase 2b):
+#   outpost  → green       (safely held square in enemy half, knight-friendly)
+#   weak     → amber       (square opponent cannot defend with a pawn)
+#   target   → red         (weak pawn or known tactical pressure point)
+#   break    → magenta     (pawn-break destination / lever square)
+#   tension  → orange      (central square where pawns/pieces clash)
+#   control  → blue        (influenced but not occupied — strategic sphere)
+#   pivot    → violet      (piece reroute hub)
 #
 # Notes are merged into the catalog in `scripts/tabiya_build/notes.py`.
 # Missing line ids are skipped with a warning. Empty file is valid.
-#
-# Example (uncomment + adapt once you have stable line ids):
-#
-# ruy-lopez-main:
-#   strategic_notes:
-#     - "Black aims for the d5 break only after White overextends kingside."
-#   key_squares:
-#     - { square: d5, note: "central light-square fight", side: both }
-#     - { square: f5, note: "Black's kingside lever in the closed Spanish", side: black }
+# Max 5 key_squares per line; `note` ≤80 chars.
+
+# ============================================================================
+# SPANISH (RUY LOPEZ)
+# ============================================================================
+
+spanish-closed-main:
+  key_squares:
+    - { square: d5, side: black, role: pivot,   note: "Breyer knight tour ...Nb8-d7-f8-g6 aims here" }
+    - { square: f5, side: black, role: break,   note: "kingside lever in the closed Spanish" }
+    - { square: d4, side: white, role: tension, note: "central pawn — defended then pushed at right moment" }
+    - { square: c2, side: white, role: pivot,   note: "Bc4-Bb3-Bc2 retreat — Spanish bishop's lifeline" }
+    - { square: g3, side: white, role: pivot,   note: "Nf1-g3 reroute toward f5/h5" }
+
+spanish-closed-chigorin:
+  key_squares:
+    - { square: c5, side: black, role: break,   note: "Chigorin queenside expansion lever after ...c5" }
+    - { square: d4, side: white, role: tension, note: "central pawn under siege; ...cxd4 opens c-file" }
+    - { square: a5, side: black, role: control, note: "knight on a5 eyes b3 and c4 weak squares" }
+    - { square: b3, side: white, role: weak,    note: "knight-on-a5 target; b-pawn structure stretched" }
+    - { square: f5, side: black, role: break,   note: "alternative kingside lever if queenside locks" }
+
+spanish-berlin-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "advanced pawn cramps Black; defended by Nf3" }
+    - { square: d5, side: black, role: outpost, note: "Berlin knight on d5 — the endgame fortress square" }
+    - { square: f5, side: black, role: target,  note: "open f-file + bishop pair pressure on f5" }
+    - { square: c2, side: white, role: pivot,   note: "king walk Kd1-c2-b3 in classic Berlin endings" }
+
+spanish-berlin-anti:
+  key_squares:
+    - { square: d5, side: white, role: control, note: "Anti-Berlin avoids exchange; eyes d5 long-term" }
+    - { square: c3, side: white, role: pivot,   note: "Nbd2-c4 / Nf1-g3 reroutes via c3 architecture" }
+    - { square: f7, side: white, role: target,  note: "classic Italian/Spanish pressure point" }
+    - { square: e5, side: black, role: outpost, note: "Black's central pawn defended by Nc6" }
+
+spanish-marshall-main:
+  key_squares:
+    - { square: f3, side: black, role: target,  note: "Marshall sac line; ...Bf3 lands on the king" }
+    - { square: h3, side: black, role: target,  note: "...Qh3 mating idea, second wave after sac" }
+    - { square: e4, side: black, role: break,   note: "...d5-d4 then ...e4 closes the long diagonal" }
+    - { square: g2, side: white, role: weak,    note: "kingside fortress hole after f3 sac" }
+
+spanish-marshall-anti-a4:
+  key_squares:
+    - { square: a4, side: white, role: control, note: "queenside expansion to avoid Marshall mainline" }
+    - { square: b5, side: black, role: target,  note: "a4-b5 attack on Black's queenside pawns" }
+    - { square: d5, side: black, role: break,   note: "...d5 still possible but less punchy w/o Marshall structure" }
+    - { square: c3, side: white, role: pivot,   note: "Nc3 reroute when a4 holds queenside" }
+
+# ============================================================================
+# ITALIAN GAME
+# ============================================================================
+
+italian-giuoco-pianissimo-main:
+  key_squares:
+    - { square: d5, side: white, role: break,   note: "c2-c3 + d2-d4 break aims here" }
+    - { square: f7, side: white, role: target,  note: "Bc4 + Ng5 tactical pressure on Black king" }
+    - { square: c4, side: white, role: control, note: "Italian bishop's diagonal; eyes f7" }
+    - { square: e5, side: black, role: outpost, note: "Black's central foothold, defended by Nc6 + d6" }
+
+italian-modern-d4:
+  key_squares:
+    - { square: d4, side: white, role: tension, note: "Modern Italian immediate central tension" }
+    - { square: e5, side: black, role: tension, note: "Black's pawn — exchange opens lines for both" }
+    - { square: f7, side: white, role: target,  note: "Bc4 diagonal still bears on f7 after exchanges" }
+    - { square: d5, side: white, role: outpost, note: "after exd4 + Nxd4, knight aims at d5" }
+
+italian-two-knights-main:
+  key_squares:
+    - { square: f7, side: white, role: target,  note: "Two Knights central tactical motif" }
+    - { square: d5, side: white, role: outpost, note: "Ng5 + Bc4 pressure; ...d5 break essential for Black" }
+    - { square: e5, side: black, role: tension, note: "central pawn — exchange decisions shape the middlegame" }
+    - { square: c6, side: black, role: weak,    note: "after ...d5 exd5 Na5, c6 can become weak" }
+
+italian-fried-liver:
+  key_squares:
+    - { square: f7, side: white, role: target,  note: "Fried Liver Nxf7 — direct king attack" }
+    - { square: e6, side: white, role: target,  note: "follow-up tactical square in the attack" }
+    - { square: d5, side: white, role: control, note: "Bc4 + Ng5 + e4 all converge on d5" }
+    - { square: g5, side: white, role: pivot,   note: "knight outpost en route to f7" }
+
+italian-evans-gambit-main:
+  key_squares:
+    - { square: c3, side: white, role: pivot,   note: "Evans pawn opens diagonal for Bb2 + attacks Bb4" }
+    - { square: d4, side: white, role: break,   note: "central pawn break after b4 wins tempo" }
+    - { square: f7, side: white, role: target,  note: "ever-present Italian target" }
+    - { square: a3, side: white, role: control, note: "open a-file potential after b4-b5" }
+    - { square: b2, side: white, role: pivot,   note: "long diagonal bishop aim after b4 + Bb2" }
+
+# ============================================================================
+# SICILIAN
+# ============================================================================
+
+sicilian-najdorf-english-attack:
+  key_squares:
+    - { square: d5, side: black, role: break,   note: "the Sicilian's holy grail — Black's central break" }
+    - { square: b5, side: black, role: break,   note: "queenside expansion lever" }
+    - { square: g4, side: white, role: control, note: "English Attack kingside pawn-storm launchpad" }
+    - { square: e5, side: white, role: outpost, note: "after Nd4-f5 or Nd5, knight aims at e5/f5" }
+    - { square: f3, side: white, role: control, note: "anchor for long-diagonal bishop after f3" }
+
+sicilian-najdorf-classical:
+  key_squares:
+    - { square: d5, side: black, role: break,   note: "central break; opens the Sicilian" }
+    - { square: e5, side: black, role: pivot,   note: "...e5 closes center, kicks Nd4 to b3/f3" }
+    - { square: f4, side: white, role: control, note: "f2-f4-f5 plan in classical setups" }
+    - { square: b5, side: black, role: break,   note: "queenside minority expansion" }
+
+sicilian-najdorf-poisoned-pawn:
+  key_squares:
+    - { square: b2, side: black, role: target,  note: "the poisoned pawn — Qxb2 razor-line theory" }
+    - { square: d5, side: black, role: break,   note: "still the canonical central lever" }
+    - { square: e5, side: white, role: outpost, note: "Bg5 + Qf3 setups eye e5/f6" }
+    - { square: a8, side: black, role: target,  note: "Nb5/Rxb7-Qxb2 lines hunt the rook corner" }
+
+sicilian-dragon-yugoslav:
+  key_squares:
+    - { square: h6, side: white, role: target,  note: "h4-h5 + Bh6 trade the Dragon bishop" }
+    - { square: g6, side: black, role: weak,    note: "post-Bh6 + h-pawn sac, g6 becomes mating square" }
+    - { square: d5, side: black, role: break,   note: "...d5! the Dragon's race-saving lever" }
+    - { square: c2, side: white, role: target,  note: "Black's ...Rxc3 + Nxc2 invasion theme" }
+    - { square: b3, side: white, role: weak,    note: "after ...Rxc3 sac, b-pawn structure collapses" }
+
+sicilian-dragon-classical:
+  key_squares:
+    - { square: d5, side: black, role: break,   note: "less-sharp Dragon, but ...d5 still central" }
+    - { square: e6, side: black, role: control, note: "...e6 supports d5 + restrains f-pawn break" }
+    - { square: f4, side: white, role: control, note: "Be2 setups still aim for f4-f5" }
+    - { square: g7, side: black, role: pivot,   note: "Dragon bishop's home diagonal a1-h8" }
+
+sicilian-sveshnikov-main:
+  key_squares:
+    - { square: d5, side: white, role: outpost, note: "Sveshnikov's signature hole on d5 — white knight dream square" }
+    - { square: f5, side: black, role: control, note: "...f5 break essential to challenge d5 outpost" }
+    - { square: e4, side: white, role: target,  note: "after ...Bxe4 sac ideas, e-pawn under fire" }
+    - { square: b5, side: black, role: break,   note: "...b5 queenside thrust kicks Nb5/Nd5" }
+    - { square: a4, side: white, role: control, note: "a4 stalls ...b5 — main positional debate" }
+
+sicilian-alapin-main:
+  key_squares:
+    - { square: d5, side: black, role: break,   note: "Alapin invites ...d5; central tension defines middlegame" }
+    - { square: c3, side: white, role: pivot,   note: "c3 supports d4 — Alapin's whole point" }
+    - { square: e5, side: white, role: outpost, note: "after dxc5 + Nc4, knight reroutes to e5" }
+    - { square: d4, side: white, role: tension, note: "central pawn under pressure from ...cxd4" }
+
+# ============================================================================
+# FRENCH
+# ============================================================================
+
+french-winawer-main:
+  key_squares:
+    - { square: c3, side: black, role: target,  note: "doubled c-pawns after ...Bxc3+ — Winawer's defining trade" }
+    - { square: c5, side: black, role: break,   note: "...c5 attacks the d4 pawn chain base" }
+    - { square: g7, side: black, role: target,  note: "Qg4 attacks ...g7; main Winawer poisoned-pawn dance" }
+    - { square: e5, side: white, role: outpost, note: "advanced e-pawn locks center, cramps Black" }
+    - { square: f5, side: black, role: break,   note: "...f6 / ...f5 attacks the e5 chain head" }
+
+french-winawer-positional:
+  key_squares:
+    - { square: c3, side: black, role: target,  note: "doubled c-pawns still — but now no Qg4 storm" }
+    - { square: c5, side: black, role: break,   note: "central pawn break vs d4 base" }
+    - { square: e5, side: white, role: outpost, note: "e-pawn still locks; piece play around it" }
+    - { square: a4, side: white, role: control, note: "a4-a5 blockade of queenside pawn structure" }
+
+french-classical-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "Steinitz pawn chain advance; cramps Black" }
+    - { square: f7, side: white, role: target,  note: "Bxh7+ + Ng5+ + Qh5 classical king-hunt setups" }
+    - { square: c5, side: black, role: break,   note: "queen-side pawn break vs d4 base" }
+    - { square: f6, side: black, role: target,  note: "Nbd2-f3-Ng5 pressures f6/f7" }
+
+french-advance-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "advance pawn — the French Advance's whole identity" }
+    - { square: d4, side: white, role: tension, note: "base of pawn chain under ...c5 + ...Qb6 fire" }
+    - { square: b2, side: white, role: weak,    note: "after ...Qb6, b-pawn under attack" }
+    - { square: f5, side: black, role: break,   note: "...f6 or ...f5 attacks the e5 chain head" }
+
+# ============================================================================
+# CARO-KANN
+# ============================================================================
+
+caro-kann-classical-main:
+  key_squares:
+    - { square: f5, side: black, role: outpost, note: "the Caro bishop's natural home — central light squares" }
+    - { square: d5, side: black, role: control, note: "Black's queenside pawn structure — solid central control" }
+    - { square: e5, side: white, role: outpost, note: "Nf3-Ne5 reroute on Black's bishop" }
+    - { square: f4, side: white, role: control, note: "kingside pawn expansion in main lines" }
+    - { square: h6, side: black, role: control, note: "...h6 defensive luft against Ne5 + Bd3 ideas" }
+
+caro-kann-karpov:
+  key_squares:
+    - { square: e4, side: black, role: tension, note: "Karpov ...Nbd7 prepares ...Nxe4 exchange" }
+    - { square: f7, side: black, role: target,  note: "tactical Bxe6/Nxf7 motifs in Karpov" }
+    - { square: d5, side: black, role: control, note: "central anchor — flexible piece play" }
+    - { square: e6, side: black, role: pivot,   note: "...e6 + ...Be7 + ...Nf8-g6 fortress setup" }
+
+caro-kann-advance-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "advance pawn cramps Black; mirror French Advance" }
+    - { square: f5, side: black, role: outpost, note: "...Bf5 escapes early — Caro's identity" }
+    - { square: c5, side: black, role: break,   note: "queenside pawn break vs e5/d4 chain" }
+    - { square: f4, side: white, role: control, note: "f-pawn storm vs Caro structure" }
+
+caro-kann-exchange-main:
+  key_squares:
+    - { square: d5, side: black, role: control, note: "Exchange leaves symmetric pawns; d5 strategic anchor" }
+    - { square: f5, side: black, role: pivot,   note: "...Bf5 (or via g4) main piece development" }
+    - { square: c5, side: white, role: control, note: "c4 break attacks Black's d5 pawn — Panov nuance" }
+    - { square: e4, side: white, role: outpost, note: "after c4-c5, knight aims to occupy e4/e5" }
+
+# ============================================================================
+# QGD
+# ============================================================================
+
+qgd-orthodox-main:
+  key_squares:
+    - { square: e4, side: white, role: break,   note: "minority attack alternative — central thrust" }
+    - { square: b5, side: white, role: break,   note: "queenside minority attack — b4-b5 main plan" }
+    - { square: c6, side: black, role: target,  note: "minority-attack target — Black's queenside pawn" }
+    - { square: d4, side: white, role: control, note: "central pawn defended by c3 + Nf3" }
+    - { square: f5, side: black, role: break,   note: "...f5 kingside counterplay vs minority attack" }
+
+qgd-orthodox-modern:
+  key_squares:
+    - { square: e4, side: white, role: break,   note: "Qc2 setup aims at e4 + kingside expansion" }
+    - { square: d5, side: black, role: tension, note: "central battleground after Bd3 + e4" }
+    - { square: h7, side: black, role: target,  note: "Bd3 + Qc2 batter h7 in some lines" }
+    - { square: e5, side: white, role: outpost, note: "after e4-e5, advanced pawn cramps Black" }
+
+qgd-tartakower-main:
+  key_squares:
+    - { square: b7, side: black, role: pivot,   note: "Tartakower ...b6 + ...Bb7 fianchetto reroute" }
+    - { square: c5, side: black, role: break,   note: "...c5 break frees Black's position" }
+    - { square: e5, side: black, role: outpost, note: "central pawn or piece outpost after ...c5 dxc5" }
+    - { square: d5, side: black, role: control, note: "...c5 + ...d4 hands central control" }
+
+qgd-exchange-main:
+  key_squares:
+    - { square: b5, side: white, role: break,   note: "minority attack — Exchange QGD's identity" }
+    - { square: c6, side: black, role: target,  note: "minority-attack endpoint pawn" }
+    - { square: e4, side: black, role: break,   note: "...Ne4 + ...f5 kingside counterplay" }
+    - { square: f5, side: black, role: break,   note: "kingside counter-pawn break" }
+    - { square: c5, side: black, role: outpost, note: "central pawn restraint hub" }
+
+# ============================================================================
+# KING'S INDIAN DEFENSE
+# ============================================================================
+
+kid-mar-del-plata-main:
+  key_squares:
+    - { square: f4, side: black, role: break,   note: "...f5-f4 kingside pawn storm — KID's whole point" }
+    - { square: g3, side: black, role: target,  note: "after ...f4, ...g5-g4 mates white king" }
+    - { square: c5, side: white, role: break,   note: "c4-c5 queenside race — white's parallel attack" }
+    - { square: b5, side: white, role: control, note: "queenside expansion endpoint" }
+    - { square: h2, side: white, role: target,  note: "Black's mating square after kingside storm" }
+
+kid-bayonet:
+  key_squares:
+    - { square: b4, side: white, role: break,   note: "Bayonet 9.b4 — fast queenside attack" }
+    - { square: c5, side: white, role: control, note: "c4-c5 follow-up cramps Black's queenside" }
+    - { square: a5, side: black, role: control, note: "...a5 challenges Bayonet pawn structure" }
+    - { square: f5, side: black, role: break,   note: "...f5 kingside race against Bayonet" }
+
+kid-saemisch-main:
+  key_squares:
+    - { square: e3, side: white, role: control, note: "Sämisch pawn chain f2-e3-d4 anchors center" }
+    - { square: c5, side: white, role: break,   note: "c4-c5 + d4-d5 spatial bind on Black" }
+    - { square: f5, side: black, role: break,   note: "...f5 standard KID kingside counter" }
+    - { square: b5, side: black, role: break,   note: "...b5 alternate queenside lever vs Sämisch" }
+    - { square: h6, side: black, role: control, note: "luft + ...g5 prep" }
+
+kid-fianchetto-main:
+  key_squares:
+    - { square: g2, side: white, role: pivot,   note: "fianchetto bishop on long diagonal" }
+    - { square: d5, side: black, role: tension, note: "central tension defines fianchetto KID middlegame" }
+    - { square: c5, side: black, role: break,   note: "...c5 break — Yugoslav-style central counter" }
+    - { square: e5, side: black, role: outpost, note: "after ...e5, central pawn cramps White d-pawn" }
+
+# ============================================================================
+# LONDON SYSTEM
+# ============================================================================
+
+london-modern-main:
+  key_squares:
+    - { square: f4, side: white, role: outpost, note: "London bishop's home; defended by e3 + Nf3" }
+    - { square: e5, side: white, role: control, note: "Modern London Ne5 outpost — central anchor" }
+    - { square: h7, side: white, role: target,  note: "Bd3 + Ne5 + Qd2-h6 batter h7 in attacks" }
+    - { square: c5, side: black, role: break,   note: "...c5 pawn break vs London center" }
+    - { square: e4, side: white, role: break,   note: "after consolidation, e3-e4 push" }
+
+london-anti-kid-main:
+  key_squares:
+    - { square: f4, side: white, role: outpost, note: "London bishop holds despite Black's fianchetto" }
+    - { square: c5, side: black, role: break,   note: "Black's central counter vs London" }
+    - { square: e5, side: white, role: outpost, note: "Ne5 outpost even against KID setup" }
+    - { square: h6, side: black, role: control, note: "...h6 prevents Ng5 mating ideas" }
+
+london-jobava-main:
+  key_squares:
+    - { square: f4, side: white, role: outpost, note: "Jobava bishop with Nc3 added — quirky London" }
+    - { square: e5, side: white, role: outpost, note: "central knight outpost (Ne5) more aggressive than vanilla London" }
+    - { square: b5, side: white, role: control, note: "Nb5 ideas — Jobava's anti-positional bite" }
+    - { square: c5, side: black, role: break,   note: "standard pawn break vs the London structure" }
+
+# ============================================================================
+# OTHER SEMI-OPEN / 1.e4
+# ============================================================================
+
+scotch-classical-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "Scotch e-pawn cramps Black after Nxc6" }
+    - { square: d5, side: white, role: break,   note: "c4-d5 central thrust in Scotch Mieses" }
+    - { square: f7, side: white, role: target,  note: "open lines + bishop pair hit f7" }
+    - { square: c5, side: white, role: control, note: "Mieses Nb3-c5 outpost in late middlegame" }
+
+vienna-gambit-main:
+  key_squares:
+    - { square: e5, side: black, role: target,  note: "Vienna 2.Nc3 + 3.f4 attacks Black's e-pawn" }
+    - { square: f4, side: white, role: break,   note: "Vienna Gambit pawn lever — opens kingside" }
+    - { square: d5, side: white, role: control, note: "Nc3 + e4 grip central light squares" }
+    - { square: f7, side: white, role: target,  note: "kingside attack landing square" }
+
+scandinavian-qa5-main:
+  key_squares:
+    - { square: a5, side: black, role: pivot,   note: "Qa5 — Scandinavian's queen home; pressures Nc3" }
+    - { square: f5, side: black, role: outpost, note: "...Bf5 — Scandinavian bishop's natural square" }
+    - { square: c2, side: black, role: target,  note: "...Bf5 + ...Qa5 + ...Bxc2 + ...Qxc2 tactics" }
+    - { square: d4, side: white, role: control, note: "central pawn vs queenside pressure" }
+
+pirc-classical-main:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "Pirc classical e4-e5 central thrust" }
+    - { square: f4, side: white, role: control, note: "kingside expansion option (Austrian Attack)" }
+    - { square: e4, side: white, role: tension, note: "central pawn under ...c5 / ...e5 fire" }
+    - { square: g7, side: black, role: pivot,   note: "Pirc bishop on long diagonal — Black's main piece" }
+    - { square: c5, side: black, role: break,   note: "Yugoslav-style central counter" }
+
+alekhine-modern-main:
+  key_squares:
+    - { square: b6, side: black, role: pivot,   note: "Alekhine knight retreats; ...c5 + ...Nb6 holds queenside" }
+    - { square: d5, side: black, role: break,   note: "...d5 break challenges Four Pawns / Modern center" }
+    - { square: e5, side: white, role: outpost, note: "advanced e-pawn cramps Black if locked" }
+    - { square: c5, side: black, role: break,   note: "alternate central counter-break" }
+
+# ============================================================================
+# QUEEN'S GAMBIT / SLAV / SEMI-SLAV / INDIAN
+# ============================================================================
+
+slav-main-line:
+  key_squares:
+    - { square: f5, side: black, role: outpost, note: "Slav bishop on f5 — out before ...e6 lock" }
+    - { square: c4, side: black, role: target,  note: "...dxc4 + ...b5 holds the gambit pawn" }
+    - { square: d5, side: black, role: control, note: "Slav's solid central pawn" }
+    - { square: b5, side: black, role: break,   note: "...b5 defends c4 pawn in main line" }
+    - { square: e4, side: white, role: break,   note: "e2-e4 central thrust after ...dxc4" }
+
+semi-slav-meran-main:
+  key_squares:
+    - { square: b5, side: black, role: break,   note: "Meran ...b5 — defines the variation" }
+    - { square: c4, side: black, role: target,  note: "...dxc4 then ...b5 + ...a6 Meran structure" }
+    - { square: e4, side: white, role: break,   note: "e4 central thrust vs Meran setup" }
+    - { square: f5, side: black, role: control, note: "...Bb7 + ...c5 = central light-square control" }
+    - { square: d5, side: black, role: control, note: "Semi-Slav cluster anchored on d5" }
+
+nimzo-rubinstein-main:
+  key_squares:
+    - { square: c3, side: black, role: target,  note: "Nimzo doubled c-pawns post-...Bxc3+ — strategic theme" }
+    - { square: c4, side: white, role: target,  note: "doubled c-pawns — Black's blockade target" }
+    - { square: d5, side: black, role: control, note: "Black blockades light squares after ...d5 + ...c5" }
+    - { square: e4, side: black, role: outpost, note: "Black's knight outpost on e4 — Nimzo classic" }
+    - { square: c5, side: black, role: break,   note: "...c5 break opens position around white doubled pawns" }
+
+queens-indian-petrosian-main:
+  key_squares:
+    - { square: b7, side: black, role: pivot,   note: "QID bishop on the long diagonal" }
+    - { square: e4, side: black, role: control, note: "...Bb7 + ...d5 control central light squares" }
+    - { square: a3, side: white, role: control, note: "Petrosian's a3 prevents ...Bb4+ — main idea" }
+    - { square: d5, side: black, role: tension, note: "central tension after ...d5" }
+    - { square: c4, side: white, role: control, note: "central pawn under long-diagonal fire" }
+
+grunfeld-exchange-main:
+  key_squares:
+    - { square: d4, side: white, role: target,  note: "Grünfeld attacks white's d-pawn from many sides" }
+    - { square: c3, side: white, role: target,  note: "c3 pawn — long-diagonal target after exchanges" }
+    - { square: b2, side: white, role: target,  note: "Grünfeld's ...Qa5 / ...Bxc3 + ...Qxb2 motifs" }
+    - { square: g7, side: black, role: pivot,   note: "Grünfeld bishop's home — long diagonal" }
+    - { square: c5, side: black, role: break,   note: "...c5 break attacks d4 base" }
+
+catalan-open-main:
+  key_squares:
+    - { square: g2, side: white, role: pivot,   note: "Catalan bishop's home — the long diagonal's heart" }
+    - { square: c4, side: white, role: target,  note: "...dxc4 holds gambit; Catalan main pawn race" }
+    - { square: d5, side: black, role: tension, note: "central pawn under fianchetto-bishop pressure" }
+    - { square: a4, side: white, role: control, note: "queenside expansion to recover c4 pawn" }
+    - { square: e4, side: white, role: break,   note: "e2-e4 central thrust after consolidation" }
+
+english-symmetrical-main:
+  key_squares:
+    - { square: d4, side: white, role: break,   note: "central pawn break — English transforms to QGD-like" }
+    - { square: d5, side: black, role: break,   note: "mirror break — ...d5 standard counter" }
+    - { square: g2, side: white, role: pivot,   note: "fianchetto bishop on long diagonal" }
+    - { square: b7, side: black, role: pivot,   note: "mirror fianchetto" }
+    - { square: e5, side: black, role: outpost, note: "...e5 advance for space" }
+
+kia-main-line:
+  key_squares:
+    - { square: e5, side: white, role: outpost, note: "KIA e2-e4-e5 central spearhead" }
+    - { square: f5, side: white, role: target,  note: "Nf3-h4 + Nf5 kingside attack focal point" }
+    - { square: g2, side: white, role: pivot,   note: "KIA bishop on long diagonal" }
+    - { square: h7, side: black, role: target,  note: "Qd1-h5 + Nf5 batter h7 in main attack" }
+    - { square: c5, side: black, role: break,   note: "queenside counter-pawn-break" }
+
+dutch-stonewall-main:
+  key_squares:
+    - { square: e4, side: black, role: outpost, note: "Stonewall knight outpost on e4 — defining feature" }
+    - { square: e5, side: black, role: control, note: "central pawn formation: ...f5+e6+d5 + maybe ...e5" }
+    - { square: d5, side: black, role: control, note: "Stonewall pawn fortress anchor" }
+    - { square: f5, side: black, role: control, note: "Stonewall f-pawn — kingside space" }
+    - { square: e3, side: white, role: weak,    note: "Stonewall's dark-square weakness — Black's bishop trade target" }

@@ -55,6 +55,7 @@ export function useSpotlightOverlay({
         square: k.square,
         note: k.note,
         side: k.side,
+        role: k.role,
       })),
     [keySquares],
   );

@@ -23,12 +23,27 @@ FamilyCategory = Literal[
 ]
 
 
+KeySquareRole = Literal[
+    "outpost",   # safe square in enemy half, knight-friendly
+    "weak",      # square opponent cannot defend with a pawn
+    "target",    # weak pawn or known tactical pressure point
+    "break",     # pawn-break destination / lever square
+    "tension",   # central square where pawns/pieces clash
+    "control",   # influenced but not occupied — strategic sphere
+    "pivot",     # piece reroute hub
+]
+
+
 class KeySquare(BaseModel):
     """A square that matters strategically in the resulting middlegame."""
 
     square: str = Field(..., description="Algebraic square notation, e.g. 'd5'")
     note: str = Field(..., description="Short strategic role description")
     side: Side | None = Field(default=None, description="Which side fights for this square")
+    role: KeySquareRole | None = Field(
+        default=None,
+        description="Strategic role classification (Phase 2b spotlight color encoding)",
+    )
 
 
 class ForkAnnotation(BaseModel):

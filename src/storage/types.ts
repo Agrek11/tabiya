@@ -16,10 +16,21 @@ export type FamilyCategory =
   | 'gambit'
   | 'uncategorized';
 
+/** Strategic role of a key square — drives spotlight color encoding. */
+export type LineKeySquareRole =
+  | 'outpost'
+  | 'weak'
+  | 'target'
+  | 'break'
+  | 'tension'
+  | 'control'
+  | 'pivot';
+
 export type KeySquare = {
   square: string;
   note: string;
   side?: Side;
+  role?: LineKeySquareRole;
 };
 
 // Re-export Phase 2a OpeningKeySquare type so Opening's optional field has a

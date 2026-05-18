@@ -32,7 +32,12 @@ import type { HighlightSquare } from '../../storage/types';
 type BrightModeProps = {
   mode: 'bright';
   /** Pattern Viz key squares (Phase 2 shape). */
-  squares: ReadonlyArray<{ square: string; note?: string; side?: 'white' | 'black' | 'both' }>;
+  squares: ReadonlyArray<{
+    square: string;
+    note?: string;
+    side?: 'white' | 'black' | 'both';
+    role?: 'outpost' | 'weak' | 'target' | 'break' | 'tension' | 'control' | 'pivot';
+  }>;
   /** Fade non-highlighted pieces under the layer. Default true for bright. */
   fadePieces?: boolean;
 };
@@ -78,7 +83,12 @@ export function deriveHighlightStyles(
 ): HighlightLayerResult {
   if (props.mode === 'bright') {
     const r = deriveKeySquareStyles({
-      keySquares: props.squares as Array<{ square: string; note?: string; side?: 'white' | 'black' | 'both' }>,
+      keySquares: props.squares as Array<{
+        square: string;
+        note?: string;
+        side?: 'white' | 'black' | 'both';
+        role?: 'outpost' | 'weak' | 'target' | 'break' | 'tension' | 'control' | 'pivot';
+      }>,
       fadePieces: props.fadePieces ?? true,
     });
     return { squareStyles: r.squareStyles, pieceOpacity: r.pieceOpacity, active: r.active };

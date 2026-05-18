@@ -1,6 +1,6 @@
 {
   "line_id": "italian-giuoco-pianissimo-main",
-  "schema_version": 2,
+  "schema_version": 3,
   "_choice_note": "CHOICE: Spec called for ~10-12 ply Italian main; the cataloged line is 19 ply (italian-giuoco-pianissimo-main). Validator requires len(blocks)==len(moves), so 19 hand-authored blocks were written. Underscore-prefixed key is ignored by pydantic — kept here as a future-archeology comment.",
   "blocks": [
     {

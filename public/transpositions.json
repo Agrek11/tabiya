@@ -1,0 +1,28 @@
+{
+  "fen_hash_algo": "sha1-16",
+  "fen_normalization": "drop-counters",
+  "generated_at": "2026-05-15T16:08:13Z",
+  "index": {
+    "2ae4d5322abb0348": [
+      "italian-game-main",
+      "ruy-lopez-main"
+    ],
+    "4146b57281efa85e": [
+      "italian-game-main",
+      "ruy-lopez-main"
+    ],
+    "66be37feb35e7d6a": [
+      "italian-game-main",
+      "ruy-lopez-main"
+    ],
+    "9d7e79c348ea1b8d": [
+      "italian-game-main",
+      "ruy-lopez-main"
+    ],
+    "e62700d17daea9b3": [
+      "italian-game-main",
+      "ruy-lopez-main"
+    ]
+  },
+  "schema_version": 1
+}

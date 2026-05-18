@@ -1,5 +1,6 @@
 {
-  "version": "2026-05-10",
+  "version": "2026-05-15",
+  "schema_version": 3,
   "families": [
     {
       "id": "spanish",
@@ -1107,7 +1108,8 @@
         "spanish-closed-main",
         "spanish-closed-chigorin"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "spanish-berlin",
@@ -1119,7 +1121,8 @@
         "spanish-berlin-main",
         "spanish-berlin-anti"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "spanish-marshall",
@@ -1131,7 +1134,8 @@
         "spanish-marshall-main",
         "spanish-marshall-anti-a4"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "italian-giuoco-piano",
@@ -1143,7 +1147,8 @@
         "italian-giuoco-pianissimo-main",
         "italian-modern-d4"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "italian-two-knights",
@@ -1155,7 +1160,8 @@
         "italian-two-knights-main",
         "italian-fried-liver"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "italian-evans-gambit",
@@ -1166,7 +1172,8 @@
       "line_ids": [
         "italian-evans-gambit-main"
       ],
-      "is_gambit": true
+      "is_gambit": true,
+      "key_squares": []
     },
     {
       "id": "sicilian-najdorf",
@@ -1179,7 +1186,8 @@
         "sicilian-najdorf-classical",
         "sicilian-najdorf-poisoned-pawn"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "sicilian-dragon",
@@ -1191,7 +1199,8 @@
         "sicilian-dragon-yugoslav",
         "sicilian-dragon-classical"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "sicilian-sveshnikov",
@@ -1202,7 +1211,8 @@
       "line_ids": [
         "sicilian-sveshnikov-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "sicilian-alapin",
@@ -1213,7 +1223,8 @@
       "line_ids": [
         "sicilian-alapin-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "french-winawer",
@@ -1225,7 +1236,8 @@
         "french-winawer-main",
         "french-winawer-positional"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "french-classical",
@@ -1236,7 +1248,8 @@
       "line_ids": [
         "french-classical-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "french-advance",
@@ -1247,7 +1260,8 @@
       "line_ids": [
         "french-advance-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "caro-kann-classical",
@@ -1259,7 +1273,8 @@
         "caro-kann-classical-main",
         "caro-kann-karpov"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "caro-kann-advance",
@@ -1270,7 +1285,8 @@
       "line_ids": [
         "caro-kann-advance-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "caro-kann-exchange",
@@ -1281,7 +1297,8 @@
       "line_ids": [
         "caro-kann-exchange-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "qgd-orthodox",
@@ -1293,7 +1310,8 @@
         "qgd-orthodox-main",
         "qgd-orthodox-modern"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "qgd-tartakower",
@@ -1304,7 +1322,8 @@
       "line_ids": [
         "qgd-tartakower-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "qgd-exchange",
@@ -1315,7 +1334,8 @@
       "line_ids": [
         "qgd-exchange-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "kid-mar-del-plata",
@@ -1327,7 +1347,8 @@
         "kid-mar-del-plata-main",
         "kid-bayonet"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "kid-saemisch",
@@ -1338,7 +1359,8 @@
       "line_ids": [
         "kid-saemisch-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "kid-fianchetto",
@@ -1349,7 +1371,8 @@
       "line_ids": [
         "kid-fianchetto-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "london-modern",
@@ -1360,7 +1383,8 @@
       "line_ids": [
         "london-modern-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "london-anti-kid",
@@ -1371,7 +1395,8 @@
       "line_ids": [
         "london-anti-kid-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "london-jobava",
@@ -1382,7 +1407,8 @@
       "line_ids": [
         "london-jobava-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "scotch-classical",
@@ -1393,7 +1419,8 @@
       "line_ids": [
         "scotch-classical-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "vienna-game-main",
@@ -1404,7 +1431,8 @@
       "line_ids": [
         "vienna-gambit-main"
       ],
-      "is_gambit": true
+      "is_gambit": true,
+      "key_squares": []
     },
     {
       "id": "scandinavian-qa5",
@@ -1415,7 +1443,8 @@
       "line_ids": [
         "scandinavian-qa5-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "pirc-classical",
@@ -1426,7 +1455,8 @@
       "line_ids": [
         "pirc-classical-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "alekhine-modern",
@@ -1437,7 +1467,8 @@
       "line_ids": [
         "alekhine-modern-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "slav-main",
@@ -1448,7 +1479,8 @@
       "line_ids": [
         "slav-main-line"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "semi-slav-meran",
@@ -1459,7 +1491,8 @@
       "line_ids": [
         "semi-slav-meran-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "nimzo-rubinstein",
@@ -1470,7 +1503,8 @@
       "line_ids": [
         "nimzo-rubinstein-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "queens-indian-petrosian",
@@ -1481,7 +1515,8 @@
       "line_ids": [
         "queens-indian-petrosian-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "grunfeld-exchange",
@@ -1492,7 +1527,8 @@
       "line_ids": [
         "grunfeld-exchange-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "catalan-open",
@@ -1503,7 +1539,8 @@
       "line_ids": [
         "catalan-open-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "english-symmetrical",
@@ -1514,7 +1551,8 @@
       "line_ids": [
         "english-symmetrical-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "kia-main",
@@ -1525,7 +1563,8 @@
       "line_ids": [
         "kia-main-line"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     },
     {
       "id": "dutch-stonewall",
@@ -1536,7 +1575,8 @@
       "line_ids": [
         "dutch-stonewall-main"
       ],
-      "is_gambit": false
+      "is_gambit": false,
+      "key_squares": []
     }
   ],
   "lines": [
@@ -1570,11 +1610,39 @@
       "end_fen": "rnbq1rk1/2p1bppp/p2p1n2/1p2p3/3PP3/1BP2N1P/PP3PP1/RNBQR1K1 b - - 0 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White builds slow kingside with d4 + Nbd2 + Nf1-g3.",
-        "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "Breyer knight tour ...Nb8-d7-f8-g6 aims here",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "f5",
+          "note": "kingside lever in the closed Spanish",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn — defended then pushed at right moment",
+          "side": "white",
+          "role": "tension"
+        },
+        {
+          "square": "c2",
+          "note": "Bc4-Bb3-Bc2 retreat — Spanish bishop's lifeline",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "g3",
+          "note": "Nf1-g3 reroute toward f5/h5",
+          "side": "white",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 17,
@@ -1618,11 +1686,39 @@
       "end_fen": "r1bq1rk1/2p1bppp/p2p1n2/np2p3/4P3/2P2N1P/PPBP1PP1/RNBQR1K1 b - - 2 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White builds slow kingside with d4 + Nbd2 + Nf1-g3.",
-        "Black aims for ...c5 break or kingside counter with ...Nbd7-f8-g6."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "c5",
+          "note": "Chigorin queenside expansion lever after ...c5",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn under siege; ...cxd4 opens c-file",
+          "side": "white",
+          "role": "tension"
+        },
+        {
+          "square": "a5",
+          "note": "knight on a5 eyes b3 and c4 weak squares",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "b3",
+          "note": "knight-on-a5 target; b-pawn structure stretched",
+          "side": "white",
+          "role": "weak"
+        },
+        {
+          "square": "f5",
+          "note": "alternative kingside lever if queenside locks",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 17,
@@ -1667,11 +1763,33 @@
       "end_fen": "r1b1kb1r/ppp2pp1/2p4p/4Pn2/8/2N2N2/PPP2PPP/R1BR2K1 w - - 2 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black trades queens early; defensive setup but Black's bishop pair compensates.",
-        "Endgame technique decides: Black aims for ...Bd7, ...c5, activate king."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "advanced pawn cramps Black; defended by Nf3",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "d5",
+          "note": "Berlin knight on d5 — the endgame fortress square",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "f5",
+          "note": "open f-file + bishop pair pressure on f5",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c2",
+          "note": "king walk Kd1-c2-b3 in classic Berlin endings",
+          "side": "white",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -1702,11 +1820,33 @@
       "end_fen": "r1bq1rk1/bpp2ppp/p1np1n2/4p3/B3P3/2PP1N2/PP1N1PPP/R1BQR1K1 b - - 3 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White avoids the Berlin endgame by keeping the queens on with d3.",
-        "Closer to Italian-style maneuvering than classical Berlin theory."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "Anti-Berlin avoids exchange; eyes d5 long-term",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "c3",
+          "note": "Nbd2-c4 / Nf1-g3 reroutes via c3 architecture",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "f7",
+          "note": "classic Italian/Spanish pressure point",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "e5",
+          "note": "Black's central pawn defended by Nc6",
+          "side": "black",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -1740,11 +1880,33 @@
       "end_fen": "r1bq1rk1/2p1bppp/p7/1p1nn3/8/1BP5/PP1P1PPP/RNBQR1K1 w - - 0 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black sacrifices a pawn for kingside attack.",
-        "White must defend precisely; long-term Black's piece activity is critical."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f3",
+          "note": "Marshall sac line; ...Bf3 lands on the king",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "h3",
+          "note": "...Qh3 mating idea, second wave after sac",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "e4",
+          "note": "...d5-d4 then ...e4 closes the long diagonal",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "g2",
+          "note": "kingside fortress hole after f3 sac",
+          "side": "white",
+          "role": "weak"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 13,
@@ -1788,11 +1950,33 @@
       "end_fen": "r2q1rk1/1bp1bppp/p1np1n2/1p2p3/P3P3/1B1P1N2/1PPN1PPP/R1BQR1K1 b - - 1 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White sidesteps Marshall by undermining b5 with a4.",
-        "Quiet positional fight; Black gives up Marshall counterplay for solid setup."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "a4",
+          "note": "queenside expansion to avoid Marshall mainline",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "b5",
+          "note": "a4-b5 attack on Black's queenside pawns",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "...d5 still possible but less punchy w/o Marshall structure",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "c3",
+          "note": "Nc3 reroute when a4 holds queenside",
+          "side": "white",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -1826,7 +2010,32 @@
       "popularity": 0.0,
       "tags": [],
       "strategic_notes": [],
-      "key_squares": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "c2-c3 + d2-d4 break aims here",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "f7",
+          "note": "Bc4 + Ng5 tactical pressure on Black king",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "c4",
+          "note": "Italian bishop's diagonal; eyes f7",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "e5",
+          "note": "Black's central foothold, defended by Nc6 + d6",
+          "side": "black",
+          "role": "outpost"
+        }
+      ],
       "forks": []
     },
     {
@@ -1856,11 +2065,33 @@
       "end_fen": "r2qk2r/pppb1ppp/2n5/1BbpP3/3Nn3/8/PPP2PPP/RNBQ1RK1 w kq - 1 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Both sides develop quietly toward h3 / h6 with Nbd2-f1-g3 / Nbd7-f8-g6.",
-        "White looks for kingside expansion; Black plays ...Re8 + central break."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d4",
+          "note": "Modern Italian immediate central tension",
+          "side": "white",
+          "role": "tension"
+        },
+        {
+          "square": "e5",
+          "note": "Black's pawn — exchange opens lines for both",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "f7",
+          "note": "Bc4 diagonal still bears on f7 after exchanges",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "after exd4 + Nxd4, knight aims at d5",
+          "side": "white",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 7,
@@ -1905,7 +2136,32 @@
       "popularity": 0.0,
       "tags": [],
       "strategic_notes": [],
-      "key_squares": [],
+      "key_squares": [
+        {
+          "square": "f7",
+          "note": "Two Knights central tactical motif",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "Ng5 + Bc4 pressure; ...d5 break essential for Black",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "e5",
+          "note": "central pawn — exchange decisions shape the middlegame",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "c6",
+          "note": "after ...d5 exd5 Na5, c6 can become weak",
+          "side": "black",
+          "role": "weak"
+        }
+      ],
       "forks": []
     },
     {
@@ -1935,11 +2191,33 @@
       "end_fen": "r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R w KQ - 4 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black sacrifices a pawn for piece activity and lead in development.",
-        "Critical position: White must consolidate while Black hunts the king."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f7",
+          "note": "Fried Liver Nxf7 — direct king attack",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "e6",
+          "note": "follow-up tactical square in the attack",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "Bc4 + Ng5 + e4 all converge on d5",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "g5",
+          "note": "knight outpost en route to f7",
+          "side": "white",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 7,
@@ -1983,11 +2261,39 @@
       "end_fen": "r2qk1nr/ppp2ppp/1bnp4/8/2BPP1b1/2N2N2/PB3PPP/R2Q1RK1 b kq - 4 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White sacs a pawn to gain time + central control.",
-        "Practical sharp line; lower-rated opponents often crumble under pressure."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "c3",
+          "note": "Evans pawn opens diagonal for Bb2 + attacks Bb4",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn break after b4 wins tempo",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "f7",
+          "note": "ever-present Italian target",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "a3",
+          "note": "open a-file potential after b4-b5",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "b2",
+          "note": "long diagonal bishop aim after b4 + Bb2",
+          "side": "white",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 9,
@@ -2031,11 +2337,39 @@
       "end_fen": "rn1q1rk1/1p2bppp/p2pbn2/4p3/4P3/1NN1BP2/PPPQ2PP/2KR1B1R b - - 4 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Both sides castle opposite; race begins.",
-        "White attacks with g4-g5 + h4-h5; Black with ...b5-b4 + ...a5-a4."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "the Sicilian's holy grail — Black's central break",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "b5",
+          "note": "queenside expansion lever",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "g4",
+          "note": "English Attack kingside pawn-storm launchpad",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "e5",
+          "note": "after Nd4-f5 or Nd5, knight aims at e5/f5",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f3",
+          "note": "anchor for long-diagonal bishop after f3",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2067,11 +2401,33 @@
       "end_fen": "r1bq1rk1/1p1nbppp/p2p1n2/4p3/4P3/1NN5/PPP1BPPP/R1BQR1K1 w - - 6 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White plays positionally — kingside castle, slow buildup.",
-        "Less theory than English Attack; suits classical-style players."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "central break; opens the Sicilian",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "...e5 closes center, kicks Nd4 to b3/f3",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "f4",
+          "note": "f2-f4-f5 plan in classical setups",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "b5",
+          "note": "queenside minority expansion",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2103,11 +2459,33 @@
       "end_fen": "rnb1kb1r/1p3ppp/p2ppn2/6B1/3NPP2/q1N5/P1PQ2PP/1R2KB1R w Kkq - 2 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black grabs the b2 pawn; sharpest line in chess theory.",
-        "Both sides need deep memorization; Fischer's signature."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b2",
+          "note": "the poisoned pawn — Qxb2 razor-line theory",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "still the canonical central lever",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "Bg5 + Qf3 setups eye e5/f6",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "a8",
+          "note": "Nb5/Rxb7-Qxb2 lines hunt the rook corner",
+          "side": "black",
+          "role": "target"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2140,11 +2518,39 @@
       "end_fen": "r2q1rk1/pp1bppbp/2np1np1/8/2BNP3/2N1BP2/PPPQ2PP/2KR3R b - - 6 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Sharp opposite-side castling. 'Open the h-file and mate' — Fischer.",
-        "Black's main idea: ...Rc8, ...Ne5, ...a6, ...b5 with Nxc3 sac options."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "h6",
+          "note": "h4-h5 + Bh6 trade the Dragon bishop",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "g6",
+          "note": "post-Bh6 + h-pawn sac, g6 becomes mating square",
+          "side": "black",
+          "role": "weak"
+        },
+        {
+          "square": "d5",
+          "note": "...d5! the Dragon's race-saving lever",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "c2",
+          "note": "Black's ...Rxc3 + Nxc2 invasion theme",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "b3",
+          "note": "after ...Rxc3 sac, b-pawn structure collapses",
+          "side": "white",
+          "role": "weak"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2176,11 +2582,33 @@
       "end_fen": "r2q1rk1/pp2ppbp/2npbnp1/8/4P3/1NN1B3/PPP1BPPP/R2Q1RK1 w - - 8 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White castles short; calmer than the Yugoslav.",
-        "Black plays ...Be6 + ...d5 break; positional Sicilian."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "less-sharp Dragon, but ...d5 still central",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e6",
+          "note": "...e6 supports d5 + restrains f-pawn break",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "f4",
+          "note": "Be2 setups still aim for f4-f5",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "g7",
+          "note": "Dragon bishop's home diagonal a1-h8",
+          "side": "black",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2214,11 +2642,39 @@
       "end_fen": "r1bqk2r/5ppp/p1np1b2/1p1Np3/4P3/N7/PPP2PPP/R2QKB1R w KQkq - 0 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black accepts a positional weakness on d5 in exchange for activity.",
-        "Modern theory considers it fully equal; very popular at top level (Magnus uses it)."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "Sveshnikov's signature hole on d5 — white knight dream square",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f5",
+          "note": "...f5 break essential to challenge d5 outpost",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "e4",
+          "note": "after ...Bxe4 sac ideas, e-pawn under fire",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "b5",
+          "note": "...b5 queenside thrust kicks Nb5/Nd5",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "a4",
+          "note": "a4 stalls ...b5 — main positional debate",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 13,
@@ -2261,11 +2717,33 @@
       "end_fen": "r3kb1r/pp1qpppp/1nn5/1B6/3P4/8/PP3PPP/RNBQK2R w KQkq - 0 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White avoids open Sicilian theory; aims for IQP play.",
-        "Solid practical choice for white below master level."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "Alapin invites ...d5; central tension defines middlegame",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "c3",
+          "note": "c3 supports d4 — Alapin's whole point",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "e5",
+          "note": "after dxc5 + Nc4, knight reroutes to e5",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn under pressure from ...cxd4",
+          "side": "white",
+          "role": "tension"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 3,
@@ -2307,11 +2785,39 @@
       "end_fen": "rnb1k1r1/ppq1np1Q/4p3/3pP3/3p4/P1P5/2P2PPP/R1B1KBNR w KQq - 0 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White grabs g7 / h7 pawns; Black gets central breaks + open lines.",
-        "Sharpest French line; both sides accept structural damage for activity."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "c3",
+          "note": "doubled c-pawns after ...Bxc3+ — Winawer's defining trade",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 attacks the d4 pawn chain base",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "g7",
+          "note": "Qg4 attacks ...g7; main Winawer poisoned-pawn dance",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "e5",
+          "note": "advanced e-pawn locks center, cramps Black",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f5",
+          "note": "...f6 / ...f5 attacks the e5 chain head",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2342,11 +2848,33 @@
       "end_fen": "r1b1k2r/pp2nppp/2n1p3/q1ppP3/3P4/P1PB1N2/2PB1PPP/R2QK2R b KQkq - 6 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Quieter alternative to 7.Qg4; White consolidates instead of grabbing pawns.",
-        "Black plays ...Qa5 + ...Nbc6 to pressure c3."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "c3",
+          "note": "doubled c-pawns still — but now no Qg4 storm",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "central pawn break vs d4 base",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "e-pawn still locks; piece play around it",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "a4",
+          "note": "a4-a5 blockade of queenside pawn structure",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2377,11 +2905,33 @@
       "end_fen": "rnb2rk1/pp1nqppp/4p3/2ppP3/3P1P2/2NB1N2/PPP3PP/R2QK2R b KQ - 1 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Locked center; flank operations decide.",
-        "Black's main plan: ...c5 + ...f6 to challenge White's e5 chain."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "Steinitz pawn chain advance; cramps Black",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f7",
+          "note": "Bxh7+ + Ng5+ + Qh5 classical king-hunt setups",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "queen-side pawn break vs d4 base",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "f6",
+          "note": "Nbd2-f3-Ng5 pressures f6/f7",
+          "side": "black",
+          "role": "target"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 7,
@@ -2422,11 +2972,33 @@
       "end_fen": "r3kb1r/pp1b1ppp/1qn1p3/3pPn2/1P1P4/P4N2/1B3PPP/RN1QKB1R w KQkq - 3 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Pawn chain c3-d4-e5 vs c5-d5-e6; closed center.",
-        "Black undermines with ...c5 + ...f6; White holds with the Bd3-Nf3-O-O setup."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "advance pawn — the French Advance's whole identity",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "d4",
+          "note": "base of pawn chain under ...c5 + ...Qb6 fire",
+          "side": "white",
+          "role": "tension"
+        },
+        {
+          "square": "b2",
+          "note": "after ...Qb6, b-pawn under attack",
+          "side": "white",
+          "role": "weak"
+        },
+        {
+          "square": "f5",
+          "note": "...f6 or ...f5 attacks the e5 chain head",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 9,
@@ -2468,11 +3040,39 @@
       "end_fen": "r2qkbnr/pp1nppp1/2p4p/7P/3P4/3b1NN1/PPP2PP1/R1BQK2R w KQkq - 0 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black trades the bishop and accepts slightly cramped position for solidity.",
-        "Long-term plan: ...c5, ...Nf6, ...Be7, equalize the structure."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f5",
+          "note": "the Caro bishop's natural home — central light squares",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "d5",
+          "note": "Black's queenside pawn structure — solid central control",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "e5",
+          "note": "Nf3-Ne5 reroute on Black's bishop",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f4",
+          "note": "kingside pawn expansion in main lines",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "h6",
+          "note": "...h6 defensive luft against Ne5 + Bd3 ideas",
+          "side": "black",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2503,11 +3103,33 @@
       "end_fen": "r1bqk2r/pp1n1pp1/2pbpn1p/8/3PN3/3B1N2/PPP1QPPP/R1B1K2R b KQkq - 1 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Karpov's signature: ...Nd7 instead of ...Bf5.",
-        "Cramped but rock-solid; black aims for ...c5 + ...b6 break later."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e4",
+          "note": "Karpov ...Nbd7 prepares ...Nxe4 exchange",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "f7",
+          "note": "tactical Bxe6/Nxf7 motifs in Karpov",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "central anchor — flexible piece play",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "e6",
+          "note": "...e6 + ...Be7 + ...Nf8-g6 fortress setup",
+          "side": "black",
+          "role": "pivot"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2538,11 +3160,33 @@
       "end_fen": "r2qkb1r/pp2nppp/1np1p1b1/3pP3/P2P4/1N3N2/1PP1BPPP/R1BQ1RK1 b kq - 0 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White seizes space; Black plays for ...c5 break.",
-        "Black bishop on g6 is fine outside the pawn chain."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "advance pawn cramps Black; mirror French Advance",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f5",
+          "note": "...Bf5 escapes early — Caro's identity",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "c5",
+          "note": "queenside pawn break vs e5/d4 chain",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "f4",
+          "note": "f-pawn storm vs Caro structure",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 5,
@@ -2583,11 +3227,33 @@
       "end_fen": "r3kb1r/pp1q1ppp/2n1pn2/3p4/3P1Bb1/1QPB4/PP1N1PPP/R3K1NR w KQkq - 0 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Symmetric pawn structure; small white edge from extra tempo.",
-        "Black aims for full equality with quick development + ...Bg4 / ...Qd7."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d5",
+          "note": "Exchange leaves symmetric pawns; d5 strategic anchor",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "f5",
+          "note": "...Bf5 (or via g4) main piece development",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "c5",
+          "note": "c4 break attacks Black's d5 pawn — Panov nuance",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "e4",
+          "note": "after c4-c5, knight aims to occupy e4/e5",
+          "side": "white",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2619,11 +3285,39 @@
       "end_fen": "r1bq1rk1/pp1nbppp/2p1p3/3n2B1/2BP4/2N1PN2/PP3PPP/2RQK2R w K - 1 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black equalizes via the Capablanca freeing maneuver ...Nd5.",
-        "Solid 100-year-old line; still mainline at top level."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e4",
+          "note": "minority attack alternative — central thrust",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "b5",
+          "note": "queenside minority attack — b4-b5 main plan",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "c6",
+          "note": "minority-attack target — Black's queenside pawn",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn defended by c3 + Nf3",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "f5",
+          "note": "...f5 kingside counterplay vs minority attack",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2654,11 +3348,33 @@
       "end_fen": "r1bq1rk1/pp1nBppp/4p3/2pn4/3P4/2N1PN2/PPQ2PPP/R3KB1R b KQ - 0 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Modern engine-prep alternative — White presses with queen on c2.",
-        "More dynamic than Capablanca; often transposes to IQP positions."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e4",
+          "note": "Qc2 setup aims at e4 + kingside expansion",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "d5",
+          "note": "central battleground after Bd3 + e4",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "h7",
+          "note": "Bd3 + Qc2 batter h7 in some lines",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "e5",
+          "note": "after e4-e5, advanced pawn cramps Black",
+          "side": "white",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2692,11 +3408,33 @@
       "end_fen": "rnb2rk1/p1p1qpp1/1p5p/3p4/3P4/4PN2/PP3PPP/R2QKB1R w KQ - 0 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black solves the QGD bishop problem by fianchetto on b7.",
-        "Hanging-pawn structure (c+d) common; central activity vs flexibility tradeoff."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b7",
+          "note": "Tartakower ...b6 + ...Bb7 fianchetto reroute",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 break frees Black's position",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "central pawn or piece outpost after ...c5 dxc5",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "d5",
+          "note": "...c5 + ...d4 hands central control",
+          "side": "black",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2727,11 +3465,39 @@
       "end_fen": "r1bqr1k1/pppnbppp/5n2/3p2B1/3P4/2NBP3/PPQ1NPPP/R3K2R b KQ - 6 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White launches minority attack b4-b5 to weaken Black's queenside.",
-        "Black counters with kingside play and active piece coordination."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b5",
+          "note": "minority attack — Exchange QGD's identity",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "c6",
+          "note": "minority-attack endpoint pawn",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "e4",
+          "note": "...Ne4 + ...f5 kingside counterplay",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "f5",
+          "note": "kingside counter-pawn break",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "c5",
+          "note": "central pawn restraint hub",
+          "side": "black",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 11,
@@ -2774,11 +3540,39 @@
       "end_fen": "r1bq1rk1/pppnn1bp/3p2p1/3Ppp2/2P1P3/2NN4/PP2BPPP/R1BQ1RK1 w - - 0 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Closed center; opposite-flank attacks. Pure 'race' — kingside vs queenside.",
-        "Black plays ...f5-f4-g5; White plays b4-c5 + breaking on the queenside."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f4",
+          "note": "...f5-f4 kingside pawn storm — KID's whole point",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "g3",
+          "note": "after ...f4, ...g5-g4 mates white king",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "c4-c5 queenside race — white's parallel attack",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "b5",
+          "note": "queenside expansion endpoint",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "h2",
+          "note": "Black's mating square after kingside storm",
+          "side": "white",
+          "role": "target"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2812,11 +3606,33 @@
       "end_fen": "r1bq1rk1/ppp1npbp/3p2p1/3Pp3/1PP1Pn2/2N2N2/P3BPPP/R1BQR1K1 w - - 3 11",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Aggressive queenside lever — White hits a5 + c5 break early.",
-        "Faster than Classical 9.Ne1; popularized by Kramnik."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b4",
+          "note": "Bayonet 9.b4 — fast queenside attack",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "c5",
+          "note": "c4-c5 follow-up cramps Black's queenside",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "a5",
+          "note": "...a5 challenges Bayonet pawn structure",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "f5",
+          "note": "...f5 kingside race against Bayonet",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -2847,11 +3663,39 @@
       "end_fen": "rnbq1rk1/ppp3bp/3p2p1/3Ppp1n/2P1P3/2N1BP2/PP1Q2PP/2KR1BNR b - - 1 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White plays for a slow kingside attack with g4 + h4-h5 after castling long.",
-        "Black hits center with ...e5/...c5 and exploits the f3 weakness."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e3",
+          "note": "Sämisch pawn chain f2-e3-d4 anchors center",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "c5",
+          "note": "c4-c5 + d4-d5 spatial bind on Black",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "f5",
+          "note": "...f5 standard KID kingside counter",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "b5",
+          "note": "...b5 alternate queenside lever vs Sämisch",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "h6",
+          "note": "luft + ...g5 prep",
+          "side": "black",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 11,
@@ -2892,11 +3736,33 @@
       "end_fen": "r1bq1rk1/pp1n1pbp/2pp1np1/4p3/2PPP3/2N2NPP/PP3PB1/R1BQ1RK1 b - - 0 9",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White's bishop on g2 controls the long diagonal; calmer than the Sämisch.",
-        "Quiet positional struggle; both sides build slowly."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "g2",
+          "note": "fianchetto bishop on long diagonal",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "d5",
+          "note": "central tension defines fianchetto KID middlegame",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 break — Yugoslav-style central counter",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "after ...e5, central pawn cramps White d-pawn",
+          "side": "black",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 11,
@@ -2938,11 +3804,39 @@
       "end_fen": "r2q1rk1/pb3ppp/1pnbpn2/2pp4/3P4/2PBPNB1/PP1N1PPP/R2Q1RK1 w - - 2 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White builds a bishop battery on b1-h7 for the kingside attack.",
-        "Black challenges the d4-pawn with c5; play around the central tension."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f4",
+          "note": "London bishop's home; defended by e3 + Nf3",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "e5",
+          "note": "Modern London Ne5 outpost — central anchor",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "h7",
+          "note": "Bd3 + Ne5 + Qd2-h6 batter h7 in attacks",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 pawn break vs London center",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e4",
+          "note": "after consolidation, e3-e4 push",
+          "side": "white",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 5,
@@ -2980,11 +3874,33 @@
       "end_fen": "rnbq1rk1/pp2ppbp/3p1np1/2pP4/4PB2/2N5/PPPQ1PPP/2KR1BNR b - - 0 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White avoids classical KID theory by skipping c4.",
-        "Long-side castling gives White attacking chances; Black plays for ...b5 break."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f4",
+          "note": "London bishop holds despite Black's fianchetto",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "c5",
+          "note": "Black's central counter vs London",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "Ne5 outpost even against KID setup",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "h6",
+          "note": "...h6 prevents Ng5 mating ideas",
+          "side": "black",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3016,11 +3932,33 @@
       "end_fen": "1rb1k2r/1p3ppp/p1nq1n2/3p4/8/4P3/PPP2PPP/R2QKBNR w KQk - 0 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Sharp anti-classical setup popularized by GM Baadur Jobava.",
-        "Surprise weapon at club level; theory is light, ideas matter more than memorization."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f4",
+          "note": "Jobava bishop with Nc3 added — quirky London",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "e5",
+          "note": "central knight outpost (Ne5) more aggressive than vanilla London",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "b5",
+          "note": "Nb5 ideas — Jobava's anti-positional bite",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "c5",
+          "note": "standard pawn break vs the London structure",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": [
         {
           "ply_index": 9,
@@ -3058,11 +3996,33 @@
       "end_fen": "r1b1k2r/ppppnppp/5q2/2b1n3/2BNP3/2P1B3/PP3PPP/RN1QK2R w KQkq - 3 8",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White trades center for piece play and open lines.",
-        "Practical alternative to Spanish/Italian; Magnus championed it 2010s."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "Scotch e-pawn cramps Black after Nxc6",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "d5",
+          "note": "c4-d5 central thrust in Scotch Mieses",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "f7",
+          "note": "open lines + bishop pair hit f7",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "Mieses Nb3-c5 outpost in late middlegame",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3087,11 +4047,33 @@
       "end_fen": "rnbqk2r/ppp1bppp/8/3pP3/3Pn3/2N2N2/PPP3PP/R1BQKB1R b KQkq - 0 6",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White sacs the e4 pawn for central control + open f-file.",
-        "Sharp practical weapon below master level."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "Vienna 2.Nc3 + 3.f4 attacks Black's e-pawn",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "f4",
+          "note": "Vienna Gambit pawn lever — opens kingside",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "d5",
+          "note": "Nc3 + e4 grip central light squares",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "f7",
+          "note": "kingside attack landing square",
+          "side": "white",
+          "role": "target"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3118,11 +4100,33 @@
       "end_fen": "rn2kb1r/pp2pppp/2p2n2/q4b2/2BP4/2N2N2/PPPB1PPP/R2QK2R b KQkq - 3 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black retains queenside pressure with Qa5.",
-        "Solid setup with ...c6, ...Nf6, ...Bf5; equalizes."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "a5",
+          "note": "Qa5 — Scandinavian's queen home; pressures Nc3",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "f5",
+          "note": "...Bf5 — Scandinavian bishop's natural square",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "c2",
+          "note": "...Bf5 + ...Qa5 + ...Bxc2 + ...Qxc2 tactics",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d4",
+          "note": "central pawn vs queenside pressure",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3149,11 +4153,39 @@
       "end_fen": "rnbq1rk1/pp2ppbp/2pp1np1/8/P2PP3/2N2N2/1PP1BPPP/R1BQ1RK1 b - - 0 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black builds a hypermodern setup, attacking center after development.",
-        "White holds central space; play around ...e5 and ...c5 breaks."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "Pirc classical e4-e5 central thrust",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f4",
+          "note": "kingside expansion option (Austrian Attack)",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "e4",
+          "note": "central pawn under ...c5 / ...e5 fire",
+          "side": "white",
+          "role": "tension"
+        },
+        {
+          "square": "g7",
+          "note": "Pirc bishop on long diagonal — Black's main piece",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "c5",
+          "note": "Yugoslav-style central counter",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3179,11 +4211,33 @@
       "end_fen": "rn1qk2r/ppp1bppp/3pp3/3nP3/3P2b1/5N2/PPP1BPPP/RNBQ1RK1 w kq - 2 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black provokes pawn pushes and chips away with ...Bg4 + ...d6.",
-        "Counter-attacking opening; concedes space for piece activity."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b6",
+          "note": "Alekhine knight retreats; ...c5 + ...Nb6 holds queenside",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "d5",
+          "note": "...d5 break challenges Four Pawns / Modern center",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e5",
+          "note": "advanced e-pawn cramps Black if locked",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "c5",
+          "note": "alternate central counter-break",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3211,11 +4265,39 @@
       "end_fen": "rn1qk2r/pp3ppp/2p1pn2/5b2/PbBP4/2N1PN2/1P3PPP/R1BQK2R w KQkq - 1 8",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black grabs c4 then develops Bf5 outside the pawn chain.",
-        "Solid mainline; classical Slav strategy."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "f5",
+          "note": "Slav bishop on f5 — out before ...e6 lock",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "c4",
+          "note": "...dxc4 + ...b5 holds the gambit pawn",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "Slav's solid central pawn",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "b5",
+          "note": "...b5 defends c4 pawn in main line",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "e4",
+          "note": "e2-e4 central thrust after ...dxc4",
+          "side": "white",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3247,11 +4329,39 @@
       "end_fen": "r1bqkb1r/3n1ppp/p3pn2/1pp5/3PP3/2NB1N2/PP3PPP/R1BQK2R w KQkq - 0 10",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black grabs queenside space with ...b5 + ...a6.",
-        "Sharp central tension after 9.e4 c5."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b5",
+          "note": "Meran ...b5 — defines the variation",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "c4",
+          "note": "...dxc4 then ...b5 + ...a6 Meran structure",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "e4",
+          "note": "e4 central thrust vs Meran setup",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "f5",
+          "note": "...Bb7 + ...c5 = central light-square control",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "d5",
+          "note": "Semi-Slav cluster anchored on d5",
+          "side": "black",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3280,11 +4390,39 @@
       "end_fen": "r1bq1rk1/pp3ppp/2n1pn2/2pp4/1bPP4/P1NBPN2/1P3PPP/R1BQ1RK1 b - - 0 8",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White builds quietly with e3 + Bd3 instead of sharp Qc2/f3 setups.",
-        "Most popular Nimzo system at top level."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "c3",
+          "note": "Nimzo doubled c-pawns post-...Bxc3+ — strategic theme",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c4",
+          "note": "doubled c-pawns — Black's blockade target",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "Black blockades light squares after ...d5 + ...c5",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "e4",
+          "note": "Black's knight outpost on e4 — Nimzo classic",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 break opens position around white doubled pawns",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3311,11 +4449,39 @@
       "end_fen": "rn1qkb1r/pbp2ppp/1p2p3/3n4/3P4/P1N2N2/1PQ1PPPP/R1B1KB1R b KQkq - 1 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White plays a3 to prevent ...Bb4 ideas.",
-        "Quiet positional Indian; Petrosian's signature."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "b7",
+          "note": "QID bishop on the long diagonal",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "e4",
+          "note": "...Bb7 + ...d5 control central light squares",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "a3",
+          "note": "Petrosian's a3 prevents ...Bb4+ — main idea",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "d5",
+          "note": "central tension after ...d5",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "c4",
+          "note": "central pawn under long-diagonal fire",
+          "side": "white",
+          "role": "control"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3344,11 +4510,39 @@
       "end_fen": "rnbqk2r/pp2ppbp/6p1/2p5/3PP3/2P1BN2/P4PPP/R2QKB1R b KQkq - 1 8",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black challenges White's big center with ...c5 + ...Bg7.",
-        "Classical attacking line; Kasparov championed it."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d4",
+          "note": "Grünfeld attacks white's d-pawn from many sides",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "c3",
+          "note": "c3 pawn — long-diagonal target after exchanges",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "b2",
+          "note": "Grünfeld's ...Qa5 / ...Bxc3 + ...Qxb2 motifs",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "g7",
+          "note": "Grünfeld bishop's home — long diagonal",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "c5",
+          "note": "...c5 break attacks d4 base",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3375,11 +4569,39 @@
       "end_fen": "r1bqkb1r/1pp2ppp/p1n1pn2/8/2pP4/4PNP1/PP3PBP/RNBQ1RK1 b kq - 0 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White stays comfortable; long-term pressure on c4 + d5.",
-        "Modern engine-prep favorite (Carlsen, Anand)."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "g2",
+          "note": "Catalan bishop's home — the long diagonal's heart",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "c4",
+          "note": "...dxc4 holds gambit; Catalan main pawn race",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "d5",
+          "note": "central pawn under fianchetto-bishop pressure",
+          "side": "black",
+          "role": "tension"
+        },
+        {
+          "square": "a4",
+          "note": "queenside expansion to recover c4 pawn",
+          "side": "white",
+          "role": "control"
+        },
+        {
+          "square": "e4",
+          "note": "e2-e4 central thrust after consolidation",
+          "side": "white",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3406,11 +4628,39 @@
       "end_fen": "r1bq1rk1/pp1pppbp/2n2np1/2p5/2P5/2NP1NP1/PP2PPBP/R1BQ1RK1 b - - 0 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Mirror development; both sides fianchetto.",
-        "Quiet positional fight; small white edge from initiative."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "d4",
+          "note": "central pawn break — English transforms to QGD-like",
+          "side": "white",
+          "role": "break"
+        },
+        {
+          "square": "d5",
+          "note": "mirror break — ...d5 standard counter",
+          "side": "black",
+          "role": "break"
+        },
+        {
+          "square": "g2",
+          "note": "fianchetto bishop on long diagonal",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "b7",
+          "note": "mirror fianchetto",
+          "side": "black",
+          "role": "pivot"
+        },
+        {
+          "square": "e5",
+          "note": "...e5 advance for space",
+          "side": "black",
+          "role": "outpost"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3435,11 +4685,39 @@
       "end_fen": "r2qkb1r/pp1npppp/2p2n2/3p4/6b1/3P1NP1/PPPNPPBP/R1BQ1RK1 b kq - 2 6",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "White plays a reversed KID setup, slow buildup.",
-        "Avoids opening theory; trick at club level."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e5",
+          "note": "KIA e2-e4-e5 central spearhead",
+          "side": "white",
+          "role": "outpost"
+        },
+        {
+          "square": "f5",
+          "note": "Nf3-h4 + Nf5 kingside attack focal point",
+          "side": "white",
+          "role": "target"
+        },
+        {
+          "square": "g2",
+          "note": "KIA bishop on long diagonal",
+          "side": "white",
+          "role": "pivot"
+        },
+        {
+          "square": "h7",
+          "note": "Qd1-h5 + Nf5 batter h7 in main attack",
+          "side": "black",
+          "role": "target"
+        },
+        {
+          "square": "c5",
+          "note": "queenside counter-pawn-break",
+          "side": "black",
+          "role": "break"
+        }
       ],
-      "key_squares": [],
       "forks": []
     },
     {
@@ -3466,11 +4744,39 @@
       "end_fen": "rnbqk2r/pp4pp/2pbpn2/3p1p2/2PP4/1P3NP1/P3PPBP/RNBQ1RK1 b kq - 0 7",
       "popularity": 0.0,
       "tags": [],
-      "strategic_notes": [
-        "Black builds the f5-e6-d5-c6 stonewall; locks center.",
-        "Counter-attacks with ...Ne4 + kingside pieces."
+      "strategic_notes": [],
+      "key_squares": [
+        {
+          "square": "e4",
+          "note": "Stonewall knight outpost on e4 — defining feature",
+          "side": "black",
+          "role": "outpost"
+        },
+        {
+          "square": "e5",
+          "note": "central pawn formation: ...f5+e6+d5 + maybe ...e5",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "d5",
+          "note": "Stonewall pawn fortress anchor",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "f5",
+          "note": "Stonewall f-pawn — kingside space",
+          "side": "black",
+          "role": "control"
+        },
+        {
+          "square": "e3",
+          "note": "Stonewall's dark-square weakness — Black's bishop trade target",
+          "side": "white",
+          "role": "weak"
+        }
       ],
-      "key_squares": [],
       "forks": []
     }
   ],

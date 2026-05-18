@@ -59,6 +59,7 @@ def load_notes(path: Path) -> dict[str, LineOverlay]:
                 square=item["square"],
                 note=item["note"],
                 side=item.get("side"),
+                role=item.get("role"),
             )
             for item in squares_list
             if isinstance(item, dict) and "square" in item and "note" in item

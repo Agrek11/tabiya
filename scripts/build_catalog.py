@@ -344,6 +344,10 @@ def main(argv: list[str] | None = None) -> int:
         families_v2, variations, openings, lines, presets = build_curated_v2(
             args.families, args.variations, args.lines, args.presets
         )
+        # Notes overlay — merges scripts/curated/notes.yml into lines
+        # (strategic_notes + key_squares per line id).
+        overlays = load_notes(args.notes)
+        lines = merge_into_lines(lines, overlays)
         # Phase 2a — attach curated key_squares (additive R4.4).
         if _attach_key_squares(openings, args) != 0:
             return 1
