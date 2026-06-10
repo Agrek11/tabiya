@@ -35,6 +35,8 @@ import { getSettings, playMove, writeSettings, type SoundSettings } from '../sou
 import { getSrsRepository } from '../storage';
 import { usePreset } from '../hooks/usePreset';
 import { ResetTelemetryButton } from '../components/settings/ResetTelemetryButton';
+import { EngineSection } from '../components/settings/EngineSection';
+import { AISection } from '../components/settings/AISection';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -322,6 +324,14 @@ export function SettingsPage() {
             ))}
           </div>
         </Card>
+      </div>
+
+      {/* ENGINE + AI COACH (Phase 4a) */}
+      <div style={sectionStyle}>
+        <EngineSection />
+      </div>
+      <div style={sectionStyle}>
+        <AISection />
       </div>
 
       {/* TELEMETRY RESET (Phase 1.5) */}

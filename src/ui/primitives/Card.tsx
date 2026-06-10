@@ -4,7 +4,6 @@
 
 import type { CSSProperties, PropsWithChildren } from 'react';
 import { useTokens } from '../../theme/ThemeContext';
-import { radius } from '../../theme/tokens';
 
 type CardProps = PropsWithChildren<{
   padding?: number;

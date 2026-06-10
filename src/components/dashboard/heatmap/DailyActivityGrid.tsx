@@ -126,7 +126,7 @@ export function DailyActivityGrid({ events }: { events: SessionEvent[] }) {
           >
             Less
           </text>
-          {BUCKETS.map((b, i) => (
+          {BUCKETS.map((_b, i) => (
             <rect
               key={i}
               className="heatmap-cell"

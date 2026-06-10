@@ -159,14 +159,15 @@ function routeFor(pathname: string, defs: Record<string, PageDef>): PageDef {
   // Longest-prefix match, but explicit list (drill before repertoire etc.).
   const orderedKeys = ['/repertoire', '/drill', '/insights', '/games', '/coach', '/settings'];
   for (const key of orderedKeys) {
-    if (pathname === key || pathname.startsWith(key + '/')) {
-      return defs[key];
+    const def = defs[key];
+    if (def && (pathname === key || pathname.startsWith(key + '/'))) {
+      return def;
     }
   }
-  return defs['/'];
+  return defs['/']!;
 }
 
-export function PageSidebar(): JSX.Element {
+export function PageSidebar() {
   const t = useTokens();
   const location = useLocation();
   const { dueLineIds } = useSRS();
@@ -242,7 +243,7 @@ export function PageSidebar(): JSX.Element {
   );
 }
 
-function SidebarItem({ item }: { item: Item }): JSX.Element {
+function SidebarItem({ item }: { item: Item }) {
   const t = useTokens();
   const active = !!item.active;
   return (

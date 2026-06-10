@@ -27,7 +27,7 @@ const NAV: NavSpec[] = [
   { to: '/coach', label: 'Coach' },
 ];
 
-export function TopBar(): JSX.Element {
+export function TopBar() {
   const t = useTokens();
   const { scheme, toggle } = useTheme();
   const navigate = useNavigate();

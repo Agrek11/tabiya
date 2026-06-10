@@ -12,7 +12,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 1: Setup — Dependencies, License Audit, Lint Gates
 
-- [ ] **Task 1.1**: Add `stockfish.wasm` (or equivalent npm `stockfish` build) to `package.json` and verify GPLv3 compatibility for bundled distribution
+- [x] **Task 1.1**: Add `stockfish.wasm` (or equivalent npm `stockfish` build) to `package.json` and verify GPLv3 compatibility for bundled distribution
   - **ID**: `task-1.1`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -21,7 +21,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Stockfish wasm binary available under `node_modules`; license declared; build still passes.
   - **Context**: R1.1 — bundle Stockfish as WASM Web Worker. Article 1 — copyleft (GPL family) is permitted, but author must declare. Article 16 — engine binary must be containerizable; verify the `.wasm` is a static asset, not a host install.
 
-- [ ] **Task 1.2**: Add `@anthropic-ai/sdk` and `openai` to `package.json`; verify MIT licenses; record in `tech.md`
+- [x] **Task 1.2**: Add `@anthropic-ai/sdk` and `openai` to `package.json`; verify MIT licenses; record in `tech.md`
   - **ID**: `task-1.2`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -30,7 +30,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Both SDKs installable; no peer-dep warnings; bundle untouched until runtime import.
   - **Context**: R5.2 — Anthropic + OpenAI direct SDK clients required. Article 1 — both MIT, permitted. Article 3 — direct SDK, NO LangChain/LlamaIndex/CrewAI. Confirm `package.json` does not pull in any of those transitively.
 
-- [ ] **Task 1.3**: Add Ollama detection helper (no SDK — raw fetch) and stub WebGPU feature-flag config
+- [x] **Task 1.3**: Add Ollama detection helper (no SDK — raw fetch) and stub WebGPU feature-flag config
   - **ID**: `task-1.3`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -39,7 +39,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Feature-flag module exports typed flags map; `webgpuLlm` defaults off.
   - **Context**: R5.2 (Ollama), Open Question #2 (WebGPU behind flag). Article 11 — local-first, no mandatory network. Article 12 — Ollama is optional.
 
-- [ ] **Task 1.4**: Install ESLint `no-restricted-imports` rule blocking `langchain`, `@langchain/*`, `llamaindex`, `crewai`
+- [x] **Task 1.4**: Install ESLint `no-restricted-imports` rule blocking `langchain`, `@langchain/*`, `llamaindex`, `crewai`
   - **ID**: `task-1.4`
   - **BlockedBy**: `none`
   - **Agent**: `chief-programmer`
@@ -48,7 +48,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: CI build fails if any banned import appears anywhere in `src/`. Verified by adding a temporary import in a scratch file and watching lint fail, then removing.
   - **Context**: Article 3 — no heavy AI orchestration. R5.7, R9.6 — explicit lint gate. Stripe/Shopify ESLint patterns: package-level deny lists are the standard guardrail.
 
-- [ ] **Task 1.5**: Verify TypeScript strict mode is enabled and add Vite Worker plugin config
+- [x] **Task 1.5**: Verify TypeScript strict mode is enabled and add Vite Worker plugin config
   - **ID**: `task-1.5`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -59,7 +59,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 2: ChessEngine Interface + Types (Article 5)
 
-- [ ] **Task 2.1**: Define `ChessEngine` interface, `EngineOpts`, `EngineAnalysis` types
+- [x] **Task 2.1**: Define `ChessEngine` interface, `EngineOpts`, `EngineAnalysis` types
   - **ID**: `task-2.1`
   - **BlockedBy**: `task-1.5`
   - **Agent**: `architect`
@@ -70,7 +70,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 3: Stockfish.wasm Web Worker + UCI Protocol
 
-- [ ] **Task 3.1**: Implement `stockfish-worker.ts` — load wasm, drive UCI handshake, parse `info` + `bestmove`
+- [x] **Task 3.1**: Implement `stockfish-worker.ts` — load wasm, drive UCI handshake, parse `info` + `bestmove`
   - **ID**: `task-3.1`
   - **BlockedBy**: `task-2.1`, `task-1.1`
   - **Agent**: `chief-programmer`
@@ -79,7 +79,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Worker handles concurrent `analyze` calls via `id` correlation; UCI is fully encapsulated inside the worker; main thread only ever exchanges SAN. PV parsing handles negative scores, `score mate N`, and partial info lines.
   - **Context**: R1.2 (worker MessageChannel only), R1.6 (parsed info + bestmove), R2.2 (UCI→SAN inside worker). Design §1 UCI protocol diagram. Pattern: lichess.org open-source uses identical wasm-in-worker isolation in `lila-stockfish-web`.
 
-- [ ] **Task 3.2**: Implement `StockfishWasmEngine` class — owns worker, exposes `ChessEngine` interface, handles ready/pending/abort
+- [x] **Task 3.2**: Implement `StockfishWasmEngine` class — owns worker, exposes `ChessEngine` interface, handles ready/pending/abort
   - **ID**: `task-3.2`
   - **BlockedBy**: `task-3.1`
   - **Agent**: `chief-programmer`
@@ -88,7 +88,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Concurrent `analyze` calls resolved independently by id; aborting one cancels in-flight without affecting other clients; `stop()` is idempotent.
   - **Context**: R1.1, R1.2, R1.6, R2.3. Design §1 `StockfishWasmEngine` block. Article 11 — `ready` failure surfaces as rejected promise but does NOT crash app. Pattern: Cloudflare Workers SDK uses identical `id` correlation map for RPC over postMessage.
 
-- [ ] **Task 3.3**: Lazy-load engine chunk on first Coach invocation (Article 11 bundle budget)
+- [x] **Task 3.3**: Lazy-load engine chunk on first Coach invocation (Article 11 bundle budget)
   - **ID**: `task-3.3`
   - **BlockedBy**: `task-3.2`
   - **Agent**: `chief-programmer`
@@ -99,7 +99,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 4: Engine Presets (Settings + Config)
 
-- [ ] **Task 4.1**: Define engine preset config `Fast | Balanced | Deep` mapping to `EngineOpts`
+- [x] **Task 4.1**: Define engine preset config `Fast | Balanced | Deep` mapping to `EngineOpts`
   - **ID**: `task-4.1`
   - **BlockedBy**: `task-2.1`
   - **Agent**: `architect`
@@ -108,7 +108,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Single source of truth for presets; UI and pipeline both consume from this module.
   - **Context**: R3.1, R3.2, R3.4. Design §1 presets block. Article 11 — localStorage is the persistence boundary.
 
-- [ ] **Task 4.2**: Build `EngineSection` Settings UI — preset radio + localStorage persistence
+- [x] **Task 4.2**: Build `EngineSection` Settings UI — preset radio + localStorage persistence
   - **ID**: `task-4.2`
   - **BlockedBy**: `task-4.1`
   - **Agent**: `general-purpose`
@@ -119,7 +119,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 5: LLMClient Interface + Four Concrete Implementations
 
-- [ ] **Task 5.1**: Define `LLMClient` interface and prompt/response types
+- [x] **Task 5.1**: Define `LLMClient` interface and prompt/response types
   - **ID**: `task-5.1`
   - **BlockedBy**: `task-1.2`
   - **Agent**: `api-designer`
@@ -128,7 +128,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Interface compiles; no concrete impl yet; type tests confirm `LLMClient.complete` returns `Promise<LLMResponse>`.
   - **Context**: R5.1, R5.7 (forward-compat hedge for 4e). Article 3 — direct SDK. Article 5 — interface-first. Design §3 LLMClient block. Pattern: Vercel AI SDK `LanguageModelV1` interface is structurally similar — typed payload in, structured response out, provider-agnostic surface.
 
-- [ ] **Task 5.2**: Implement `AnthropicLLMClient` with prompt caching on system prompt
+- [x] **Task 5.2**: Implement `AnthropicLLMClient` with prompt caching on system prompt
   - **ID**: `task-5.2`
   - **BlockedBy**: `task-5.1`
   - **Agent**: `chief-programmer`
@@ -137,7 +137,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Real call against Anthropic API succeeds; usage reports cache_read_input_tokens on 2nd call with same system prompt.
   - **Context**: R5.2, R5.3 (caching mandatory for cost discipline). Article 3 — direct SDK. Design §3 AnthropicLLMClient block. Anthropic docs `docs.anthropic.com/en/docs/build-with-claude/prompt-caching` — system-message ephemeral cache_control is the documented pattern.
 
-- [ ] **Task 5.3**: Implement `OpenAILLMClient` (direct `openai` SDK)
+- [x] **Task 5.3**: Implement `OpenAILLMClient` (direct `openai` SDK)
   - **ID**: `task-5.3`
   - **BlockedBy**: `task-5.1`
   - **Agent**: `chief-programmer`
@@ -146,7 +146,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Real call against OpenAI API succeeds; returns text + usage.
   - **Context**: R5.2. Article 3 — direct SDK. Design §3.
 
-- [ ] **Task 5.4**: Implement `OllamaLLMClient` (HTTP fetch to localhost:11434)
+- [x] **Task 5.4**: Implement `OllamaLLMClient` (HTTP fetch to localhost:11434)
   - **ID**: `task-5.4`
   - **BlockedBy**: `task-5.1`
   - **Agent**: `chief-programmer`
@@ -155,7 +155,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: With Ollama running locally, real call succeeds; with no Ollama, `available()` returns false and surface goes to degraded mode.
   - **Context**: R5.2, R5.5 (degraded mode on unreachable). Article 11 — local-first; Article 12 — backend optional. Design §3 Ollama block.
 
-- [ ] **Task 5.5**: Implement `LlamaCppWebGPULLMClient` skeleton (feature-flagged)
+- [x] **Task 5.5**: Implement `LlamaCppWebGPULLMClient` skeleton (feature-flagged)
   - **ID**: `task-5.5`
   - **BlockedBy**: `task-5.1`, `task-1.3`
   - **Agent**: `chief-programmer`
@@ -164,7 +164,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Class compiles; `available()` correctly returns false on most devices and when flag off; UI gates the option behind the flag.
   - **Context**: R5.2, Open Question #2 (WebGPU 4a.1 follow-up). Design §3 LlamaCppWebGPU block.
 
-- [ ] **Task 5.6**: Wire DI factory `getLLMClient(): LLMClient | null` reading Settings
+- [x] **Task 5.6**: Wire DI factory `getLLMClient(): LLMClient | null` reading Settings
   - **ID**: `task-5.6`
   - **BlockedBy**: `task-5.2`, `task-5.3`, `task-5.4`, `task-5.5`
   - **Agent**: `architect`
@@ -175,7 +175,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 6: Settings UI — Inference Location + API Key (Security Review Required)
 
-- [ ] **Task 6.1**: Build `AISection` Settings UI — radios, dropdowns, API key field
+- [x] **Task 6.1**: Build `AISection` Settings UI — radios, dropdowns, API key field
   - **ID**: `task-6.1`
   - **BlockedBy**: `task-5.6`
   - **Agent**: `general-purpose`
@@ -184,7 +184,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: User configures provider end-to-end; localStorage keys `tabiya.ai.location|provider|model|apiKey` populated; Test button gives actionable diagnostic.
   - **Context**: R6.1–R6.4. Design §4 Settings tree. Article 11 — keys local-only.
 
-- [ ] **Task 6.2**: Security review of API key handling — never logged, never in snapshots, never on console, never to telemetry
+- [x] **Task 6.2**: Security review of API key handling — never logged, never in snapshots, never on console, never to telemetry
   - **ID**: `task-6.2`
   - **BlockedBy**: `task-6.1`
   - **Agent**: `security-reviewer`
@@ -195,7 +195,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 7: CoachContext Assembly (4a Minimal — No RAG)
 
-- [ ] **Task 7.1**: Define `CoachContext` types with forward-compatible optional fields
+- [x] **Task 7.1**: Define `CoachContext` types with forward-compatible optional fields
   - **ID**: `task-7.1`
   - **BlockedBy**: `task-2.1`
   - **Agent**: `architect`
@@ -204,7 +204,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Type compiles; future 4b–4d additions are additive (no breaking changes for 4a consumers).
   - **Context**: R4.1, R4.4 (forward-compatible). Article 5. Design §2.
 
-- [ ] **Task 7.2**: Implement `CoachContextBuilder.build(input)` — engine + history only, history capped at 6
+- [x] **Task 7.2**: Implement `CoachContextBuilder.build(input)` — engine + history only, history capped at 6
   - **ID**: `task-7.2`
   - **BlockedBy**: `task-7.1`
   - **Agent**: `chief-programmer`
@@ -213,7 +213,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Builder is pure, fully unit-testable; history cap enforced; deterministic.
   - **Context**: R4.2, R4.3. Design §2. Rationale block: 4a does NOT use Phase 1b ExplainBlock or Phase 2 key_squares retrieval — that's 4d.
 
-- [ ] **Task 7.3**: Write 4a prompt template `prompts/coach/v1.txt` with 3 few-shot examples + honest-baseline hedge
+- [x] **Task 7.3**: Write 4a prompt template `prompts/coach/v1.txt` with 3 few-shot examples + honest-baseline hedge
   - **ID**: `task-7.3`
   - **BlockedBy**: `none`
   - **Agent**: `chief-programmer`
@@ -222,7 +222,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Template loads at build time, NO runtime fetch; v1 is reproducible.
   - **Context**: R8.1–R8.5. Article 4 — eval traceability requires version-pinned prompts. Pattern: Anthropic Cookbook and `dust.tt` both ship prompts as version-controlled text files imported as raw strings.
 
-- [ ] **Task 7.4**: Implement `CoachPipeline.run(input)` — orchestrator engine → context → LLM, returns `{engine, llm?}`
+- [x] **Task 7.4**: Implement `CoachPipeline.run(input)` — orchestrator engine → context → LLM, returns `{engine, llm?}`
   - **ID**: `task-7.4`
   - **BlockedBy**: `task-3.3`, `task-5.6`, `task-7.2`, `task-7.3`
   - **Agent**: `chief-programmer`
@@ -233,7 +233,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 8: Surface A — In-Drill "Why?" Button + Modal
 
-- [ ] **Task 8.1**: Build `WhyButton` component + keyboard shortcut `?`
+- [x] **Task 8.1**: Build `WhyButton` component + keyboard shortcut `?`
   - **ID**: `task-8.1`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -242,7 +242,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Button visible during drill; keyboard-accessible; ARIA `aria-label="Why is this the best move?"`.
   - **Context**: R7.1, R7.7. Design §5.
 
-- [ ] **Task 8.2**: Build `CoachModal` component — engine card + LLM card + degraded footer
+- [x] **Task 8.2**: Build `CoachModal` component — engine card + LLM card + degraded footer
   - **ID**: `task-8.2`
   - **BlockedBy**: `task-7.4`, `task-8.1`
   - **Agent**: `general-purpose`
@@ -251,7 +251,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Modal renders correctly for both LLM-configured and degraded paths; ESC/click-outside dismiss; drill state preserved.
   - **Context**: R7.2–R7.6, R7.8. Design §5 ASCII mockup. Article 11 — engine card always present.
 
-- [ ] **Task 8.3**: Implement `useCoach` hook — invokes pipeline + in-memory cache
+- [x] **Task 8.3**: Implement `useCoach` hook — invokes pipeline + in-memory cache
   - **ID**: `task-8.3`
   - **BlockedBy**: `task-7.4`
   - **Agent**: `chief-programmer`
@@ -262,7 +262,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 9: Engine-Only Degraded Mode (Article 11)
 
-- [ ] **Task 9.1**: Verify engine-only degraded rendering in `CoachModal` when LLM unconfigured
+- [x] **Task 9.1**: Verify engine-only degraded rendering in `CoachModal` when LLM unconfigured
   - **ID**: `task-9.1`
   - **BlockedBy**: `task-8.2`
   - **Agent**: `general-purpose`
@@ -271,7 +271,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Engine-only is a first-class rendering mode, not an error state; users without API keys still see engine truth.
   - **Context**: R7.6, R9.3. Article 11 — local-first; Article 12 — backend (or in this case, LLM) optional.
 
-- [ ] **Task 9.2**: Verify engine load failure renders graceful "engine unavailable" state
+- [x] **Task 9.2**: Verify engine load failure renders graceful "engine unavailable" state
   - **ID**: `task-9.2`
   - **BlockedBy**: `task-3.3`, `task-8.2`
   - **Agent**: `general-purpose`
@@ -282,7 +282,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 10: Cache Verification
 
-- [ ] **Task 10.1**: Verify cache invalidates on Settings change for preset / provider / model
+- [x] **Task 10.1**: Verify cache invalidates on Settings change for preset / provider / model
   - **ID**: `task-10.1`
   - **BlockedBy**: `task-8.3`, `task-4.2`, `task-6.1`
   - **Agent**: `chief-programmer`
@@ -293,7 +293,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
 
 ### Phase 11: Tests + Lint Check + Bundle Budget
 
-- [ ] **Task 11.1**: Engine integration tests — 5 known FENs return valid PVs
+- [x] **Task 11.1**: Engine integration tests — 5 known FENs return valid PVs
   - **ID**: `task-11.1`
   - **BlockedBy**: `task-3.2`
   - **Agent**: `testability-reviewer`
@@ -302,7 +302,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Real engine integration verified end-to-end including UCI→SAN.
   - **Context**: R9.1. Design §8.
 
-- [ ] **Task 11.2**: `ChessEngine` interface contract test suite (reusable)
+- [x] **Task 11.2**: `ChessEngine` interface contract test suite (reusable)
   - **ID**: `task-11.2`
   - **BlockedBy**: `task-2.1`
   - **Agent**: `testability-reviewer`
@@ -311,7 +311,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Reusable contract test; new engines drop in with single-line addition.
   - **Context**: R9.2. Article 5 — interface contract. Pattern: Spring `@TestContract` / Java `Tck` pattern; structurally identical.
 
-- [ ] **Task 11.3**: Each `LLMClient` impl has a happy-path test with provider mocked
+- [x] **Task 11.3**: Each `LLMClient` impl has a happy-path test with provider mocked
   - **ID**: `task-11.3`
   - **BlockedBy**: `task-5.2`, `task-5.3`, `task-5.4`, `task-5.5`
   - **Agent**: `testability-reviewer`
@@ -320,7 +320,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: All 4 providers covered; mocks are realistic enough to catch shape regressions.
   - **Context**: R9.4. Design §8 test plan.
 
-- [ ] **Task 11.4**: Surface A engine-only degraded-mode test
+- [x] **Task 11.4**: Surface A engine-only degraded-mode test
   - **ID**: `task-11.4`
   - **BlockedBy**: `task-9.1`
   - **Agent**: `testability-reviewer`
@@ -329,7 +329,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Article 11 degraded path is a first-class tested mode.
   - **Context**: R9.3. Article 11.
 
-- [ ] **Task 11.5**: Cache test — re-click same position SHALL NOT re-invoke engine or LLM
+- [x] **Task 11.5**: Cache test — re-click same position SHALL NOT re-invoke engine or LLM
   - **ID**: `task-11.5`
   - **BlockedBy**: `task-8.3`
   - **Agent**: `testability-reviewer`
@@ -338,7 +338,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Cache deduplication AND invalidation both verified.
   - **Context**: R9.5. Design §6.
 
-- [ ] **Task 11.6**: ESLint `no-LangChain` lint check passes; add a fixture test
+- [x] **Task 11.6**: ESLint `no-LangChain` lint check passes; add a fixture test
   - **ID**: `task-11.6`
   - **BlockedBy**: `task-1.4`
   - **Agent**: `testability-reviewer`
@@ -347,7 +347,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Lint gate is itself tested; future contributor cannot disable the rule without breaking this test.
   - **Context**: R9.6. Article 3.
 
-- [ ] **Task 11.7**: API key never appears in test snapshots — Settings component snapshot test
+- [x] **Task 11.7**: API key never appears in test snapshots — Settings component snapshot test
   - **ID**: `task-11.7`
   - **BlockedBy**: `task-6.2`
   - **Agent**: `security-reviewer`
@@ -356,7 +356,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Security regression caught at test time, not after a leak.
   - **Context**: R6.6. Article 11.
 
-- [ ] **Task 11.8**: Bundle size budget verification — base trainer chunk delta ≤30 kB gzip
+- [x] **Task 11.8**: Bundle size budget verification — base trainer chunk delta ≤30 kB gzip
   - **ID**: `task-11.8`
   - **BlockedBy**: `task-3.3`, `task-8.2`, `task-6.1`
   - **Agent**: `testability-reviewer`
@@ -365,7 +365,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: CI fails any PR that bloats the base bundle past the budget. Article 11 enforced at gate.
   - **Context**: R9.7. Article 11. Pattern: Next.js `next-bundle-analyzer` + GitHub Actions size-limit bot.
 
-- [ ] **Task 11.9**: TypeScript strict — no `any` without inline justification
+- [x] **Task 11.9**: TypeScript strict — no `any` without inline justification
   - **ID**: `task-11.9`
   - **BlockedBy**: `task-11.8`
   - **Agent**: `testability-reviewer`
@@ -374,7 +374,7 @@ References: `requirements.md` R1–R9 (4a active section); `design.md` Sections 
   - **Outcome**: Type discipline mechanically enforced.
   - **Context**: R9.8. Article 14.
 
-- [ ] **Task 11.10**: Honest-acceptance walkthrough — 10-position Markdown checklist
+- [x] **Task 11.10**: Honest-acceptance walkthrough — 10-position Markdown checklist
   - **ID**: `task-11.10`
   - **BlockedBy**: `task-8.2`, `task-7.3`
   - **Agent**: `general-purpose`

@@ -14,7 +14,7 @@
  * The component owns the open-fork popover state because it's purely visual.
  */
 
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/tokens';
 import { useClickOutside } from '../../ui/use-click-outside';

@@ -53,7 +53,29 @@ export function setExplainTtsFlag(value: boolean): void {
   writeFlag('explainTts', value);
 }
 
+// ---------------------------------------------------------------------------
+// Phase 4a — Coach: in-browser WebGPU LLM (R5.2, Open Question #2)
+// ---------------------------------------------------------------------------
+
+/**
+ * `tabiya:flag:webgpuLlm` — when on, the AI Settings inference-location radio
+ * offers "Local (Browser WebGPU)" and `LlamaCppWebGPULLMClient.available()`
+ * may return true on WebGPU-capable devices. Default OFF in 4a — the client is
+ * a skeleton; full in-browser model loading is deferred to a 4a.1 follow-up.
+ *
+ * Ollama is NOT behind a flag and needs no SDK — it is detected at runtime via
+ * a raw `fetch` to `http://localhost:11434/api/tags` (see OllamaLLMClient).
+ */
+export function getWebgpuLlmFlag(): boolean {
+  return readFlag('webgpuLlm', false);
+}
+
+export function setWebgpuLlmFlag(value: boolean): void {
+  writeFlag('webgpuLlm', value);
+}
+
 /** Exported for tests that need to reset flag state directly. */
 export const FLAG_STORAGE_KEYS = {
   explainTts: `${FLAG_KEY_PREFIX}explainTts`,
+  webgpuLlm: `${FLAG_KEY_PREFIX}webgpuLlm`,
 } as const;

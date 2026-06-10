@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useReducer, useMemo, useRef, useState, useCallback } from 'react';
-import { Chess } from 'chess.js';
+import { Chess, type Square } from 'chess.js';
 import { compareMove, type MoveAttempt } from './move-comparator';
 import { SAMPLE_LINE_SAN } from './sample-line';
 import { playMove } from '../sound/sounds';
@@ -495,7 +495,7 @@ export function useDrill(
       // pieces of the player's color so clicks on opponent pieces (or empty
       // squares passed in by mistake) yield no destinations.
       try {
-        const moves = chess.moves({ square, verbose: true }) as Array<{
+        const moves = chess.moves({ square: square as Square, verbose: true }) as Array<{
           from: string;
           to: string;
           color: 'w' | 'b';

@@ -43,6 +43,9 @@ Single-language backend: Python owns the catalog build script, AI service, and a
 | `vitest` (MIT) | Unit tests |
 | `idb` (ISC) | IndexedDB wrapper for local SRS state |
 | `fake-indexeddb` (MIT, dev-only) | IndexedDB simulator for tests |
+| `stockfish.wasm` (**GPL-3.0**) | Phase 4a — Stockfish engine as a WASM Web Worker for position eval + multi-PV. GPLv3 — copyleft permitted by Article 1, but redistribution requires source availability; engine ships as a separate runtime asset (lazy chunk in `public/`), no static linking into the app bundle, so no copyleft bleed in the browser context. |
+| `@anthropic-ai/sdk` (MIT) | Phase 4a — direct Anthropic client for Coach narration (Surface A). Runtime, browser (`dangerouslyAllowBrowser`). Loaded only when the Anthropic provider is selected. NO LangChain/LlamaIndex/CrewAI wrapper (Article 3). |
+| `openai` (Apache-2.0) | Phase 4a — direct OpenAI client for Coach narration. Runtime, browser. Loaded only when the OpenAI provider is selected. Direct SDK only (Article 3). |
 
 All MIT / Apache-2 / BSD / GPL / ISC — fully open source, no proprietary deps.
 

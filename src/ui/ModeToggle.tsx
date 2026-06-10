@@ -90,7 +90,7 @@ export function ModeToggle({ value, onChange, disabled = false }: ModeToggleProp
               fontSize: 13,
               fontWeight: isActive ? 600 : 500,
               color: isActive ? t.brand : t.ink,
-              boxShadow: isActive ? t.shadow : 'none',
+              boxShadow: isActive ? t.shadowSm : 'none',
               transition: 'background 120ms ease, color 120ms ease',
             }}
           >

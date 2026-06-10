@@ -49,6 +49,7 @@ import {
 } from 'lucide-react';
 import { useClickOutside } from '../ui/use-click-outside';
 import { useDrill } from '../drill/useDrill';
+import { WhyButton } from '../components/coach/WhyButton';
 import { useSRS } from '../hooks/useSRS';
 import { useEventEmitter } from '../hooks/useEventEmitter';
 import { useEffectivePick } from '../hooks/useEffectivePick';
@@ -224,7 +225,7 @@ export function DrillPage() {
     };
   }, [requestedLine, requestedOpening]);
 
-  const { dueLineIds, loading: srsLoading, states: srsStates } = useSRS();
+  const { dueLineIds, loading: srsLoading } = useSRS();
   const { effective } = useEffectivePick();
 
   // Queue init.
@@ -649,7 +650,6 @@ export function DrillPage() {
 
   // Drill stats — wired where available.
   const accuracySoFar = totalPly > 0 ? Math.round((currentPly / totalPly) * 100) : 0;
-  const activeSrsBox = activeLineId ? srsStates.get(activeLineId)?.box ?? null : null;
 
   const isExplainViewActive =
     explainMode === 'explain' &&
@@ -991,6 +991,17 @@ export function DrillPage() {
                     {item.label}
                   </button>
                 ))}
+                {/* Phase 4a — Coach "Why?" (Surface A). Opens engine + LLM
+                    narration for the current position; `?` shortcut too. */}
+                {activeLine ? (
+                  <WhyButton
+                    lineName={activeLine.name}
+                    lineId={activeLineId ?? undefined}
+                    fen={fen}
+                    plyIndex={playedCount}
+                    lineSans={drillMoves}
+                  />
+                ) : null}
               </div>
             </div>
 
@@ -1023,7 +1034,7 @@ export function DrillPage() {
               </Card>
               <WhyThisMoveRail
                 notes={activeLine?.strategic_notes ?? []}
-                keySquares={activeLine?.key_squares ?? []}
+                keySquares={(activeLine?.key_squares ?? []).map((k) => k.square)}
               />
             </aside>
 
