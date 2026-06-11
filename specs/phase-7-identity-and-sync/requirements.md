@@ -123,19 +123,37 @@ The local-first architecture is the cost strategy: ALL heavy compute (Stockfish
 WASM, WebGPU LLM, BYOK cloud calls) runs client-side. The server holds only
 sync state — SRS is ~5 KB/user (51 lines × ~100 B), so 100k users ≈ 500 MB.
 
-**Stack direction — serverless, scale-to-zero, autoscale-by-default:**
+**Stack DECISION (2026-06-11): CLOUD-AGNOSTIC core, launch on the cheapest
+runner.** Portability comes from the architecture (the server-side twin of
+Article 5), NOT from abstraction frameworks or Kubernetes — those buy
+portability with permanent complexity and are rejected.
 
-| Layer | Direction | Free until |
+Portable-by-construction layers:
+
+| Layer | Portability mechanism | Cloudflare / AWS / Azure runner |
 |---|---|---|
-| Frontend | Cloudflare Pages (static; `_headers` gives COOP/COEP for stockfish.wasm) | effectively always |
-| API (auth broker + sync) | Cloudflare Workers | 100k req/day, then $5/mo flat + usage |
-| DB | Cloudflare D1 (SQLite) | 5 GB / 5M reads/day ≈ ~1M users of SRS |
-| Auth | Hand-rolled OIDC on Workers (PKCE code exists in-repo); fallback: Supabase auth-in-a-box (50k MAU free) | — |
+| HTTP/API | **Hono** — web-standard fetch handlers, one codebase, native adapters per platform | Workers / Lambda / Azure Functions |
+| Domain logic (sync, merge, OIDC flows) | pure TypeScript, zero platform imports | identical everywhere |
+| Storage | `SyncStore` interface (server twin of the repository pattern); per-user KV-shaped rows | D1 / DynamoDB / Cosmos DB |
+| Auth | standard OIDC PKCE (provider- and cloud-agnostic) | identical everywhere |
+| Frontend | static files + COOP/COEP headers | Pages / S3+CloudFront / Static Web Apps |
 
-Rejected shapes: container hosts (Fly/Railway/Render — idle cost or cold
-sleeps), Kubernetes (pure overhead below very large scale). Cost curve:
-$0 to ~2k DAU → $5-30/mo to ~50k DAU → usage-linear after; serverless means
-"autoscale then pay" is default behavior, no step functions.
+Per-cloud residue that is NOT abstracted (accepted): one small deploy config
+each, headers config, billing alarms. Switching or adding a cloud = adapter +
+deploy config, weekend-sized by design — verified by a CI job that builds the
+API for ≥2 runtimes from day one.
+
+**Launch default: Cloudflare** (free egress, $5 flat Workers, edge-global by
+default — wins cost/ease/ops/global on merit). AWS = first alternate (owner's
+PERSONAL account ONLY — never the employer scratch account) and the natural
+home if heavy backend features (queues, batch eval, hosted-LLM proxy at
+scale) appear later. Azure = supported by the same seams, no earlier
+commitment. AWS multi-region note: Lambda is regional; true global on AWS
+means Global Tables + N-region deploys + latency routing — a real project
+Cloudflare makes unnecessary at this size.
+
+Cost curve (launch runner): ~$0 to ~2k DAU → $5-30/mo to ~50k DAU →
+usage-linear; serverless autoscale is default behavior, no step functions.
 
 **Revenue alignment:** free = local-only app (static files, $0 marginal) and
 free accounts (sync ≈ $0 marginal). Paid tier ($2-4/mo) = hosted Coach
