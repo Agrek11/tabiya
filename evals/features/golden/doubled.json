@@ -1,0 +1,9 @@
+{
+  "feature": "pawns.doubled",
+  "positions": [
+    { "name": "doubled c-pawns", "fen": "8/8/8/8/2P5/2P5/8/K6k w - - 0 1",
+      "expected": { "white": ["c3", "c4"], "black": [] } },
+    { "name": "start position has none", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } }
+  ]
+}

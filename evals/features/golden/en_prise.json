@@ -1,0 +1,9 @@
+{
+  "feature": "tactics_geometry.en_prise",
+  "positions": [
+    { "name": "mutually attacked undefended pawns", "fen": "k7/8/8/3p4/4P3/8/8/K7 w - - 0 1",
+      "expected": ["d5", "e4"] },
+    { "name": "defended target not en prise", "fen": "k7/8/2p5/3p4/4P3/5P2/8/K7 w - - 0 1",
+      "expected": [] }
+  ]
+}

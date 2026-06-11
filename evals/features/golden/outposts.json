@@ -1,0 +1,17 @@
+{
+  "feature": "activity.outposts",
+  "positions": [
+    { "name": "d4 pawn grants c5+e5; black none (own-half squares excluded)",
+      "fen": "k7/8/2p5/8/3P4/8/8/K7 w - - 0 1",
+      "expected": {
+        "white": { "occupied": [], "available": ["c5", "e5"] },
+        "black": { "occupied": [], "available": [] }
+      } },
+    { "name": "start position none",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": {
+        "white": { "occupied": [], "available": [] },
+        "black": { "occupied": [], "available": [] }
+      } }
+  ]
+}

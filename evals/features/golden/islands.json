@@ -1,0 +1,9 @@
+{
+  "feature": "pawns.islands",
+  "positions": [
+    { "name": "three white islands", "fen": "8/8/8/8/8/8/P2P3P/K6k w - - 0 1",
+      "expected": { "white": 3, "black": 0 } },
+    { "name": "start position one each", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": 1, "black": 1 } }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "feature": "files_diagonals.open_files",
+  "positions": [
+    { "name": "only a-file has a pawn", "fen": "k7/8/8/8/8/8/P7/K7 w - - 0 1",
+      "expected": ["b", "c", "d", "e", "f", "g", "h"] },
+    { "name": "start position none", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": [] }
+  ]
+}

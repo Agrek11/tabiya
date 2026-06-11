@@ -66,6 +66,11 @@ from .tabiya_build.whitelist import (  # noqa: E402
     OpeningSpec,
     filter_openings,
 )
+from .tabiya_build.features.sidecar import (  # noqa: E402
+    build_features_index,
+    read_previous_sidecar,
+    write_features_sidecar,
+)
 from .tabiya_build.writer import build_version, print_summary, write_catalog  # noqa: E402
 
 logger = logging.getLogger("tabiya.build")
@@ -84,6 +89,7 @@ DEFAULT_EXPLAIN_DST = REPO_ROOT / "public" / "explain"
 DEFAULT_KEY_SQUARES = REPO_ROOT / "scripts" / "curated" / "key_squares.yml"
 DEFAULT_SOURCES_YML = REPO_ROOT / "scripts" / "key_squares" / "sources.yml"
 DEFAULT_TRANSPOSITIONS_OUT = REPO_ROOT / "public" / "transpositions.json"
+DEFAULT_FEATURES_OUT = REPO_ROOT / "public" / "features.json"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -148,6 +154,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--skip-key-squares",
         action="store_true",
         help="Skip key_squares load + license audit + join (Phase 2a additive).",
+    )
+    p.add_argument(
+        "--features-out",
+        type=Path,
+        default=DEFAULT_FEATURES_OUT,
+        help="Features sidecar output (default: public/features.json).",
+    )
+    p.add_argument(
+        "--skip-features",
+        action="store_true",
+        help="Skip Phase 4b features sidecar emission.",
     )
     p.add_argument(
         "--skip-transpositions",
@@ -218,6 +235,17 @@ def _emit_transposition_sidecar(
         size,
         args.transpositions_out,
     )
+    return 0
+
+
+def _emit_features_sidecar(lines: list[Line], args: argparse.Namespace) -> int:
+    """Phase 4b — build + write public/features.json sidecar."""
+    if args.skip_features:
+        logger.info("Skipping features sidecar emission (--skip-features)")
+        return 0
+    previous = read_previous_sidecar(args.features_out)
+    index = build_features_index(lines, previous)
+    write_features_sidecar(index, args.features_out)
     return 0
 
 
@@ -364,6 +392,8 @@ def main(argv: list[str] | None = None) -> int:
         # Phase 2a — transposition sidecar emission.
         if _emit_transposition_sidecar(lines, args) != 0:
             return 1
+        if _emit_features_sidecar(lines, args) != 0:
+            return 1
         if _process_explain_sidecars(catalog, args) != 0:
             return 1
         return 0
@@ -417,6 +447,8 @@ def main(argv: list[str] | None = None) -> int:
     size = write_catalog(catalog, args.out)
     print_summary(catalog, size)
     if _emit_transposition_sidecar(lines, args) != 0:
+        return 1
+    if _emit_features_sidecar(lines, args) != 0:
         return 1
     if _process_explain_sidecars(catalog, args) != 0:
         return 1

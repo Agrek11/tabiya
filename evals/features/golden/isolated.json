@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.isolated",
+  "positions": [
+    { "name": "a-pawn isolated among a/c/d", "fen": "8/8/8/3P4/8/8/P1P5/K6k w - - 0 1",
+      "expected": { "white": ["a2"], "black": [] } },
+    { "name": "start position has none", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } },
+    { "name": "rim h-pawn alone", "fen": "8/8/8/8/8/8/7P/K6k w - - 0 1",
+      "expected": { "white": ["h2"], "black": [] } }
+  ]
+}

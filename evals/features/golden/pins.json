@@ -1,0 +1,11 @@
+{
+  "feature": "tactics_geometry.pins",
+  "positions": [
+    { "name": "relative pin: Nf6 to Qd8 by Bg5", "fen": "3q3k/8/5n2/6B1/8/8/8/K7 w - - 0 1",
+      "expected": [ { "pinned": "Nf6", "to": "Qd8", "by": "Bg5", "absolute": false } ] },
+    { "name": "absolute pin: same geometry vs king", "fen": "3k4/8/5n2/6B1/8/8/8/K7 w - - 0 1",
+      "expected": [ { "pinned": "Nf6", "to": "Kd8", "by": "Bg5", "absolute": true } ] },
+    { "name": "no pin when ray blocked twice", "fen": "3q3k/4p3/5n2/6B1/8/8/8/K7 w - - 0 1",
+      "expected": [] }
+  ]
+}

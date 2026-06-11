@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.passed",
+  "positions": [
+    { "name": "lone d5 pawn is passed", "fen": "8/8/8/3P4/8/8/8/K6k w - - 0 1",
+      "expected": { "white": ["d5"], "black": [] } },
+    { "name": "adjacent-file blocker stops both", "fen": "8/8/4p3/3P4/8/8/8/K6k w - - 0 1",
+      "expected": { "white": [], "black": [] } },
+    { "name": "rim passer past blocker", "fen": "8/7P/8/8/6p1/8/8/K6k w - - 0 1",
+      "expected": { "white": ["h7"], "black": ["g4"] } }
+  ]
+}
