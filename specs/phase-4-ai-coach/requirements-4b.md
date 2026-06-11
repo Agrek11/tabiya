@@ -150,6 +150,29 @@ that two implementers produce identical output (golden-fixture enforceable).
 - Pre-generated narrations shipped as content ("stock coach for keyless
   users") — parked product idea, Open Question.
 
+## Decisions appended 2026-06-11 (same-day discussion)
+
+**D-A — Retrieval = exact key, NOT search.** Feature lookup uses the
+normalized-FEN sha1-16 hash as a direct map key. BM25/hybrid retrieval was
+considered (RAG instinct) and rejected for FACTS: position→facts is an
+exact-match problem; ranking adds recall risk to an O(1) lookup. The hash key
+also beats a composite `opening-variation-ply-color` key: transpositions
+collapse to one entry, and the key derives from the BOARD, so it extends to
+arbitrary FENs. Fuzzy retrieval (BM25/hybrid over strategic-notes text,
+similarity over structures) is correctly placed in 4d — facts exact,
+knowledge ranked.
+
+**D-B — Trainer vs imported-games split.** Precompute serves the TRAINER
+(catalog positions only — drill Why-clicks always land on catalog positions).
+Imported Lichess/chess.com games (OOB viewer coaching) need DYNAMIC handling:
+engine side is already dynamic (4a WASM analyzes any FEN); the runtime
+feature extractor (TS port of the same definitions, validated against the
+SAME golden fixtures for cross-implementation parity) is 4d/4e scope. A
+hosted evaluate+narrate API is the optional PAID lane (Phase 7 economics),
+never the only path — local-first dynamic stays free. Composite resolution
+behind the single `FeatureExtractor` interface: sidecar hit → runtime
+extractor → degrade to engine-only.
+
 ## Open questions
 
 1. Stretch S1 in or out of the first 4b cut? (Bias: in, if build-time cost
