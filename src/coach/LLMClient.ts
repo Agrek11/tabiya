@@ -15,7 +15,7 @@ export type ProviderName =
   | 'cloud-anthropic'
   | 'cloud-openai'
   | 'local-ollama'
-  | 'local-llamacpp-webgpu';
+  | 'local-webgpu';
 
 export type PromptPayload = {
   systemPrompt: string;

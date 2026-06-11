@@ -59,15 +59,16 @@ export function setExplainTtsFlag(value: boolean): void {
 
 /**
  * `tabiya:flag:webgpuLlm` — when on, the AI Settings inference-location radio
- * offers "Local (Browser WebGPU)" and `LlamaCppWebGPULLMClient.available()`
- * may return true on WebGPU-capable devices. Default OFF in 4a — the client is
- * a skeleton; full in-browser model loading is deferred to a 4a.1 follow-up.
+ * offers the free in-browser tier and `WebLLMClient.available()` may return
+ * true on WebGPU-capable devices. Default ON since 4a.1 shipped the real MLC
+ * web-llm runtime; the flag remains as a kill switch (hardware gating is
+ * `navigator.gpu`, checked separately by `available()`).
  *
  * Ollama is NOT behind a flag and needs no SDK — it is detected at runtime via
  * a raw `fetch` to `http://localhost:11434/api/tags` (see OllamaLLMClient).
  */
 export function getWebgpuLlmFlag(): boolean {
-  return readFlag('webgpuLlm', false);
+  return readFlag('webgpuLlm', true);
 }
 
 export function setWebgpuLlmFlag(value: boolean): void {

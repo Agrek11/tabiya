@@ -18,7 +18,7 @@ import {
 } from './AnthropicLLMClient';
 import { OpenAILLMClient, DEFAULT_OPENAI_MODEL } from './OpenAILLMClient';
 import { OllamaLLMClient, DEFAULT_OLLAMA_MODEL } from './OllamaLLMClient';
-import { LlamaCppWebGPULLMClient, DEFAULT_WEBGPU_MODEL } from './LlamaCppWebGPULLMClient';
+import { WebLLMClient, DEFAULT_WEBGPU_MODEL } from './WebLLMClient';
 import { loadAISettings } from './aiSettings';
 import type { LLMClient } from './LLMClient';
 
@@ -33,7 +33,7 @@ export function getLLMClient(): LLMClient | null {
     return new OllamaLLMClient(s.model || DEFAULT_OLLAMA_MODEL);
   }
   if (s.location === 'webgpu') {
-    return new LlamaCppWebGPULLMClient(s.model || DEFAULT_WEBGPU_MODEL);
+    return new WebLLMClient(s.model || DEFAULT_WEBGPU_MODEL);
   }
   // cloud
   if (!s.apiKey) return null;

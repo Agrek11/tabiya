@@ -17,6 +17,7 @@
     "@anthropic-ai/sdk": "^0.100.1",
     "@fontsource/jetbrains-mono": "^5.1.0",
     "@fontsource/plus-jakarta-sans": "^5.1.0",
+    "@mlc-ai/web-llm": "^0.2.84",
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
     "chess.js": "1.4.0",

@@ -10,7 +10,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 1: Setup — IDB schema bump + types + config scaffold
 
-- [ ] **Task 1.1**: Add Lichess module types
+- [x] **Task 1.1**: Add Lichess module types
   - **ID**: `task-1.1`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -19,7 +19,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: All Lichess data shapes typed; importable by repository, oauth, api, detector
   - **Context**: R4 AC3/AC4; design.md §4 Types block; Article 14 TS strict — no `any`
 
-- [ ] **Task 1.2**: Add Lichess config constants
+- [x] **Task 1.2**: Add Lichess config constants
   - **ID**: `task-1.2`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -28,7 +28,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Single source of truth for Lichess endpoints + tunables; Docker `LICHESS_OAUTH_ORIGIN` shim honored
   - **Context**: design.md §1 Endpoints + Redirect URL resolution; Article 16 (no host-only paths)
 
-- [ ] **Task 1.3**: Bump IDB schema to add `lichess_games` + `lichess_oob_events` stores
+- [x] **Task 1.3**: Bump IDB schema to add `lichess_games` + `lichess_oob_events` stores
   - **ID**: `task-1.3`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `chief-programmer`
@@ -37,7 +37,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Existing Phase 1 SRS data preserved; new stores available on next page load
   - **Context**: R4 AC2; design.md §4 Object stores; Article 5 (single DB, multi-store)
 
-- [ ] **Task 1.4**: Add async serial queue utility
+- [x] **Task 1.4**: Add async serial queue utility
   - **ID**: `task-1.4`
   - **BlockedBy**: `none`
   - **Agent**: `general-purpose`
@@ -46,7 +46,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Detection runs one game at a time without blocking sync UI
   - **Context**: design.md §5 Async scheduling; single-threaded JS — no point parallelizing CPU-bound detection
 
-- [ ] **Task 1.5**: Add `SensitiveStore` wrapper
+- [x] **Task 1.5**: Add `SensitiveStore` wrapper
   - **ID**: `task-1.5`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `security-reviewer`
@@ -59,7 +59,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 2: OAuth PKCE flow (R1)
 
-- [ ] **Task 2.1**: Implement PKCE primitives
+- [x] **Task 2.1**: Implement PKCE primitives
   - **ID**: `task-2.1`
   - **BlockedBy**: `task-1.2`
   - **Agent**: `security-reviewer`
@@ -68,7 +68,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: PKCE flow callable from Settings + Callback page; pure functions, no DOM coupling
   - **Context**: R1 AC2/AC9; design.md §1 Code verifier/challenge + State parameter; Article 1 + Article 3 (no Auth0/Passport)
 
-- [ ] **Task 2.2**: OAuth unit tests
+- [x] **Task 2.2**: OAuth unit tests
   - **ID**: `task-2.2`
   - **BlockedBy**: `task-2.1`
   - **Agent**: `testability-reviewer`
@@ -77,7 +77,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: PKCE crypto and exchange wire format pinned by tests
   - **Context**: R8 AC1; design.md Test plan Unit table
 
-- [ ] **Task 2.3**: Lichess account fetch + token persistence helper
+- [x] **Task 2.3**: Lichess account fetch + token persistence helper
   - **ID**: `task-2.3`
   - **BlockedBy**: `task-2.1`, `task-1.5`
   - **Agent**: `general-purpose`
@@ -86,7 +86,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Callback page completes consent in one call after exchange
   - **Context**: R1 AC4; design.md §1 Token storage shape
 
-- [ ] **Task 2.4**: `LichessCallback` route component
+- [x] **Task 2.4**: `LichessCallback` route component
   - **ID**: `task-2.4`
   - **BlockedBy**: `task-2.3`
   - **Agent**: `general-purpose`
@@ -95,7 +95,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Round-trip completes; Settings re-renders into connected state
   - **Context**: R1 AC4; design.md §1 State parameter + Disconnect mechanics
 
-- [ ] **Task 2.5**: Register `/lichess/callback` route
+- [x] **Task 2.5**: Register `/lichess/callback` route
   - **ID**: `task-2.5`
   - **BlockedBy**: `task-2.4`
   - **Agent**: `general-purpose`
@@ -104,7 +104,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Browser arriving from Lichess hits the callback page
   - **Context**: R1 AC3; design.md Component tree (full)
 
-- [ ] **Task 2.6**: `LichessSection` Connect/Disconnect UI in Settings
+- [x] **Task 2.6**: `LichessSection` Connect/Disconnect UI in Settings
   - **ID**: `task-2.6`
   - **BlockedBy**: `task-2.1`, `task-1.5`
   - **Agent**: `general-purpose`
@@ -113,7 +113,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: User can connect, disconnect, and observe the token-rejected fallback
   - **Context**: R1 AC1/AC7/AC8; design.md §1 Disconnect mechanics
 
-- [ ] **Task 2.7**: Mount `LichessSection` in Settings page
+- [x] **Task 2.7**: Mount `LichessSection` in Settings page
   - **ID**: `task-2.7`
   - **BlockedBy**: `task-2.6`
   - **Agent**: `general-purpose`
@@ -126,7 +126,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 3: Sync endpoint client (R2)
 
-- [ ] **Task 3.1**: `authedFetch` wrapper + NDJSON stream parser
+- [x] **Task 3.1**: `authedFetch` wrapper + NDJSON stream parser
   - **ID**: `task-3.1`
   - **BlockedBy**: `task-1.5`, `task-1.2`
   - **Agent**: `chief-programmer`
@@ -135,7 +135,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Single fetch primitive used by sync + manual import + account fetch; native fetch only, zero npm deps added
   - **Context**: R2 AC2; design.md §HTTP client + §2 NDJSON streaming; Article 1 (no axios/ky)
 
-- [ ] **Task 3.2**: `getUserGames` sync client
+- [x] **Task 3.2**: `getUserGames` sync client
   - **ID**: `task-3.2`
   - **BlockedBy**: `task-3.1`, `task-1.1`
   - **Agent**: `general-purpose`
@@ -144,7 +144,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Streaming generator of synced games — caller controls termination
   - **Context**: R2 AC2/AC3; design.md §2
 
-- [ ] **Task 3.3**: Sync orchestrator (rate-limit + idempotency + counters)
+- [x] **Task 3.3**: Sync orchestrator (rate-limit + idempotency + counters)
   - **ID**: `task-3.3`
   - **BlockedBy**: `task-3.2`, `task-5.2`, `task-1.4`
   - **Agent**: `chief-programmer`
@@ -153,7 +153,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Idempotent, rate-limited sync; sync UI driven by `onProgress` callbacks
   - **Context**: R2 AC3/AC4/AC7; R4 AC6; design.md §2 Idempotency + Rate limit
 
-- [ ] **Task 3.4**: Sync UI in `LichessSection`
+- [x] **Task 3.4**: Sync UI in `LichessSection`
   - **ID**: `task-3.4`
   - **BlockedBy**: `task-3.3`, `task-2.6`
   - **Agent**: `general-purpose`
@@ -162,7 +162,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: User-facing sync surface complete
   - **Context**: R2 AC1/AC4/AC5/AC6/AC7
 
-- [ ] **Task 3.5**: Sync pipeline tests
+- [x] **Task 3.5**: Sync pipeline tests
   - **ID**: `task-3.5`
   - **BlockedBy**: `task-3.3`
   - **Agent**: `testability-reviewer`
@@ -175,7 +175,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 4: Manual import-by-ID (R3)
 
-- [ ] **Task 4.1**: `getGameById` client + ID validator
+- [x] **Task 4.1**: `getGameById` client + ID validator
   - **ID**: `task-4.1`
   - **BlockedBy**: `task-3.1`, `task-1.1`
   - **Agent**: `general-purpose`
@@ -184,7 +184,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Single-game endpoint client; reuses mapping logic from sync
   - **Context**: R3 AC2/AC3/AC5; design.md §3
 
-- [ ] **Task 4.2**: Manual import flow + UI
+- [x] **Task 4.2**: Manual import flow + UI
   - **ID**: `task-4.2`
   - **BlockedBy**: `task-4.1`, `task-5.2`, `task-3.4`
   - **Agent**: `general-purpose`
@@ -197,7 +197,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 5: `LichessRepository` + IDB persistence (R4)
 
-- [ ] **Task 5.1**: `LichessRepository` interface
+- [x] **Task 5.1**: `LichessRepository` interface
   - **ID**: `task-5.1`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `api-designer`
@@ -206,7 +206,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: One seam for all Lichess persistence; consumers depend on this only
   - **Context**: R4 AC1/AC5; design.md §4 Interface; Article 5
 
-- [ ] **Task 5.2**: IDB-backed implementation + DI accessor
+- [x] **Task 5.2**: IDB-backed implementation + DI accessor
   - **ID**: `task-5.2`
   - **BlockedBy**: `task-5.1`, `task-1.3`
   - **Agent**: `chief-programmer`
@@ -215,7 +215,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Concrete persistence layer hidden behind interface + DI
   - **Context**: R4 AC2/AC5/AC6; design.md §4 DI accessor + Idempotent write semantics
 
-- [ ] **Task 5.3**: Repository contract test
+- [x] **Task 5.3**: Repository contract test
   - **ID**: `task-5.3`
   - **BlockedBy**: `task-5.1`
   - **Agent**: `testability-reviewer`
@@ -224,7 +224,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Future backend-served impl ships only when this suite passes against it
   - **Context**: R8 AC5; design.md Test plan; Article 5
 
-- [ ] **Task 5.4**: IDB impl + in-memory test double
+- [x] **Task 5.4**: IDB impl + in-memory test double
   - **ID**: `task-5.4`
   - **BlockedBy**: `task-5.2`, `task-5.3`
   - **Agent**: `testability-reviewer`
@@ -233,7 +233,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Two impls, one contract; Article 5 enforced by test
   - **Context**: R8 AC5
 
-- [ ] **Task 5.5**: PGN→SAN helper
+- [x] **Task 5.5**: PGN→SAN helper
   - **ID**: `task-5.5`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `general-purpose`
@@ -246,7 +246,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 6: OOB detection algorithm (R5)
 
-- [ ] **Task 6.1**: Picked-repertoire adapter
+- [x] **Task 6.1**: Picked-repertoire adapter
   - **ID**: `task-6.1`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `architect`
@@ -255,7 +255,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Detector decoupled from Phase 1.5 storage shape
   - **Context**: R5 AC3; design.md §5 Inputs; Article 5
 
-- [ ] **Task 6.2**: Linear OOB detector
+- [x] **Task 6.2**: Linear OOB detector
   - **ID**: `task-6.2`
   - **BlockedBy**: `task-5.5`, `task-6.1`, `task-1.1`
   - **Agent**: `chief-programmer`
@@ -264,7 +264,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Deterministic, replayable OOB events keyed to stable line IDs
   - **Context**: R5 AC1–AC10; Article 6; Article 9; design.md §5 Algorithm + Determinism
 
-- [ ] **Task 6.3**: Detection runner + queue wiring
+- [x] **Task 6.3**: Detection runner + queue wiring
   - **ID**: `task-6.3`
   - **BlockedBy**: `task-6.2`, `task-5.2`, `task-1.4`
   - **Agent**: `general-purpose`
@@ -273,7 +273,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Single entrypoint sync + manual-import call after every `putGame`
   - **Context**: R5 AC1; design.md §5 Async scheduling + Failure modes (malformed PGN)
 
-- [ ] **Task 6.4**: Detector golden-game tests
+- [x] **Task 6.4**: Detector golden-game tests
   - **ID**: `task-6.4`
   - **BlockedBy**: `task-6.2`
   - **Agent**: `testability-reviewer`
@@ -286,7 +286,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 7: Optional transposition-aware OOB (R6)
 
-- [ ] **Task 7.1**: Transposition-aware detector branch
+- [x] **Task 7.1**: Transposition-aware detector branch
   - **ID**: `task-7.1`
   - **BlockedBy**: `task-6.2`
   - **Agent**: `chief-programmer`
@@ -295,7 +295,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Caro-Kann/Slav transposition recognized as in-book when Phase 2 index exists
   - **Context**: R6 AC1–AC5; design.md §6
 
-- [ ] **Task 7.2**: Transposition test (conditionally skipped)
+- [x] **Task 7.2**: Transposition test (conditionally skipped)
   - **ID**: `task-7.2`
   - **BlockedBy**: `task-7.1`, `task-6.4`
   - **Agent**: `testability-reviewer`
@@ -308,7 +308,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 8: Dashboard OOB widget + position viewer + CoachSlot placeholder (R7)
 
-- [ ] **Task 8.1**: `<CoachSlot>` placeholder component
+- [x] **Task 8.1**: `<CoachSlot>` placeholder component
   - **ID**: `task-8.1`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `architect`
@@ -317,7 +317,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Phase 4 plug-point reserved with stable contract
   - **Context**: R7 AC7; design.md §7 `<CoachSlot>` placeholder; Article 4 (forward-compat for AI feature)
 
-- [ ] **Task 8.2**: `OOBWidget` dashboard component
+- [x] **Task 8.2**: `OOBWidget` dashboard component
   - **ID**: `task-8.2`
   - **BlockedBy**: `task-5.2`, `task-1.1`
   - **Agent**: `general-purpose`
@@ -326,7 +326,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Dashboard widget renders all three states correctly
   - **Context**: R7 AC1–AC4, AC8; design.md §7 Component tree + Empty states
 
-- [ ] **Task 8.3**: `OOBEventRow` component
+- [x] **Task 8.3**: `OOBEventRow` component
   - **ID**: `task-8.3`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `general-purpose`
@@ -335,7 +335,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Compact dense row; click → viewer
   - **Context**: R7 AC4/AC5
 
-- [ ] **Task 8.4**: `OOBPositionViewerPage` route
+- [x] **Task 8.4**: `OOBPositionViewerPage` route
   - **ID**: `task-8.4`
   - **BlockedBy**: `task-5.2`, `task-8.1`
   - **Agent**: `general-purpose`
@@ -344,7 +344,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Full position context displayed; Phase 4 plug-point already mounted
   - **Context**: R7 AC5–AC7; R5 AC8 (line-removed handling); Article 15 (shared highlight primitive)
 
-- [ ] **Task 8.5**: Register `/lichess/oob/:gameId/:plyIndex` route
+- [x] **Task 8.5**: Register `/lichess/oob/:gameId/:plyIndex` route
   - **ID**: `task-8.5`
   - **BlockedBy**: `task-8.4`
   - **Agent**: `general-purpose`
@@ -353,7 +353,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Viewer reachable from widget clicks + direct URL
   - **Context**: R7 AC5
 
-- [ ] **Task 8.6**: Mount `OOBWidget` in Dashboard
+- [x] **Task 8.6**: Mount `OOBWidget` in Dashboard
   - **ID**: `task-8.6`
   - **BlockedBy**: `task-8.2`
   - **Agent**: `general-purpose`
@@ -366,7 +366,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
 
 ### Phase 9: Quality gates (R8) + Docker + docs
 
-- [ ] **Task 9.1**: Integration test — connect → sync → display
+- [x] **Task 9.1**: Integration test — connect → sync → display
   - **ID**: `task-9.1`
   - **BlockedBy**: `task-3.4`, `task-8.6`, `task-6.3`
   - **Agent**: `testability-reviewer`
@@ -375,7 +375,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: End-to-end flow proven in test environment
   - **Context**: R8 (integration); design.md Test plan Integration table
 
-- [ ] **Task 9.2**: Integration test — disconnect clears everything
+- [x] **Task 9.2**: Integration test — disconnect clears everything
   - **ID**: `task-9.2`
   - **BlockedBy**: `task-3.4`, `task-8.6`
   - **Agent**: `testability-reviewer`
@@ -384,7 +384,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Disconnect contract proven
   - **Context**: R1 AC7; design.md §1 Disconnect mechanics
 
-- [ ] **Task 9.3**: Integration test — token-rejected mid-sync
+- [x] **Task 9.3**: Integration test — token-rejected mid-sync
   - **ID**: `task-9.3`
   - **BlockedBy**: `task-3.4`
   - **Agent**: `testability-reviewer`
@@ -393,7 +393,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: 401-mid-stream failure mode pinned
   - **Context**: R1 AC8; design.md Failure modes table
 
-- [ ] **Task 9.4**: License audit script
+- [x] **Task 9.4**: License audit script
   - **ID**: `task-9.4`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `general-purpose`
@@ -402,7 +402,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Zero-new-deps invariant enforced at CI
   - **Context**: design.md §HTTP client + Constitution compliance; Article 1
 
-- [ ] **Task 9.5**: ESLint rule tightened for `src/lib/lichess/**`
+- [x] **Task 9.5**: ESLint rule tightened for `src/lib/lichess/**`
   - **ID**: `task-9.5`
   - **BlockedBy**: `task-1.1`
   - **Agent**: `general-purpose`
@@ -411,7 +411,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Lichess module typed strictly; no `any` smuggled in
   - **Context**: R8 AC4; Article 14
 
-- [ ] **Task 9.6**: Docker `LICHESS_OAUTH_ORIGIN` shim
+- [x] **Task 9.6**: Docker `LICHESS_OAUTH_ORIGIN` shim
   - **ID**: `task-9.6`
   - **BlockedBy**: `task-1.2`
   - **Agent**: `general-purpose`
@@ -420,7 +420,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Self-hosted Docker users configure callback origin via env var only
   - **Context**: R1 AC3; Article 16; design.md §1 Redirect URL resolution
 
-- [ ] **Task 9.7**: Update `tech.md` + README
+- [x] **Task 9.7**: Update `tech.md` + README
   - **ID**: `task-9.7`
   - **BlockedBy**: `task-9.4`, `task-9.6`
   - **Agent**: `general-purpose`
@@ -429,7 +429,7 @@ Strategy: lock the IDB schema first, ship OAuth and the repository layer in para
   - **Outcome**: Phase 3 setup documented for both dev and self-hosted paths
   - **Context**: R1 AC3 + R1 AC9; design.md File tree forecast
 
-- [ ] **Task 9.8**: Coverage gates
+- [x] **Task 9.8**: Coverage gates
   - **ID**: `task-9.8`
   - **BlockedBy**: `task-9.1`, `task-9.2`, `task-9.3`, `task-6.4`, `task-5.4`
   - **Agent**: `testability-reviewer`

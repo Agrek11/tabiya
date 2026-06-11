@@ -37,6 +37,7 @@ import { usePreset } from '../hooks/usePreset';
 import { ResetTelemetryButton } from '../components/settings/ResetTelemetryButton';
 import { EngineSection } from '../components/settings/EngineSection';
 import { AISection } from '../components/settings/AISection';
+import { LichessSection } from '../components/settings/LichessSection';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -332,6 +333,11 @@ export function SettingsPage() {
       </div>
       <div style={sectionStyle}>
         <AISection />
+      </div>
+
+      {/* LICHESS SYNC (Phase 3) */}
+      <div style={sectionStyle}>
+        <LichessSection />
       </div>
 
       {/* TELEMETRY RESET (Phase 1.5) */}

@@ -35,6 +35,7 @@ import { useStreaks } from '../hooks/useStreaks';
 import { useAccuracy } from '../hooks/useAccuracy';
 import { getRepository } from '../storage';
 import { EventsContextProvider } from '../state/EventsContext';
+import { OOBWidget } from '../components/dashboard/OOBWidget';
 
 export function DashboardPage() {
   return (
@@ -233,6 +234,11 @@ function DashboardBody() {
           }
           caption={masteredCount === 0 ? 'Drill to start mastering' : 'Box 4+'}
         />
+      </div>
+
+      {/* Out-of-book moments (Phase 3) */}
+      <div style={{ marginBottom: 18 }}>
+        <OOBWidget />
       </div>
 
       {/* Secondary row ×3 — static v1 placeholders */}

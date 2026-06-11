@@ -17,11 +17,13 @@
 import type { IDBPDatabase, IDBPTransaction } from 'idb';
 
 export const DB_NAME = 'tabiya';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export const STORE_SRS = 'srs_state';
 export const STORE_EVENTS = 'session_events';
 export const STORE_REPERTOIRE = 'repertoire_pick';
+export const STORE_LICHESS_GAMES = 'lichess_games';
+export const STORE_LICHESS_OOB = 'lichess_oob_events';
 
 /** Out-of-line key used by the single-row repertoire pick store. */
 export const REPERTOIRE_KEY = 'current';
@@ -59,6 +61,20 @@ export function runMigrations(
     if (!db.objectStoreNames.contains(STORE_REPERTOIRE)) {
       // Out-of-line keys — we always read/write at REPERTOIRE_KEY.
       db.createObjectStore(STORE_REPERTOIRE);
+    }
+  }
+  // v2 -> v3: lichess_games + lichess_oob_events (Phase 3).
+  if (oldVersion < 3) {
+    if (!db.objectStoreNames.contains(STORE_LICHESS_GAMES)) {
+      const s = db.createObjectStore(STORE_LICHESS_GAMES, { keyPath: 'id' });
+      s.createIndex('by_createdAt', 'createdAt', { unique: false });
+    }
+    if (!db.objectStoreNames.contains(STORE_LICHESS_OOB)) {
+      const s = db.createObjectStore(STORE_LICHESS_OOB, {
+        keyPath: ['gameId', 'plyIndex'],
+      });
+      s.createIndex('by_detectedAt', 'detectedAt', { unique: false });
+      s.createIndex('by_lineId', 'lineId', { unique: false });
     }
   }
 }

@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
 import { IndexedDbEventsRepository } from '../../src/storage/events/IndexedDbEventsRepository';
+import { DB_NAME, DB_VERSION } from '../../src/storage/db/schema';
 import { createEventsBus } from '../../src/storage/events/EventsBus';
 import type { SessionEvent } from '../../src/types/events';
 
@@ -162,7 +163,7 @@ describe('IndexedDbEventsRepository', () => {
     await repo.append(mk(T0, 'a'));
     // Inject a corrupt row.
     await new Promise<void>((resolve, reject) => {
-      const req = indexedDB.open('tabiya', 2);
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onsuccess = () => {
         const tx = req.result.transaction('session_events', 'readwrite');
         tx.objectStore('session_events').put({

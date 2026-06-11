@@ -51,6 +51,7 @@ import { getLLMClient, _clearClientCache } from '../../coach/container';
 import { DEFAULT_ANTHROPIC_MODEL } from '../../coach/AnthropicLLMClient';
 import { DEFAULT_OPENAI_MODEL } from '../../coach/OpenAILLMClient';
 import { DEFAULT_OLLAMA_MODEL, OllamaLLMClient } from '../../coach/OllamaLLMClient';
+import { DEFAULT_WEBGPU_MODEL } from '../../coach/WebLLMClient';
 
 type Diagnostic =
   | { kind: 'idle' }
@@ -60,7 +61,7 @@ type Diagnostic =
 
 function defaultModelFor(location: InferenceLocation, provider: CloudProvider): string {
   if (location === 'ollama') return DEFAULT_OLLAMA_MODEL;
-  if (location === 'webgpu') return '';
+  if (location === 'webgpu') return DEFAULT_WEBGPU_MODEL;
   return provider === 'openai' ? DEFAULT_OPENAI_MODEL : DEFAULT_ANTHROPIC_MODEL;
 }
 
@@ -169,9 +170,22 @@ export function AISection() {
         <LocationRadio current={location} value="cloud" label="Cloud (Anthropic / OpenAI)" onChange={onLocation} />
         <LocationRadio current={location} value="ollama" label="Local (Ollama)" onChange={onLocation} />
         {webgpuEnabled ? (
-          <LocationRadio current={location} value="webgpu" label="Local (Browser WebGPU)" onChange={onLocation} />
+          <LocationRadio
+            current={location}
+            value="webgpu"
+            label="In-browser (free — no key, no install)"
+            onChange={onLocation}
+          />
         ) : null}
       </div>
+
+      {location === 'webgpu' ? (
+        <div style={{ fontSize: 11.5, color: t.inkSoft, marginTop: -8, marginBottom: 12, lineHeight: 1.5 }}>
+          Runs a small model on your GPU via WebGPU. First use downloads ~1 GB
+          (cached by the browser). Narration quality is below the cloud models —
+          the trade for free and fully private.
+        </div>
+      ) : null}
 
       {isCloud ? (
         <>

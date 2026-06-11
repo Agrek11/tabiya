@@ -10,6 +10,8 @@ import { GambitsPage } from './pages/GambitsPage';
 import { DrillPage } from './pages/DrillPage';
 import { ProgressPage } from './pages/ProgressPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { LichessCallbackPage } from './pages/LichessCallbackPage';
+import { OOBPositionViewerPage } from './pages/OOBPositionViewerPage';
 import { unlockAudio } from './sound/sounds';
 
 // Phase 2 placeholder stubs — Batch 3 will replace with real page modules
@@ -46,6 +48,8 @@ function App() {
                 <Route path="/games" element={<GamesPage />} />
                 <Route path="/coach" element={<CoachPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/lichess/callback" element={<LichessCallbackPage />} />
+                <Route path="/lichess/oob/:gameId/:plyIndex" element={<OOBPositionViewerPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AppShell>

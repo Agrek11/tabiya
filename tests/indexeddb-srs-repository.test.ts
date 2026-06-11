@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import 'fake-indexeddb/auto';
 
 import { IndexedDbSrsRepository } from '../src/storage/srs/IndexedDbSrsRepository';
+import { DB_NAME, DB_VERSION } from '../src/storage/db/schema';
 import type { DrillResult } from '../src/storage/types';
 
 const baseResult: DrillResult = {
@@ -109,10 +110,10 @@ describe('IndexedDbSrsRepository', () => {
     await repo.recordDrillResult('valid', baseResult);
     // Inject a corrupt record through the underlying IDB.
     await new Promise<void>((resolve, reject) => {
-      // Open at current DB_VERSION (2) — opening below the existing version
+      // Open at the current DB_VERSION — opening below the existing version
       // would raise VersionError under fake-indexeddb. The repo has already
-      // created the v2 schema in `recordDrillResult` above.
-      const req = indexedDB.open('tabiya', 2);
+      // created the schema in `recordDrillResult` above.
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onsuccess = () => {
         const tx = req.result.transaction('srs_state', 'readwrite');
         tx.objectStore('srs_state').put({

@@ -495,3 +495,18 @@ This is the shortest sequence that proves the full 4a end-to-end: SDK → interf
 
 - **Future sub-phases 4b–4e tracked in spec `design.md`; this `tasks.md` scopes 4a only.** Spawn a separate `tasks.md` (or split files: `tasks-4b.md`, `tasks-4c.md`, etc.) when starting 4b. Do not mix forward-looking work into 4a tasks — the moat narrative depends on shipping 4a as a deliberately shallow baseline.
 - **Open Questions deferred:** Q1 (recent-plies inline disclosure) → ship as a "Details" toggle in Surface A after manual smoke; Q2 (WebGPU 4a vs 4a.1) → ship the client skeleton in 4a behind the flag, full model loading deferred; Q3 (Pyodide vs FastAPI for 4b) → not a 4a decision; Q4 (Haiku cost) → verify in manual smoke during `task-11.10`; Q5 (in-memory vs IDB cache) → in-memory only for 4a, IDB lands in 4e.
+
+---
+
+## 4a.1 Addendum — WebGPU free tier SHIPPED (2026-06-11)
+
+Open Question #2 closed. `LlamaCppWebGPULLMClient` skeleton replaced by
+`src/coach/WebLLMClient.ts` — real in-browser inference via `@mlc-ai/web-llm`
+(Apache-2.0, declared in tech.md). Default model
+`Qwen2.5-1.5B-Instruct-q4f16_1-MLC` (~1 GB, browser-cached, single-flight
+engine load). `tabiya:flag:webgpuLlm` now defaults ON (kill switch retained);
+hardware gate stays `navigator.gpu`. web-llm is a dynamic-import-only chunk —
+bundle budget unaffected (entry 163 kB gzip ≤ 187 kB ceiling). Provider matrix
+complete: BYOK cloud (Anthropic/OpenAI) · Local Ollama · FREE in-browser.
+Tests: tests/coach/WebLLMClient.test.ts (gating, request shape, single-flight,
+retryable failed load).
