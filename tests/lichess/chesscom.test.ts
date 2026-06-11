@@ -6,6 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   archiveUrlsForWindow,
+  fetchChessComProfile,
   mapChessComGame,
   openingFromPgn,
   type ChessComApiGame,
@@ -125,6 +126,38 @@ describe('syncChessComRecentGames', () => {
     const second = await syncChessComRecentGames('agrek11');
     await second.detectionDone;
     expect(second).toMatchObject({ synced: 0, known: 1 });
+  });
+});
+
+describe('fetchChessComProfile (link confirmation)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns the canonical profile for a known user', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            username: 'Agrek11',
+            name: 'Abhishek',
+            avatar: 'https://images.chesscomfiles.com/x.png',
+            joined: 1_600_000_000,
+            extra_field_ignored: true,
+          }),
+        ),
+      ),
+    );
+    expect(await fetchChessComProfile('agrek11')).toEqual({
+      username: 'Agrek11',
+      name: 'Abhishek',
+      avatar: 'https://images.chesscomfiles.com/x.png',
+      joined: 1_600_000_000,
+    });
+  });
+
+  it('returns null on 404 (typo path)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('', { status: 404 })));
+    expect(await fetchChessComProfile('nosuchuserxyz')).toBeNull();
   });
 });
 

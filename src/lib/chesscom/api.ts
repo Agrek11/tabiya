@@ -145,3 +145,31 @@ export class ChessComUserNotFoundError extends Error {
     this.name = 'ChessComUserNotFoundError';
   }
 }
+
+/** Public profile subset used by the Link confirmation step. */
+export interface ChessComProfile {
+  /** Canonical capitalization from chess.com (the typed name may differ). */
+  username: string;
+  name?: string;
+  avatar?: string;
+  joined: number; // epoch seconds
+}
+
+/**
+ * Fetch a public profile for the link-time "is this you?" confirmation.
+ * Returns null on 404 (unknown username — usually a typo).
+ */
+export async function fetchChessComProfile(username: string): Promise<ChessComProfile | null> {
+  const res = await fetch(
+    `https://api.chess.com/pub/player/${encodeURIComponent(username.toLowerCase())}`,
+  );
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`chess.com profile fetch failed: ${res.status}`);
+  const json = (await res.json()) as {
+    username: string;
+    name?: string;
+    avatar?: string;
+    joined: number;
+  };
+  return { username: json.username, name: json.name, avatar: json.avatar, joined: json.joined };
+}
