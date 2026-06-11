@@ -16,15 +16,23 @@ export interface LichessOpening {
   ply: number; // first ply where Lichess matched this opening
 }
 
+/** Where a synced game came from. Absent on pre-chess.com records = lichess. */
+export type GameSource = 'lichess' | 'chesscom';
+
 export interface LichessGame {
-  id: string; // 8-char Lichess ID
-  createdAt: number; // epoch ms (game start)
+  id: string; // lichess: 8-char game ID; chess.com: game uuid
+  /** Provider that produced this record. Optional for backward compatibility
+   *  with rows written before chess.com support — read via `gameSource()`. */
+  source?: GameSource;
+  createdAt: number; // epoch ms (game start; chess.com: end_time)
   whiteUsername: string;
   blackUsername: string;
   userColor: LichessColor;
   result: LichessResult;
   pgn: string; // full PGN with headers
   opening: LichessOpening | null;
+  /** chess.com only — canonical game URL from the archive record. */
+  url?: string;
   importedAt: number;
   oobChecked: boolean; // detection has run (regardless of whether event emitted)
 }
@@ -50,6 +58,20 @@ export interface PickedLine {
 }
 
 export const LICHESS_SCOPES = ['preference:read'] as const;
+
+/** Source of a stored game, defaulting legacy rows to lichess. */
+export function gameSource(game: Pick<LichessGame, 'source'>): GameSource {
+  return game.source ?? 'lichess';
+}
+
+/** Web URL for a stored game on its provider's site. */
+export function gameWebUrl(game: Pick<LichessGame, 'source' | 'id'> & { url?: string }, color: LichessColor): string {
+  if (gameSource(game) === 'chesscom') {
+    // chess.com archive records carry their own canonical URL.
+    return game.url ?? `https://www.chess.com/analysis/game/live/${game.id}`;
+  }
+  return LICHESS.gameWebUrl(game.id, color);
+}
 
 /** OAuth + API endpoints — single source of truth (design §1). */
 export const LICHESS = {

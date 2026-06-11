@@ -38,6 +38,7 @@ import { ResetTelemetryButton } from '../components/settings/ResetTelemetryButto
 import { EngineSection } from '../components/settings/EngineSection';
 import { AISection } from '../components/settings/AISection';
 import { LichessSection } from '../components/settings/LichessSection';
+import { ChessComSection } from '../components/settings/ChessComSection';
 
 export function SettingsPage() {
   const t = useTokens();
@@ -335,9 +336,12 @@ export function SettingsPage() {
         <AISection />
       </div>
 
-      {/* LICHESS SYNC (Phase 3) */}
+      {/* GAME SYNC (Phase 3): Lichess + chess.com */}
       <div style={sectionStyle}>
         <LichessSection />
+      </div>
+      <div style={sectionStyle}>
+        <ChessComSection />
       </div>
 
       {/* TELEMETRY RESET (Phase 1.5) */}

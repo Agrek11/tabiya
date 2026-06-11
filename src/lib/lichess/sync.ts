@@ -11,6 +11,7 @@
  */
 
 import { fetchGameById, fetchRecentGames, recordSyncStarted } from './api';
+import { fetchChessComRecentGames } from '../chesscom/api';
 import { AsyncSerialQueue } from './async-serial-queue';
 import { detectOOB } from './detect-oob';
 import { getLichessRepository } from './repository-di';
@@ -52,27 +53,51 @@ export interface SyncResult extends SyncProgress {
   detectionDone: Promise<void>;
 }
 
-/** R2 — bulk sync. `onProgress` fires per streamed game. */
+/** Persist one game if new + enqueue detection. Shared by every provider. */
+async function ingestGame(
+  game: LichessGame,
+  counters: { synced: number; known: number },
+): Promise<void> {
+  const repo = getLichessRepository();
+  const existing = await repo.getGame(game.id);
+  if (existing) {
+    counters.known++;
+    return;
+  }
+  await repo.putGame(game);
+  void detectionQueue.enqueue(() => runDetection(game));
+  counters.synced++;
+}
+
+/** R2 — Lichess bulk sync. `onProgress` fires per streamed game. */
 export async function syncRecentGames(
   username: string,
   onProgress?: (p: SyncProgress) => void,
 ): Promise<SyncResult> {
   recordSyncStarted();
-  const repo = getLichessRepository();
-  let synced = 0;
-  let known = 0;
+  const counters = { synced: 0, known: 0 };
   for await (const game of fetchRecentGames(username)) {
-    const existing = await repo.getGame(game.id);
-    if (existing) {
-      known++;
-    } else {
-      await repo.putGame(game);
-      void detectionQueue.enqueue(() => runDetection(game));
-      synced++;
-    }
-    onProgress?.({ synced, known });
+    await ingestGame(game, counters);
+    onProgress?.({ ...counters });
   }
-  return { synced, known, detectionDone: detectionQueue.drain() };
+  return { ...counters, detectionDone: detectionQueue.drain() };
+}
+
+/**
+ * Chess.com bulk sync (Phase 3 addendum) — same window, same idempotency,
+ * same detection pipeline; only the fetch differs (monthly archives, no auth).
+ */
+export async function syncChessComRecentGames(
+  username: string,
+  onProgress?: (p: SyncProgress) => void,
+): Promise<SyncResult> {
+  const games = await fetchChessComRecentGames(username);
+  const counters = { synced: 0, known: 0 };
+  for (const game of games) {
+    await ingestGame(game, counters);
+    onProgress?.({ ...counters });
+  }
+  return { ...counters, detectionDone: detectionQueue.drain() };
 }
 
 export type ImportOutcome =

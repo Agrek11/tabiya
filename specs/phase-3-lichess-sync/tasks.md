@@ -645,3 +645,24 @@ Phase 3 is **done** when all of the following hold:
 ## Summary
 
 37 tasks across 9 phases. Critical path is 8 tasks long (types → repository interface → IDB impl → PGN helper → linear detector → detection runner → connect-sync-display integration → coverage gates), dominated by the persistence-layer-to-detector chain. Five distinct fan-out waves expose substantial parallelism — the OAuth leg, the API client leg, and the Docker shim leg all run concurrently after `task-1.2`; the detector forks into runner + golden tests + transposition branch after `task-6.2`. Phase 7 (transposition) is intentionally off the critical path and degrades gracefully when Phase 2 is absent. Phase 9 closes with explicit Article 1 / 5 / 11 / 12 / 14 / 15 / 16 audit gates so Phase 4 inherits a clean, contract-tested foundation for the Coach.
+
+---
+
+## Addendum — chess.com integration SHIPPED (2026-06-11)
+
+"Chess.com sync" moved from Out-of-scope to done, by user request. Design:
+- **No OAuth** — chess.com Published-Data API (`api.chess.com/pub/*`) is
+  public read-only + CORS-enabled; the only config is a username
+  (`tabiya:chesscom:username`, plain localStorage — public info, not a secret).
+- **Full pipeline reuse:** games map into the same stored shape with an
+  additive `source: 'lichess' | 'chesscom'` field (legacy rows = lichess via
+  `gameSource()`); same IDB stores, same `LichessRepository`, same OOB
+  detector/queue, same window (100 games / 15 days) + idempotency.
+- Sync walks monthly archives overlapping the window; variants
+  (`rules !== 'chess'`) and no-PGN records skipped; ECO/opening parsed from
+  PGN headers. No manual import (API has no game-by-id endpoint).
+- UI: `ChessComSection` Settings card (Link/Unlink/Sync); Unlink deletes that
+  provider's rows via new `LichessRepository.clearSource(source)`; Dashboard
+  widget rows carry a provider badge; viewer external link branches per source.
+- Tests: tests/lichess/chesscom.test.ts (mapping, draw/win codes, ECO parse,
+  archive windowing, sync idempotency via shared ingest, clearSource).

@@ -13,7 +13,7 @@ import {
   runMigrations,
 } from '../../storage/db/schema';
 import type { LichessRepository } from './repository';
-import type { LichessGame, OOBEvent } from './types';
+import { gameSource, type GameSource, type LichessGame, type OOBEvent } from './types';
 
 export class IdbLichessRepository implements LichessRepository {
   private dbPromise: Promise<IDBPDatabase> | null = null;
@@ -78,5 +78,17 @@ export class IdbLichessRepository implements LichessRepository {
     const db = await this.getDb();
     await db.clear(STORE_LICHESS_GAMES);
     await db.clear(STORE_LICHESS_OOB);
+  }
+
+  async clearSource(source: GameSource): Promise<void> {
+    const db = await this.getDb();
+    const games = (await db.getAll(STORE_LICHESS_GAMES)) as LichessGame[];
+    const doomed = games.filter((g) => gameSource(g) === source);
+    const doomedIds = new Set(doomed.map((g) => g.id));
+    for (const g of doomed) await db.delete(STORE_LICHESS_GAMES, g.id);
+    const events = (await db.getAll(STORE_LICHESS_OOB)) as OOBEvent[];
+    for (const e of events) {
+      if (doomedIds.has(e.gameId)) await db.delete(STORE_LICHESS_OOB, [e.gameId, e.plyIndex]);
+    }
   }
 }

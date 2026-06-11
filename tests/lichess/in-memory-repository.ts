@@ -4,7 +4,12 @@
  */
 
 import type { LichessRepository } from '../../src/lib/lichess/repository';
-import type { LichessGame, OOBEvent } from '../../src/lib/lichess/types';
+import {
+  gameSource,
+  type GameSource,
+  type LichessGame,
+  type OOBEvent,
+} from '../../src/lib/lichess/types';
 
 export class InMemoryLichessRepository implements LichessRepository {
   private games = new Map<string, LichessGame>();
@@ -50,5 +55,15 @@ export class InMemoryLichessRepository implements LichessRepository {
   async clearAll(): Promise<void> {
     this.games.clear();
     this.events.clear();
+  }
+
+  async clearSource(source: GameSource): Promise<void> {
+    const doomedIds = new Set(
+      [...this.games.values()].filter((g) => gameSource(g) === source).map((g) => g.id),
+    );
+    for (const id of doomedIds) this.games.delete(id);
+    for (const [key, e] of this.events) {
+      if (doomedIds.has(e.gameId)) this.events.delete(key);
+    }
   }
 }

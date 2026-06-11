@@ -19,7 +19,7 @@ import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { CoachSlot } from '../components/coach/CoachSlot';
 import { getLichessRepository } from '../lib/lichess/repository-di';
 import { getRepository } from '../storage';
-import { LICHESS } from '../lib/lichess/types';
+import { gameSource, gameWebUrl } from '../lib/lichess/types';
 import type { LichessGame, OOBEvent } from '../lib/lichess/types';
 
 type LoadState =
@@ -159,12 +159,12 @@ export function OOBPositionViewerPage() {
 
             <div style={{ marginTop: 14 }}>
               <a
-                href={LICHESS.gameWebUrl(event.gameId, event.color)}
+                href={gameWebUrl(game ?? { id: event.gameId }, event.color)}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ color: t.brand, fontSize: 12.5 }}
               >
-                View full game on Lichess ↗
+                View full game on {game && gameSource(game) === 'chesscom' ? 'chess.com' : 'Lichess'} ↗
               </a>
             </div>
           </div>

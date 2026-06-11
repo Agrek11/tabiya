@@ -13,28 +13,37 @@ import { fonts } from '../../theme/tokens';
 import { Card } from '../../ui/primitives/Card';
 import { CardTitle } from '../../ui/primitives/CardTitle';
 import { isConnected, LICHESS_CONNECTED_EVENT, LICHESS_DISCONNECTED_EVENT } from '../../lib/lichess/oauth';
+import { getChessComUsername } from '../../lib/chesscom/api';
+import { CHESSCOM_CHANGED_EVENT } from '../settings/ChessComSection';
 import { getLichessRepository } from '../../lib/lichess/repository-di';
-import type { LichessGame, OOBEvent } from '../../lib/lichess/types';
+import { gameSource, type GameSource, type LichessGame, type OOBEvent } from '../../lib/lichess/types';
 
 const PAGE = 10;
 
-type Row = OOBEvent & { opponent: string; dateLabel: string };
+type Row = OOBEvent & { opponent: string; dateLabel: string; source: GameSource };
+
+/** Any game source linked? (Lichess token OR chess.com username.) */
+function anySourceConnected(): boolean {
+  return isConnected() || getChessComUsername() !== null;
+}
 
 export function OOBWidget() {
   const t = useTokens();
   const navigate = useNavigate();
-  const [connected, setConnected] = useState(isConnected());
+  const [connected, setConnected] = useState(anySourceConnected());
   const [rows, setRows] = useState<Row[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    const refresh = (): void => setConnected(isConnected());
+    const refresh = (): void => setConnected(anySourceConnected());
     window.addEventListener(LICHESS_CONNECTED_EVENT, refresh);
     window.addEventListener(LICHESS_DISCONNECTED_EVENT, refresh);
+    window.addEventListener(CHESSCOM_CHANGED_EVENT, refresh);
     return () => {
       window.removeEventListener(LICHESS_CONNECTED_EVENT, refresh);
       window.removeEventListener(LICHESS_DISCONNECTED_EVENT, refresh);
+      window.removeEventListener(CHESSCOM_CHANGED_EVENT, refresh);
     };
   }, []);
 
@@ -67,8 +76,9 @@ export function OOBWidget() {
       <Card>
         <CardTitle>Out-of-book moments</CardTitle>
         <p style={emptyText(t)}>
-          Connect Lichess in <Link to="/settings" style={{ color: t.brand }}>Settings</Link> to
-          see when your games leave your prep.
+          Connect Lichess or chess.com in{' '}
+          <Link to="/settings" style={{ color: t.brand }}>Settings</Link> to see when your games
+          leave your prep.
         </p>
       </Card>
     );
@@ -98,6 +108,19 @@ export function OOBWidget() {
             </span>
             <span style={{ fontWeight: 600, flexShrink: 0, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               vs {r.opponent}
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                fontFamily: fonts.mono,
+                color: t.inkSoft,
+                border: `0.5px solid ${t.border}`,
+                borderRadius: 999,
+                padding: '1px 7px',
+                flexShrink: 0,
+              }}
+            >
+              {r.source === 'chesscom' ? 'chess.com' : 'lichess'}
             </span>
             <span style={{ color: t.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
               {r.openingName ?? '—'}
@@ -139,7 +162,7 @@ function toRow(e: OOBEvent, game: LichessGame | null): Row {
   const dateLabel = game
     ? new Date(game.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
     : '—';
-  return { ...e, opponent, dateLabel };
+  return { ...e, opponent, dateLabel, source: game ? gameSource(game) : 'lichess' };
 }
 
 function formatExpected(sans: string[]): string {

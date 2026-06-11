@@ -7,7 +7,7 @@
  * implementation, so a future backend-served swap is a single DI edit.
  */
 
-import type { LichessGame, OOBEvent } from './types';
+import type { GameSource, LichessGame, OOBEvent } from './types';
 
 export interface LichessRepository {
   getGame(gameId: string): Promise<LichessGame | null>;
@@ -20,6 +20,9 @@ export interface LichessRepository {
   getOOBEvents(opts?: { limit?: number; offset?: number; gameId?: string }): Promise<OOBEvent[]>;
   /** Upsert by composite key [gameId, plyIndex] — naturally idempotent. */
   putOOBEvent(event: OOBEvent): Promise<void>;
-  /** Wipes BOTH stores — used by Disconnect (R1 AC7). */
+  /** Wipes BOTH stores — used by Lichess Disconnect (R1 AC7). */
   clearAll(): Promise<void>;
+  /** Removes one provider's games + their OOB events (chess.com Unlink).
+   *  Legacy rows without a `source` count as lichess. */
+  clearSource(source: GameSource): Promise<void>;
 }
