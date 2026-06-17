@@ -1,0 +1,11 @@
+{
+  "feature": "motifs.pins",
+  "positions": [
+    { "name": "relative pin: Bg5 pins Nf6 to Qd8", "fen": "3qk3/8/5n2/6B1/8/8/8/4K3 w - - 0 1",
+      "expected": [{ "by": "Bg5", "pinned": "Nf6", "to": "Qd8", "kind": "relative", "confidence": "high" }] },
+    { "name": "absolute pin: Bg5 pins Nf6 to the king", "fen": "3k4/8/5n2/6B1/8/8/8/4K3 w - - 0 1",
+      "expected": [{ "by": "Bg5", "pinned": "Nf6", "to": "Kd8", "kind": "absolute", "confidence": "high" }] },
+    { "name": "no pin in the start position", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": [] }
+  ]
+}

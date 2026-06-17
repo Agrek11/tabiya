@@ -1,0 +1,11 @@
+{
+  "feature": "motifs.batteries",
+  "positions": [
+    { "name": "Qd1 + Rd3 stacked on the d-file bearing on Qd8", "fen": "3qk3/8/8/8/8/3R4/8/3QK3 w - - 0 1",
+      "expected": [{ "pieces": ["Qd1", "Rd3"], "target": "Qd8", "confidence": "high" }] },
+    { "name": "no battery in the start position", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": [] },
+    { "name": "two rooks aligned on d-file but no enemy on it → no target → empty", "fen": "4k3/8/8/8/8/3R4/3R4/4K3 w - - 0 1",
+      "expected": [] }
+  ]
+}

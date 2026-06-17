@@ -99,7 +99,30 @@ function filesLines(f: PositionFeatures['files_diagonals']): string[] {
   return out;
 }
 
-function tacticsLines(t: PositionFeatures['tactics_geometry']): string[] {
+/** Speculative motifs are prefixed "possible" so the narrator hedges them. */
+function tag(text: string, confidence: 'high' | 'speculative'): string {
+  return confidence === 'speculative' ? `possible ${text}` : text;
+}
+
+/** 4c.1 validated motifs — preferred over raw geometry when present. */
+function motifLines(m: PositionFeatures['motifs']): string[] {
+  if (!m) return [];
+  const out: string[] = [];
+  for (const f of m.forks) out.push(tag(`fork: ${f.by} forks ${list(f.targets)}`, f.confidence));
+  for (const s of m.skewers) out.push(tag(`skewer: ${s.by} skewers ${s.front} to ${s.back}`, s.confidence));
+  for (const b of m.batteries) out.push(tag(`battery: ${list(b.pieces)} bearing on ${b.target}`, b.confidence));
+  for (const p of m.pins) out.push(tag(`${p.kind} pin: ${p.by} pins ${p.pinned} to ${p.to}`, p.confidence));
+  for (const r of m.removing_defender) {
+    out.push(tag(`removing the defender: ${r.defender} is overloaded guarding ${list(r.abandons)}`, r.confidence));
+  }
+  for (const h of m.hanging) out.push(tag(`hanging: ${h.piece} can be taken by ${h.by}`, h.confidence));
+  return out;
+}
+
+/** Raw geometry fallback — used only when no validated motifs group exists
+ *  (pre-v4 sidecar). When motifs ARE present they supersede pins/overload/
+ *  en-prise to avoid double-stating the same fact. */
+function geometryLines(t: PositionFeatures['tactics_geometry']): string[] {
   const out: string[] = [];
   for (const p of t.pins) {
     out.push(`${p.absolute ? 'absolute' : 'relative'} pin: ${p.by} pins ${p.pinned} to ${p.to}`);
@@ -128,7 +151,8 @@ export function renderFeaturesBlock(f: PositionFeatures): string {
     ],
     ['Files', filesLines(f.files_diagonals)],
     ['Activity', activityLines(f.activity)],
-    ['Tactics', tacticsLines(f.tactics_geometry)],
+    // Prefer validated 4c.1 motifs; fall back to raw geometry on old sidecars.
+    ['Tactics', f.motifs ? motifLines(f.motifs) : geometryLines(f.tactics_geometry)],
   ];
 
   const bishopPair = (['white', 'black'] as const).filter((s) => f.material.bishop_pair[s]);

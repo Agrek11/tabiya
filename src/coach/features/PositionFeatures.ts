@@ -102,6 +102,53 @@ export interface TacticsGeometryFeatures {
   en_prise: string[];
 }
 
+// --- 4c.1 validated motifs --------------------------------------------------
+
+export type MotifConfidence = 'high' | 'speculative';
+
+export interface ForkMotif {
+  by: string;
+  targets: string[];
+  confidence: MotifConfidence;
+}
+export interface SkewerMotif {
+  by: string;
+  front: string;
+  back: string;
+  confidence: MotifConfidence;
+}
+export interface BatteryMotif {
+  pieces: string[];
+  target: string;
+  confidence: MotifConfidence;
+}
+export interface PinMotif {
+  by: string;
+  pinned: string;
+  to: string;
+  kind: 'absolute' | 'relative';
+  confidence: MotifConfidence;
+}
+export interface RemovingDefenderMotif {
+  defender: string;
+  abandons: string[];
+  confidence: MotifConfidence;
+}
+export interface HangingMotif {
+  piece: string;
+  by: string;
+  confidence: MotifConfidence;
+}
+
+export interface MotifFeatures {
+  forks: ForkMotif[];
+  skewers: SkewerMotif[];
+  batteries: BatteryMotif[];
+  pins: PinMotif[];
+  removing_defender: RemovingDefenderMotif[];
+  hanging: HangingMotif[];
+}
+
 export interface PositionFeatures {
   version: number;
   material: MaterialFeatures;
@@ -111,6 +158,8 @@ export interface PositionFeatures {
   files_diagonals: FilesDiagonalsFeatures;
   activity: ActivityFeatures;
   tactics_geometry: TacticsGeometryFeatures;
+  /** 4c.1 — validated, named motifs (optional: absent on pre-v4 sidecars). */
+  motifs?: MotifFeatures;
 }
 
 export interface FeaturesSidecar {

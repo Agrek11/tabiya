@@ -17,10 +17,11 @@ from .center_space import center_space
 from .files_diagonals import files_diagonals
 from .king_safety import king_safety
 from .material import material
+from .motifs import motifs
 from .pawns import pawn_structure
 from .tactics_geometry import tactics_geometry
 
-EXTRACTOR_VERSION = 3  # v3: `bad_bishop` requires ≥3 own pawns FIXED on its color
+EXTRACTOR_VERSION = 4  # v4: 4c.1 validated `motifs` group
 
 
 def extract_features(board: chess.Board) -> dict[str, Any]:
@@ -33,4 +34,5 @@ def extract_features(board: chess.Board) -> dict[str, Any]:
         "files_diagonals": files_diagonals(board),
         "activity": activity(board),
         "tactics_geometry": tactics_geometry(board),
+        "motifs": motifs(board),
     }

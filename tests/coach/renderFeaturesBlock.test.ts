@@ -81,9 +81,31 @@ describe('renderFeaturesBlock', () => {
     expect(block).toContain("black has an isolated queen's pawn");
   });
 
-  it('reports an absolute pin distinctly', () => {
+  it('reports an absolute pin distinctly (geometry fallback, no motifs)', () => {
     const f = base();
     f.tactics_geometry.pins = [{ pinned: 'Nf6', to: 'Kd8', by: 'Bg5', absolute: true }];
     expect(renderFeaturesBlock(f)).toContain('absolute pin: Bg5 pins Nf6 to Kd8');
+  });
+
+  it('prefers validated 4c.1 motifs over raw geometry and hedges speculative ones', () => {
+    const f = base();
+    // Raw geometry present...
+    f.tactics_geometry.en_prise = ['e5'];
+    // ...but validated motifs supersede it.
+    f.motifs = {
+      forks: [{ by: 'Nd5', targets: ['Qc7', 'Be7'], confidence: 'high' }],
+      skewers: [{ by: 'Ra1', front: 'Ka4', back: 'Ra8', confidence: 'high' }],
+      batteries: [],
+      pins: [{ by: 'Bg5', pinned: 'Nf6', to: 'Qd8', kind: 'relative', confidence: 'high' }],
+      removing_defender: [],
+      hanging: [{ piece: 'Be6', by: 'Nd4', confidence: 'speculative' }],
+    };
+    const block = renderFeaturesBlock(f);
+    expect(block).toContain('fork: Nd5 forks Qc7, Be7');
+    expect(block).toContain('skewer: Ra1 skewers Ka4 to Ra8');
+    expect(block).toContain('relative pin: Bg5 pins Nf6 to Qd8');
+    expect(block).toContain('possible hanging: Be6 can be taken by Nd4'); // speculative → "possible"
+    // Geometry en-prise is NOT double-stated when motifs exist.
+    expect(block).not.toContain('en prise');
   });
 });

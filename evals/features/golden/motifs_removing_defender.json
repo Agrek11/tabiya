@@ -1,0 +1,9 @@
+{
+  "feature": "motifs.removing_defender",
+  "positions": [
+    { "name": "Nf6 overloaded: sole defender of attacked Bd7 and h7", "fen": "k7/3b3p/5n2/8/8/8/2B5/3RK3 w - - 0 1",
+      "expected": [{ "defender": "Nf6", "abandons": ["d7", "h7"], "confidence": "high" }] },
+    { "name": "no overload in the start position", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": [] }
+  ]
+}
