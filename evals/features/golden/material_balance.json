@@ -1,0 +1,11 @@
+{
+  "feature": "material.balance_cp",
+  "positions": [
+    { "name": "start position is equal", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": 0 },
+    { "name": "white up a knight (+300)", "fen": "r1bqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": 300 },
+    { "name": "black up a rook and a pawn (-600)", "fen": "rnbqkbnr/pppppppp/8/8/8/8/1PPPPPPP/1NBQKBNR w Kkq - 0 1",
+      "expected": -600 }
+  ]
+}

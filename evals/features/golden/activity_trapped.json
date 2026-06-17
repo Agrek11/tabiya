@@ -1,0 +1,11 @@
+{
+  "feature": "activity.trapped",
+  "positions": [
+    { "name": "Ba8 attacked by Nc7, only move Bxb7 loses to the rook defending b7: trapped", "fen": "B6k/1pn5/8/8/8/7K/8/1r6 w - - 0 1",
+      "expected": { "white": ["Ba8"], "black": [] } },
+    { "name": "same corner bishop but b7 escape is open: not trapped (under no attack pressure it can flee)", "fen": "B6k/2n5/8/8/8/7K/8/8 w - - 0 1",
+      "expected": { "white": [], "black": [] } },
+    { "name": "start position: home pieces are passive, not trapped (none under attack)", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } }
+  ]
+}

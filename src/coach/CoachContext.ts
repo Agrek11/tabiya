@@ -10,6 +10,7 @@
 
 import type { EngineAnalysis } from '../engine/ChessEngine';
 import type { EnginePresetName } from '../engine/presets';
+import type { PositionFeatures } from './features/PositionFeatures';
 
 export type PlyHistoryEntry = {
   san: string;
@@ -28,8 +29,9 @@ export type CoachContext = {
   plyIndex?: number;
 
   // --- forward-compatible (typed in later sub-phases) ----------------------
-  /** 4b — ~30 deterministic positional features. */
-  features?: unknown;
+  /** 4b — ~30 deterministic positional features (null = position not in the
+   *  precomputed sidecar; narrator falls back to engine-only v1). */
+  features?: PositionFeatures | null;
   /** 4c — open/closed, pawn-structure class, sharpness. */
   classification?: unknown;
   /** 4c — tactical + positional motifs. */

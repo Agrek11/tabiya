@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.iqp",
+  "positions": [
+    { "name": "white isolated d-pawn (no c/e pawns) is an IQP", "fen": "k7/2p1p3/8/8/3P4/8/8/K7 w - - 0 1",
+      "expected": "white" },
+    { "name": "d-pawn supported by a c-pawn is not isolated, so not an IQP", "fen": "k7/8/8/8/2PP4/8/8/K7 w - - 0 1",
+      "expected": null },
+    { "name": "edge: lone black d5 pawn is a black IQP", "fen": "k7/8/8/3p4/8/8/8/K7 w - - 0 1",
+      "expected": "black" }
+  ]
+}

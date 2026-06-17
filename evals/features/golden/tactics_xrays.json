@@ -1,0 +1,11 @@
+{
+  "feature": "tactics_geometry.xrays",
+  "positions": [
+    { "name": "Rd1 x-rays the black queen through its own knight on d4", "fen": "3q3k/8/8/8/3N4/8/8/3RK3 w - - 0 1",
+      "expected": [ { "by": "Rd1", "target": "Qd8", "through": "Nd4" } ] },
+    { "name": "queen interposed: both rooks x-ray each other through the black queen (queen too valuable to be a pin)", "fen": "3r3k/8/8/3q4/8/8/8/3RK3 w - - 0 1",
+      "expected": [ { "by": "Rd1", "target": "Rd8", "through": "Qd5" }, { "by": "Rd8", "target": "Rd1", "through": "Qd5" } ] },
+    { "name": "open d-file with nothing interposed: no x-ray", "fen": "3q3k/8/8/8/8/8/8/3RK3 w - - 0 1",
+      "expected": [] }
+  ]
+}

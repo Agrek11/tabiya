@@ -20,7 +20,7 @@ from .material import material
 from .pawns import pawn_structure
 from .tactics_geometry import tactics_geometry
 
-EXTRACTOR_VERSION = 1
+EXTRACTOR_VERSION = 3  # v3: `bad_bishop` requires ≥3 own pawns FIXED on its color
 
 
 def extract_features(board: chess.Board) -> dict[str, Any]:

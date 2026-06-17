@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.candidate_passers",
+  "positions": [
+    { "name": "b/c majority: b4 is a candidate passer (supporter c4 matches guard c6)", "fen": "k7/8/2p5/8/1PP5/8/8/K7 w - - 0 1",
+      "expected": { "white": ["b4"], "black": [] } },
+    { "name": "outnumbered c4 facing b6+d6 is not a candidate (0 supporters vs 2 guards)", "fen": "k7/8/1p1p4/8/2P5/8/8/K7 w - - 0 1",
+      "expected": { "white": [], "black": [] } },
+    { "name": "edge: an already-passed pawn is excluded from candidates", "fen": "k7/8/8/2P5/8/8/8/K7 w - - 0 1",
+      "expected": { "white": [], "black": [] } }
+  ]
+}

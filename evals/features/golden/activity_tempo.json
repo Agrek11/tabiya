@@ -1,0 +1,11 @@
+{
+  "feature": "activity.tempo",
+  "positions": [
+    { "name": "start position: white to move, development even", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "side_to_move": "white", "development_lead": "even" } },
+    { "name": "white has a knight out and is castled (+1) while black is untouched: white+3, black to move", "fen": "rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQ1RK1 b kq - 0 1",
+      "expected": { "side_to_move": "black", "development_lead": "white+3" } },
+    { "name": "black has developed both knights, white none, white to move: black+2", "fen": "r1bqkb1r/pppppppp/2n2n2/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "side_to_move": "white", "development_lead": "black+2" } }
+  ]
+}

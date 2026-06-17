@@ -1,0 +1,11 @@
+{
+  "feature": "material.bishop_pair",
+  "positions": [
+    { "name": "start position: both sides have the pair", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": true, "black": true } },
+    { "name": "white keeps both bishops, black down to one", "fen": "rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": true, "black": false } },
+    { "name": "neither side has the pair (one bishop each)", "fen": "rn1qkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR w KQkq - 0 1",
+      "expected": { "white": false, "black": false } }
+  ]
+}

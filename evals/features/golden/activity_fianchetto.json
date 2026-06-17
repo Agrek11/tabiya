@@ -1,0 +1,11 @@
+{
+  "feature": "activity.fianchetto",
+  "positions": [
+    { "name": "white g2 fianchetto with intact f2/g3/h2 shield", "fen": "6k1/8/8/8/8/6P1/5PBP/6K1 w - - 0 1",
+      "expected": { "white": "intact-g2", "black": null } },
+    { "name": "white g2 fianchetto with a broken shield (g3 pawn missing)", "fen": "6k1/8/8/8/8/8/5PBP/6K1 w - - 0 1",
+      "expected": { "white": "broken-g2", "black": null } },
+    { "name": "black g7 fianchetto with intact f7/g6/h7 shield", "fen": "6k1/5pbp/6p1/8/8/8/8/6K1 w - - 0 1",
+      "expected": { "white": null, "black": "intact-g7" } }
+  ]
+}

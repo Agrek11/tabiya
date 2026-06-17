@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.hanging_duo",
+  "positions": [
+    { "name": "white c4+d4 side-by-side with no b/e pawns is a hanging duo", "fen": "k7/8/8/8/2PP4/8/8/K7 w - - 0 1",
+      "expected": "white" },
+    { "name": "an e-pawn neighbor breaks the c/d hanging-duo pattern", "fen": "k7/8/8/8/2PPP3/8/8/K7 w - - 0 1",
+      "expected": null },
+    { "name": "edge: black c5+d5 is a black hanging duo", "fen": "k7/8/8/2pp4/8/8/8/K7 w - - 0 1",
+      "expected": "black" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "feature": "files_diagonals.half_open",
+  "positions": [
+    { "name": "white d-file half-open (no white d-pawn, black d-pawn present)", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": ["d"], "black": [] } },
+    { "name": "white half-open d and black half-open e", "fen": "rnbqkbnr/pppp1ppp/8/8/8/8/PPP1PPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": ["d"], "black": ["e"] } },
+    { "name": "start position: no half-open files", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } }
+  ]
+}

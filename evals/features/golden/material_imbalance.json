@@ -1,0 +1,11 @@
+{
+  "feature": "material.imbalance",
+  "positions": [
+    { "name": "start position: equal material, none", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": "none" },
+    { "name": "bishop vs knight: white keeps 2B+1N, black 1B+2N", "fen": "rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1",
+      "expected": "B vs N" },
+    { "name": "exchange imbalance: white rook vs black bishop+knight, pawns equal", "fen": "1nb1k3/4pppp/8/8/8/8/4PPPP/R3K3 w Q - 0 1",
+      "expected": "R vs B+N" }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "feature": "king_safety.black",
+  "positions": [
+    { "name": "black short-castled with an intact f7/g7/h7 shield", "fen": "r4rk1/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQ - 0 1",
+      "expected": { "castled": "short", "shield": "intact", "adjacent_open_files": [], "adjacent_half_open_files": [], "king_zone_attackers": 0 } },
+    { "name": "black long-castled (queenside) with an intact a7/b7/c7 shield", "fen": "2kr3r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQ - 0 1",
+      "expected": { "castled": "long", "shield": "intact", "adjacent_open_files": [], "adjacent_half_open_files": [], "king_zone_attackers": 0 } },
+    { "name": "black uncastled at the start: castled none, shield n/a", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "castled": "none", "shield": "n/a", "adjacent_open_files": [], "adjacent_half_open_files": [], "king_zone_attackers": 0 } }
+  ]
+}

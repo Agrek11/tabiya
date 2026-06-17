@@ -1,0 +1,11 @@
+{
+  "feature": "king_safety.white",
+  "positions": [
+    { "name": "white short-castled with an intact f2/g2/h2 shield, no nearby weaknesses", "fen": "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R4RK1 w kq - 0 1",
+      "expected": { "castled": "short", "shield": "intact", "adjacent_open_files": [], "adjacent_half_open_files": [], "king_zone_attackers": 0 } },
+    { "name": "uncastled king with rights intact: castled none, shield n/a", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "castled": "none", "shield": "n/a", "adjacent_open_files": [], "adjacent_half_open_files": [], "king_zone_attackers": 0 } },
+    { "name": "open g-file beside the castled king with a black rook bearing down (one zone attacker)", "fen": "6rk/8/8/8/8/8/PPPPPP1P/5RK1 w - - 0 1",
+      "expected": { "castled": "short", "shield": "one-breach", "adjacent_open_files": ["g"], "adjacent_half_open_files": [], "king_zone_attackers": 1 } }
+  ]
+}

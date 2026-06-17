@@ -9,6 +9,7 @@
 import type { EngineAnalysis } from '../engine/ChessEngine';
 import type { EnginePresetName } from '../engine/presets';
 import type { CoachContext, PlyHistoryEntry } from './CoachContext';
+import type { PositionFeatures } from './features/PositionFeatures';
 
 export const MAX_HISTORY_PLIES = 6;
 
@@ -19,6 +20,8 @@ export type CoachContextInput = {
   enginePresetName: EnginePresetName;
   lineId?: string;
   plyIndex?: number;
+  /** 4b — precomputed features for this position, or null when off-book. */
+  features?: PositionFeatures | null;
 };
 
 export const CoachContextBuilder = {
@@ -30,6 +33,7 @@ export const CoachContextBuilder = {
       enginePresetName: input.enginePresetName,
       lineId: input.lineId,
       plyIndex: input.plyIndex,
+      features: input.features ?? null,
     };
   },
 };

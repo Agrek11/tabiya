@@ -1,0 +1,11 @@
+{
+  "feature": "tactics_geometry.discovered_candidates",
+  "positions": [
+    { "name": "moving Nd4 discovers Bb2's attack on the black queen on h8", "fen": "7q/8/8/8/3N4/8/1B6/K6k w - - 0 1",
+      "expected": [ { "mover": "Nd4", "battery_piece": "Bb2", "target": "Qh8" } ] },
+    { "name": "bishop already bears directly on the queen (no interposed mover): not a discovery", "fen": "7q/8/8/8/8/8/1B6/K6k w - - 0 1",
+      "expected": [] },
+    { "name": "start position: no discovered-attack candidates", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": [] }
+  ]
+}

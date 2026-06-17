@@ -100,17 +100,26 @@ def _outposts(board: chess.Board, color: chess.Color) -> dict[str, list[str]]:
 
 
 def _bad_bishop(board: chess.Board, color: chess.Color) -> str | None:
-    """Own pawns on the bishop's color ≥4 AND ≥2 of them central (c-f files);
-    returns the bishop's square or null. Single worst bishop reported."""
+    """A bishop hemmed in by its OWN pawns that are FIXED on its square color.
+    A pawn is fixed when the square directly in front of it is occupied (by
+    any piece) — it cannot advance to clear the bishop's diagonals. ≥3 fixed
+    same-color own pawns → bad bishop. The fixed requirement is what stops
+    this firing on the opening, where every pawn is still mobile (the bishop
+    is merely undeveloped, not bad). Single worst bishop reported."""
+    direction = 1 if color == chess.WHITE else -1
     for bishop in sorted(board.pieces(chess.BISHOP, color)):
         bishop_color = (chess.square_file(bishop) + chess.square_rank(bishop)) % 2
-        same_color_pawns = [
-            p
-            for p in board.pieces(chess.PAWN, color)
-            if (chess.square_file(p) + chess.square_rank(p)) % 2 == bishop_color
-        ]
-        central = [p for p in same_color_pawns if 2 <= chess.square_file(p) <= 5]
-        if len(same_color_pawns) >= 4 and len(central) >= 2:
+        fixed_same_color = 0
+        for pawn in board.pieces(chess.PAWN, color):
+            if (chess.square_file(pawn) + chess.square_rank(pawn)) % 2 != bishop_color:
+                continue
+            ahead_rank = chess.square_rank(pawn) + direction
+            if not 0 <= ahead_rank <= 7:
+                continue
+            ahead = chess.square(chess.square_file(pawn), ahead_rank)
+            if board.piece_at(ahead) is not None:  # blocked → fixed
+                fixed_same_color += 1
+        if fixed_same_color >= 3:
             return chess.square_name(bishop)
     return None
 
@@ -131,12 +140,17 @@ def _fianchetto(board: chess.Board, color: chess.Color) -> str | None:
 
 
 def _trapped(board: chess.Board, color: chess.Color) -> list[str]:
-    """Non-pawn, non-king piece with zero SAFE destinations: every reachable
-    square is occupied by own piece or attacked by enemy and defended fewer
-    times than attacked."""
+    """A piece is TRAPPED only if it is currently attacked by the enemy AND has
+    no safe destination. The attack requirement is what separates "trapped"
+    from merely "undeveloped/passive" — a rook on a1 at the start has no moves
+    but is not under attack, so it is NOT trapped. A safe destination = an
+    empty-or-capturable square not occupied by an own piece, that is either
+    unattacked by the enemy or defended at least as many times as attacked."""
     result = []
     for piece_type in (chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN):
         for square in board.pieces(piece_type, color):
+            if not board.attackers(not color, square):
+                continue  # not under attack → passive, not trapped
             safe = False
             for target in board.attacks(square):
                 occupant = board.piece_at(target)

@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.backward",
+  "positions": [
+    { "name": "black e6 backward (stop e5 hit by d4 pawn, no d/f support); white c3-d4 chain is not", "fen": "k7/8/4p3/8/3P4/2P5/8/K7 w - - 0 1",
+      "expected": { "white": [], "black": ["e6"] } },
+    { "name": "start position has no backward pawns", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } },
+    { "name": "rim edge: both a6 and b4 are backward (each stop square hit by the lone enemy pawn, no adjacent support)", "fen": "k7/8/p7/8/1P6/8/8/K7 w - - 0 1",
+      "expected": { "white": ["b4"], "black": ["a6"] } }
+  ]
+}

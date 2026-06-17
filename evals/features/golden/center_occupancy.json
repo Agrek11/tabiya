@@ -1,0 +1,11 @@
+{
+  "feature": "center_space.center_occupancy",
+  "positions": [
+    { "name": "after 1.e4 d5: e4 white pawn, d5 black pawn, d4/e5 empty", "fen": "rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+      "expected": { "d4": null, "e4": "white_pawn", "d5": "black_pawn", "e5": null } },
+    { "name": "start position: center empty", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "d4": null, "e4": null, "d5": null, "e5": null } },
+    { "name": "edge: a non-pawn occupant is reported by type (knight on d5)", "fen": "k7/8/8/3N4/8/8/8/K7 w - - 0 1",
+      "expected": { "d4": null, "e4": null, "d5": "white_knight", "e5": null } }
+  ]
+}

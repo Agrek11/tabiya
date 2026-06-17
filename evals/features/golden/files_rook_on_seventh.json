@@ -1,0 +1,11 @@
+{
+  "feature": "files_diagonals.rook_on_seventh",
+  "positions": [
+    { "name": "white Ra7 and black Rb2 each on the enemy's second rank", "fen": "7k/R7/8/8/8/8/1r6/7K w - - 0 1",
+      "expected": { "white": ["Ra7"], "black": ["Rb2"] } },
+    { "name": "doubled white rooks on the seventh (c7 and e7)", "fen": "k7/2R1R3/8/8/8/8/8/K7 w - - 0 1",
+      "expected": { "white": ["Rc7", "Re7"], "black": [] } },
+    { "name": "start position: no rook on the seventh", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": [], "black": [] } }
+  ]
+}

@@ -5,53 +5,53 @@ golden fixtures + sidecar + TS lookup + prompt v2 + eval vs 4a baseline.
 
 ## Phase 1 — Python extractor (build pipeline)
 
-- [ ] **1.1** `scripts/tabiya_build/features/` package skeleton: `extract.py`
+- [x] **1.1** `scripts/tabiya_build/features/` package skeleton: `extract.py`
       orchestrator + `EXTRACTOR_VERSION = 1`, per-group modules, typed dicts.
-- [ ] **1.2** Group 1 material (+tests): balance_cp, imbalance label, bishop pair.
-- [ ] **1.3** Group 2 pawns (+tests): doubled/isolated/backward/passed/
+- [x] **1.2** Group 1 material (+tests): balance_cp, imbalance label, bishop pair.
+- [x] **1.3** Group 2 pawns (+tests): doubled/isolated/backward/passed/
       candidates/islands/chains/majorities/IQP/hanging duo.
-- [ ] **1.4** Group 3 king safety (+tests): castled, shield, adjacent files,
+- [x] **1.4** Group 3 king safety (+tests): castled, shield, adjacent files,
       king-zone attackers.
-- [ ] **1.5** Group 4 center/space (+tests): occupancy, attacks, space counts,
+- [x] **1.5** Group 4 center/space (+tests): occupancy, attacks, space counts,
       locked flag.
-- [ ] **1.6** Group 5 files/diagonals (+tests): open/half-open, rook
+- [x] **1.6** Group 5 files/diagonals (+tests): open/half-open, rook
       placements, 7th rank, long diagonals.
-- [ ] **1.7** Group 6 activity (+tests): mobility, outposts, bad bishop,
+- [x] **1.7** Group 6 activity (+tests): mobility, outposts, bad bishop,
       fianchetto, trapped, development, tempo.
-- [ ] **1.8** Group 7 tactics geometry (+tests): pins, x-rays, overloaded,
+- [x] **1.8** Group 7 tactics geometry (+tests): pins, x-rays, overloaded,
       discovered candidates, en prise.
 
 ## Phase 2 — Golden fixtures (the spec of record)
 
-- [ ] **2.1** `evals/features/golden/<feature>.json` for every feature —
+- [x] **2.1** `evals/features/golden/<feature>.json` for every feature —
       ≥3 positions each (positive / negative / edge: rim files, ep, promotion-
       adjacent). Author reviews fixtures for chess truth (HUMAN GATE).
-- [ ] **2.2** pytest golden runner looping all fixture files; CI-wired;
+- [x] **2.2** pytest golden runner looping all fixture files; CI-wired;
       100% pass required.
 
 ## Phase 3 — Sidecar emission
 
-- [ ] **3.1** `features/sidecar.py`: walk lines → dedupe by fen_hash →
+- [x] **3.1** `features/sidecar.py`: walk lines → dedupe by fen_hash →
       `public/features.json` (sorted keys, deterministic).
-- [ ] **3.2** Wire into `build_catalog.py` (`--skip-features` flag, summary
+- [x] **3.2** Wire into `build_catalog.py` (`--skip-features` flag, summary
       line); incremental reuse by extractor_version.
-- [ ] **3.3** Determinism test: double build byte-identical; JSON Schema
+- [x] **3.3** Determinism test: double build byte-identical; JSON Schema
       committed + validated at build.
 
 ## Phase 4 — TS consumption
 
-- [ ] **4.1** `PositionFeatures.ts` types + `FeatureExtractor` interface.
-- [ ] **4.2** `SidecarFeatureExtractor` (lazy fetch, schema check, hash
+- [x] **4.1** `PositionFeatures.ts` types + `FeatureExtractor` interface.
+- [x] **4.2** `SidecarFeatureExtractor` (lazy fetch, schema check, hash
       lookup) + tests (hit / miss / version-mismatch degrade).
-- [ ] **4.3** `renderFeaturesBlock.ts` — compact prose, omits empty facts;
+- [x] **4.3** `renderFeaturesBlock.ts` — compact prose, omits empty facts;
       snapshot test.
-- [ ] **4.4** Pipeline integration: CoachContext.features typed properly
+- [x] **4.4** Pipeline integration: CoachContext.features typed properly
       (replace 4a `unknown` placeholder), prompt v2 path, promptVersion
       v2/v1 switching + tests.
 
 ## Phase 5 — Prompt v2 + eval
 
-- [ ] **5.1** `prompts/coach/v2.txt` + CHANGELOG entry (grounding rules,
+- [x] **5.1** `prompts/coach/v2.txt` + CHANGELOG entry (grounding rules,
       3 few-shots incl. honest hedge).
 - [ ] **5.2** `evals/coach/4b-walkthrough.md`: same 10 positions as 4a
       baseline, prompt v2, rated. Success: mean ≥ +1.0 vs 4a AND zero

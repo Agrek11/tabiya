@@ -124,9 +124,9 @@ square); no timestamps inside entries; `json.dumps(..., sort_keys=True)`.
 | long diagonal control | side whose pieces attack ≥ N more squares of a1-h8 (resp h1-a8) than opponent; tie = "contested" |
 | outpost (available) | square in enemy half defendable by own pawn now AND never attackable by enemy pawn advance |
 | outpost (occupied) | knight/bishop currently on an outpost square |
-| bad bishop | bishop whose own pawns on its color ≥4 AND ≥2 of them central/blocked; fixture-pinned |
+| bad bishop | bishop hemmed by ≥3 of its OWN pawns FIXED on its square color (a pawn is fixed when the square directly ahead is occupied by any piece). The fixed requirement is what stops it firing on the opening, where pawns are still mobile — an undeveloped bishop is not a bad bishop. |
 | fianchetto intact | bishop on g2/b2/g7/b7 with its shield pawn structure unbroken |
-| trapped | piece (not pawn/king) with 0 safe moves (every destination attacked-and-underdefended) |
+| trapped | piece (not pawn/king) that is UNDER ENEMY ATTACK and has 0 safe destinations (every reachable square own-occupied, or attacked-and-underdefended). The attack requirement separates trapped from merely undeveloped — a home rook with no moves is passive, not trapped. |
 | undeveloped minors | knights/bishops still on home squares |
 | development lead | difference in developed minors + castled bonus(=1) |
 | pin (absolute) | pinned to king (chess.js/python-chess native) |

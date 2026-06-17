@@ -1,0 +1,11 @@
+{
+  "feature": "pawns.majorities",
+  "positions": [
+    { "name": "classic split: white queenside majority, black kingside majority", "fen": "k7/pp3ppp/8/8/8/8/PPP3PP/K7 w - - 0 1",
+      "expected": { "queenside": "white", "kingside": "black", "center": null } },
+    { "name": "start position: every wing balanced", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "queenside": null, "kingside": null, "center": null } },
+    { "name": "edge: white central majority (d2+e2 vs e7)", "fen": "k7/4p3/8/8/8/8/3PP3/K7 w - - 0 1",
+      "expected": { "queenside": null, "kingside": null, "center": "white" } }
+  ]
+}

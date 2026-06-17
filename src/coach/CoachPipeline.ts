@@ -17,9 +17,19 @@ import { CoachContextBuilder } from './CoachContextBuilder';
 import type { PlyHistoryEntry } from './CoachContext';
 import { getLLMClient } from './container';
 import type { LLMResponse } from './LLMClient';
+import { SidecarFeatureExtractor } from './features/SidecarFeatureExtractor';
+import type { FeatureExtractor } from './features/FeatureExtractor';
+import { renderFeaturesBlock } from './features/renderFeaturesBlock';
 import promptV1Raw from '../../prompts/coach/v1.txt?raw';
+import promptV2Raw from '../../prompts/coach/v2.txt?raw';
 
-export const PROMPT_VERSION = 'v1' as const;
+export type PromptVersion = 'v1' | 'v2';
+
+/** Module-level singleton; swappable for tests. */
+let featureExtractor: FeatureExtractor = new SidecarFeatureExtractor();
+export function _setFeatureExtractorForTesting(fx: FeatureExtractor): void {
+  featureExtractor = fx;
+}
 
 export type CoachRunInput = {
   fen: string;
@@ -35,13 +45,14 @@ export type CoachRunInput = {
 export type CoachResult = {
   engine: EngineAnalysis | null;
   llm?: LLMResponse;
-  promptVersion: typeof PROMPT_VERSION;
+  promptVersion: PromptVersion;
   error?: 'engine-unavailable';
 };
 
-// --- prompt template (parsed once) -----------------------------------------
+// --- prompt templates (parsed once) ----------------------------------------
 
-const { systemPrompt, userTemplate } = parseTemplate(promptV1Raw);
+const V1 = parseTemplate(promptV1Raw);
+const V2 = parseTemplate(promptV2Raw);
 
 function parseTemplate(raw: string): { systemPrompt: string; userTemplate: string } {
   const sysMarker = '===SYSTEM===';
@@ -78,12 +89,18 @@ export function renderPliesBlock(history: PlyHistoryEntry[]): string {
 
 function renderUserPrompt(
   template: string,
-  vars: { engine_block: string; recent_plies_block: string; engine_preset_name: string },
+  vars: {
+    engine_block: string;
+    recent_plies_block: string;
+    engine_preset_name: string;
+    features_block?: string;
+  },
 ): string {
   return template
     .replaceAll('{{engine_block}}', vars.engine_block)
     .replaceAll('{{recent_plies_block}}', vars.recent_plies_block)
-    .replaceAll('{{engine_preset_name}}', vars.engine_preset_name);
+    .replaceAll('{{engine_preset_name}}', vars.engine_preset_name)
+    .replaceAll('{{features_block}}', vars.features_block ?? '');
 }
 
 // --- pipeline --------------------------------------------------------------
@@ -99,30 +116,52 @@ export const CoachPipeline = {
       const sf = await loadStockfishEngine();
       engine = await sf.analyze(input.fen, opts);
     } catch {
-      return { engine: null, promptVersion: PROMPT_VERSION, error: 'engine-unavailable' };
+      return { engine: null, promptVersion: 'v1', error: 'engine-unavailable' };
     }
 
-    // Step 2 — context.
+    // Step 2 — features (4b): precomputed lookup; null = off-book → v1 path.
+    // Never throws (extractor degrades to null on any failure, Article 11).
+    let features: Awaited<ReturnType<FeatureExtractor['extract']>>;
+    try {
+      features = await featureExtractor.extract(input.fen);
+    } catch {
+      features = null;
+    }
+
+    // Step 3 — context.
     const ctx = CoachContextBuilder.build({
       engine,
       history: input.history,
       enginePresetName: presetName,
       lineId: input.lineId,
       plyIndex: input.plyIndex,
+      features,
     });
 
-    // Step 3 — optional LLM narration (degraded path = llm undefined).
+    // Prompt selection: v2 when we have a non-empty features block, else v1.
+    const featuresBlock = ctx.features ? renderFeaturesBlock(ctx.features) : '';
+    const useV2 = featuresBlock.length > 0;
+    const tpl = useV2 ? V2 : V1;
+    const promptVersion: PromptVersion = useV2 ? 'v2' : 'v1';
+
+    // Step 4 — optional LLM narration (degraded path = llm undefined).
     let llm: LLMResponse | undefined;
     const client = getLLMClient();
     if (client) {
       try {
         if (await client.available()) {
-          const userPrompt = renderUserPrompt(userTemplate, {
+          const userPrompt = renderUserPrompt(tpl.userTemplate, {
             engine_block: renderEngineBlock(ctx.engine),
             recent_plies_block: renderPliesBlock(ctx.history),
             engine_preset_name: ctx.enginePresetName,
+            features_block: useV2 ? featuresBlock : undefined,
           });
-          llm = await client.complete({ systemPrompt, userPrompt, maxTokens: 400, temperature: 0.6 });
+          llm = await client.complete({
+            systemPrompt: tpl.systemPrompt,
+            userPrompt,
+            maxTokens: 400,
+            temperature: 0.6,
+          });
         }
       } catch (err) {
         // Article 11 — narration failure must not break the surface.
@@ -131,7 +170,7 @@ export const CoachPipeline = {
       }
     }
 
-    if (import.meta.env.DEV) console.debug('[coach] promptVersion', PROMPT_VERSION);
-    return { engine, llm, promptVersion: PROMPT_VERSION };
+    if (import.meta.env.DEV) console.debug('[coach] promptVersion', promptVersion);
+    return { engine, llm, promptVersion };
   },
 };

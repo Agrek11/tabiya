@@ -1,0 +1,12 @@
+{
+  "feature": "activity.bad_bishop",
+  "positions": [
+    { "name": "dark Bc1 hemmed by 3 own dark pawns fixed by enemy pawns (c3/e5/g3)", "fen": "6k1/8/4p3/4P3/2p3p1/2P3P1/8/2B3K1 w - - 0 1",
+      "expected": { "white": "c1", "black": null } },
+    { "name": "good bishop: own pawns sit on the opposite color, bishop is free", "fen": "6k1/8/8/8/8/8/1P1P1P2/5BK1 w - - 0 1",
+      "expected": { "white": null, "black": null } },
+    { "name": "start position: bishops are not bad (own pawns are mobile, not fixed)",
+      "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": { "white": null, "black": null } }
+  ]
+}
