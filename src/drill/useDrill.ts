@@ -242,17 +242,35 @@ export function useDrill(
   // -------------------------------------------------------------------------
   const wrongAttemptsRef = useRef(0);
   const hintUsesRef = useRef(0);
-  const startedAtRef = useRef<number>(Date.now());
+  // Seeded to 0 (not Date.now() — calling it during render is impure). The
+  // mount-time reset effect below stamps the real start time before any drill
+  // move can complete, and resetCounters() re-stamps on every reset.
+  const startedAtRef = useRef<number>(0);
   const [drillResult, setDrillResult] = useState<DrillResult | null>(null);
 
+  // Reset the per-drill counter REFS. Pure w.r.t. React state (refs only); the
+  // `drillResult` state reset is handled separately at render time so this can
+  // run inside an effect without a setState-in-effect cascade.
   const resetCounters = useCallback((): void => {
     wrongAttemptsRef.current = 0;
     hintUsesRef.current = 0;
     startedAtRef.current = Date.now();
-    setDrillResult(null);
   }, []);
 
-  // Reset chess + state when the active line OR player color changes.
+  // Clear the emitted result when the active line OR player color changes.
+  // Done during render (not in an effect) per "adjusting state when a prop
+  // changes" — avoids a setState-in-effect cascade.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevLine, setPrevLine] = useState(line);
+  const [prevColor, setPrevColor] = useState(playerColor);
+  if (prevLine !== line || prevColor !== playerColor) {
+    setPrevLine(line);
+    setPrevColor(playerColor);
+    if (drillResult !== null) setDrillResult(null);
+  }
+
+  // Reset chess + state when the active line OR player color changes. Refs
+  // only here (no setState) → no cascade.
   useEffect(() => {
     chess.reset();
     dispatch({ type: 'RESET' });
@@ -461,10 +479,16 @@ export function useDrill(
   }, [state, line, chess, hintSquare]);
 
   // Clear hint whenever drill state advances (move played, line changed, etc.).
-  useEffect(() => {
-    setHintSquare(null);
-    setHintTier(null);
-  }, [state]);
+  // Done during render (not in an effect) keyed on the `state` reference, so a
+  // hint-only re-render (showHint sets hint state without changing `state`)
+  // does NOT wipe the hint it just set. "Adjusting state when a prop changes":
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevStateForHint, setPrevStateForHint] = useState(state);
+  if (prevStateForHint !== state) {
+    setPrevStateForHint(state);
+    if (hintSquare !== null) setHintSquare(null);
+    if (hintTier !== null) setHintTier(null);
+  }
 
   // Auto-fade hint after window even if state hasn't changed.
   useEffect(() => {

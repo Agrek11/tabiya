@@ -120,13 +120,22 @@ export function ChessBoardPanel({
   const lightSq = lightSquare ?? theme.light;
   const darkSq = darkSquare ?? theme.dark;
 
-  // Board flip animation: brief opacity dip on orientation change.
+  // Board flip animation: brief opacity dip on orientation change. The flag is
+  // raised during render when the orientation prop changes ("adjusting state
+  // when a prop changes"), and cleared from a timer (async continuation) — so
+  // neither setState happens synchronously inside an effect body.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
   const [flipping, setFlipping] = useState(false);
-  useEffect(() => {
+  const [prevOrientation, setPrevOrientation] = useState(boardOrientation);
+  if (prevOrientation !== boardOrientation) {
+    setPrevOrientation(boardOrientation);
     setFlipping(true);
+  }
+  useEffect(() => {
+    if (!flipping) return;
     const id = window.setTimeout(() => setFlipping(false), 300);
     return () => window.clearTimeout(id);
-  }, [boardOrientation]);
+  }, [flipping]);
 
   const handleDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs): boolean => {
     if (targetSquare === null) return false;

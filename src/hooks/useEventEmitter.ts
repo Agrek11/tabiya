@@ -50,7 +50,7 @@ export function useEventEmitter(activeLineId: string | null): UseEventEmitterRet
       const lineId = activeLineRef.current;
       if (lineId === null) return; // no active line — drop silently
       const now = Date.now();
-      let durationMs: number | null = null;
+      let durationMs: number | null;
       let ply: number | null = plyIndex ?? null;
 
       if (eventType === 'line_start') {

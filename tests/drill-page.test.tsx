@@ -6,7 +6,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, screen, waitFor } from '@testing-library/react';
 
 // Mock canvas-confetti — jsdom has no canvas so the celebration call would
 // crash on getContext. Tests don't need to assert the burst fires.

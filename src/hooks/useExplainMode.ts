@@ -218,8 +218,13 @@ export function useExplainMode({
   // block for that index.
   const blocksRef = useRef<readonly ExplainBlock[]>(blocks);
   const movesRef = useRef<readonly string[]>(moves);
-  blocksRef.current = blocks;
-  movesRef.current = moves;
+  // Keep the refs current WITHOUT writing them during render (react-hooks/refs).
+  // This effect is declared before the consuming effects below, so it runs
+  // first on each commit and the latest arrays are in place when they read.
+  useEffect(() => {
+    blocksRef.current = blocks;
+    movesRef.current = moves;
+  });
 
   const clearTimer = useCallback((): void => {
     if (timerRef.current !== null) {

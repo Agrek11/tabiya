@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'playwright-report', 'test-results']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -42,5 +42,23 @@ export default defineConfig([
         },
       ],
     },
+  },
+  {
+    // React Context providers deliberately co-locate their `use*()` hook with
+    // the Provider component (the standard React pattern). `react-refresh`'s
+    // only-export-components is a fast-refresh DX rule, not a correctness rule;
+    // splitting each hook into its own module would churn ~55 import sites for
+    // zero runtime benefit. Scoped off for these provider/overlay files only —
+    // it still applies everywhere else. (Must come AFTER the main block: flat
+    // config is later-wins.)
+    files: [
+      'src/state/EventsContext.tsx',
+      'src/theme/ThemeContext.tsx',
+      'src/theme/BoardThemeContext.tsx',
+      'src/theme/PieceSetContext.tsx',
+      'src/ui/KeySquareOverlay.tsx',
+      'src/ui/board/HighlightLayer.tsx',
+    ],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

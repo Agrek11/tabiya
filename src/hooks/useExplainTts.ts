@@ -77,11 +77,15 @@ export function useExplainTts({ lineId, paused }: UseExplainTtsArgs): UseExplain
   // intentionally re-read on every lineId change rather than subscribing to
   // localStorage (storage events fire across tabs only); the Settings page
   // is the only place that mutates the global flag and consumers re-mount
-  // when they need a fresh read.
-  useEffect(() => {
+  // when they need a fresh read. Done during render (not in an effect) per the
+  // "adjusting state when a prop changes" pattern, avoiding a cascading render.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevLineId, setPrevLineId] = useState(lineId);
+  if (prevLineId !== lineId) {
+    setPrevLineId(lineId);
     setGlobalEnabled(getExplainTtsFlag());
     setMutedForLine(readLineMute(lineId));
-  }, [lineId]);
+  }
 
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 

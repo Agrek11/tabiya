@@ -228,47 +228,60 @@ export function DrillPage() {
   const { dueLineIds, loading: srsLoading } = useSRS();
   const { effective } = useEffectivePick();
 
-  // Queue init.
-  useEffect(() => {
-    if (requestedQueue !== 'due') return;
-    if (catalog.kind !== 'ready') return;
-    if (srsLoading) return;
-    if (queueState.kind !== 'off') return;
+  // Queue init. Done during render (not in an effect): this is a one-shot
+  // initialization of queueState from async-resolved catalog + SRS data, and
+  // the `queueState.kind === 'off'` guard makes it run exactly once (the body
+  // moves queueState off 'off'). Doing it inline avoids a setState-in-effect
+  // cascade. https://react.dev/learn/you-might-not-need-an-effect
+  if (
+    requestedQueue === 'due' &&
+    catalog.kind === 'ready' &&
+    !srsLoading &&
+    queueState.kind === 'off'
+  ) {
     if (dueLineIds.length === 0) {
       setQueueState({ kind: 'exhausted', total: 0 });
-      return;
+    } else {
+      const valid = dueLineIds
+        .filter((id) => catalog.lines.some((l) => l.id === id))
+        .filter((id) => !effective.isFiltered || effective.lineIds.has(id));
+      if (valid.length === 0) {
+        setQueueState({ kind: 'exhausted', total: 0 });
+      } else {
+        setQueueState({ kind: 'active', lineIds: valid, index: 0 });
+        setSelectedLineId(valid[0]!);
+        const firstLine = catalog.lines.find((l) => l.id === valid[0]);
+        const firstOpening = firstLine
+          ? catalog.openings.find((o) => o.id === firstLine.opening_id)
+          : undefined;
+        if (firstOpening) setSelectedFamilyId(firstOpening.family_id);
+      }
     }
-    const valid = dueLineIds
-      .filter((id) => catalog.lines.some((l) => l.id === id))
-      .filter((id) => !effective.isFiltered || effective.lineIds.has(id));
-    if (valid.length === 0) {
-      setQueueState({ kind: 'exhausted', total: 0 });
-      return;
-    }
-    setQueueState({ kind: 'active', lineIds: valid, index: 0 });
-    setSelectedLineId(valid[0]!);
-    const firstLine = catalog.lines.find((l) => l.id === valid[0]);
-    const firstOpening = firstLine
-      ? catalog.openings.find((o) => o.id === firstLine.opening_id)
-      : undefined;
-    if (firstOpening) setSelectedFamilyId(firstOpening.family_id);
-  }, [requestedQueue, catalog, srsLoading, dueLineIds, queueState.kind, effective]);
+  }
 
-  // Family change → reset line to first in family.
-  useEffect(() => {
-    if (catalog.kind !== 'ready' || selectedFamilyId === '') return;
-    const familyOpeningIds = new Set(
-      catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
-    );
-    const linesForFam = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
-    if (linesForFam.length === 0) {
-      setSelectedLineId('');
-      return;
+  // Family change → reset line to first in family. Done during render (not in
+  // an effect) per "adjusting state when a prop changes": this is pure state
+  // derivation from selectedFamilyId + catalog, so doing it inline avoids the
+  // extra commit + setState-in-effect cascade an effect would cause.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevFamSync, setPrevFamSync] = useState<{ fam: string; cat: CatalogState }>({
+    fam: selectedFamilyId,
+    cat: catalog,
+  });
+  if (prevFamSync.fam !== selectedFamilyId || prevFamSync.cat !== catalog) {
+    setPrevFamSync({ fam: selectedFamilyId, cat: catalog });
+    if (catalog.kind === 'ready' && selectedFamilyId !== '') {
+      const familyOpeningIds = new Set(
+        catalog.openings.filter((o) => o.family_id === selectedFamilyId).map((o) => o.id)
+      );
+      const linesForFam = catalog.lines.filter((l) => familyOpeningIds.has(l.opening_id));
+      if (linesForFam.length === 0) {
+        if (selectedLineId !== '') setSelectedLineId('');
+      } else if (!linesForFam.some((l) => l.id === selectedLineId)) {
+        setSelectedLineId(linesForFam[0]!.id);
+      }
     }
-    if (!linesForFam.some((l) => l.id === selectedLineId)) {
-      setSelectedLineId(linesForFam[0]!.id);
-    }
-  }, [selectedFamilyId, catalog, selectedLineId]);
+  }
 
   const activeLine: Line | null = useMemo(() => {
     if (catalog.kind !== 'ready') return null;
@@ -378,7 +391,25 @@ export function DrillPage() {
     srsRecordedForRef.current = null;
   }, [activeLine]);
 
-  // Queue auto-advance.
+  // Queue end-of-list → exhausted. Done during render (not in an effect): it
+  // is a pure transition off `active` when the last line in the queue is
+  // complete, and the `queueState.kind === 'active'` guard makes it fire once.
+  // (Originally this transition was synchronous inside the auto-advance effect;
+  // keeping it synchronous here preserves the immediate exhausted screen while
+  // dropping the setState-in-effect cascade.)
+  if (
+    state.kind === 'complete' &&
+    queueState.kind === 'active' &&
+    catalog.kind === 'ready' &&
+    activeLine !== null &&
+    queueState.lineIds[queueState.index] === activeLine.id &&
+    queueState.index + 1 >= queueState.lineIds.length
+  ) {
+    setQueueState({ kind: 'exhausted', total: queueState.lineIds.length });
+  }
+
+  // Queue auto-advance (timer-based; setState lives in the timer callback, an
+  // async continuation, so no setState-in-effect cascade).
   useEffect(() => {
     if (state.kind !== 'complete') return;
     if (queueState.kind !== 'active') return;
@@ -387,10 +418,7 @@ export function DrillPage() {
     const currentLineId = queueState.lineIds[queueState.index];
     if (currentLineId !== activeLine.id) return;
     const nextIndex = queueState.index + 1;
-    if (nextIndex >= queueState.lineIds.length) {
-      setQueueState({ kind: 'exhausted', total: queueState.lineIds.length });
-      return;
-    }
+    if (nextIndex >= queueState.lineIds.length) return; // handled at render time
     const id = window.setTimeout(() => {
       const nextLineId = queueState.lineIds[nextIndex]!;
       const nextLine = catalog.lines.find((l) => l.id === nextLineId);
@@ -422,9 +450,18 @@ export function DrillPage() {
     return legalMovesFrom(selectedSquare);
   }, [selectedSquare, legalMovesFrom]);
 
-  useEffect(() => {
-    setSelectedSquare(null);
-  }, [state, drillMoves]);
+  // Clear the click-to-move selection whenever drill state advances or the
+  // line changes. Done during render (not in an effect) per "adjusting state
+  // when a prop changes" — avoids a setState-in-effect cascade.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevSelKey, setPrevSelKey] = useState<{ state: typeof state; moves: typeof drillMoves }>({
+    state,
+    moves: drillMoves,
+  });
+  if (prevSelKey.state !== state || prevSelKey.moves !== drillMoves) {
+    setPrevSelKey({ state, moves: drillMoves });
+    if (selectedSquare !== null) setSelectedSquare(null);
+  }
 
   const onPieceClick = useCallback(
     ({ square }: { piece: unknown; square: string | null }) => {

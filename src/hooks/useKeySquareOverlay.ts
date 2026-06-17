@@ -22,7 +22,7 @@
  * Article 14 (type discipline): strict, no `any`.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 const KEY_PREFIX = 'tabiya:linePrefs:';
 const KEY_SUFFIX = ':keySquareOverlay';
@@ -77,10 +77,15 @@ export function useKeySquareOverlay({
 }: UseKeySquareOverlayArgs): UseKeySquareOverlayReturn {
   const [drillPref, setDrillPref] = useState<boolean>(() => readPref(lineId));
 
-  // Re-sync on lineId change — each line has its own preference.
-  useEffect(() => {
+  // Re-sync on lineId change — each line has its own preference. Done during
+  // render (not in an effect) per the "adjusting state when a prop changes"
+  // pattern, avoiding the extra commit + cascading render an effect would cause.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevLineId, setPrevLineId] = useState(lineId);
+  if (prevLineId !== lineId) {
+    setPrevLineId(lineId);
     setDrillPref(readPref(lineId));
-  }, [lineId]);
+  }
 
   const toggle = useCallback((): void => {
     if (!hasKeySquares) return;

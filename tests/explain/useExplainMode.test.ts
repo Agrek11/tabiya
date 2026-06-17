@@ -6,10 +6,9 @@
  * cleanup, and empty-blocks short-circuit.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import {
-  DEFAULT_PAUSE_MS,
   POST_MOVE_BEAT_MS,
   reducer,
   useExplainMode,

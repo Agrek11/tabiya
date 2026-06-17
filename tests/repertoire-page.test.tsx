@@ -5,7 +5,7 @@
  * behavior, search filter, category filter, and gambits link presence.
  */
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 
 import { RepertoirePage } from '../src/pages/RepertoirePage';

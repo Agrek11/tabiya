@@ -9,7 +9,7 @@
  * (type discipline): strict, no `any`.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export type ExplainModeChoice = 'drill' | 'explain';
 
@@ -45,10 +45,15 @@ export function useLinePrefMode(
 ): [ExplainModeChoice, (mode: ExplainModeChoice) => void] {
   const [mode, setMode] = useState<ExplainModeChoice>(() => readMode(lineId));
 
-  // Re-sync on lineId change.
-  useEffect(() => {
+  // Re-sync on lineId change. Done during render (not in an effect) per the
+  // "adjusting state when a prop changes" pattern — avoids the extra commit +
+  // cascading render an effect-based reset would cause.
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevLineId, setPrevLineId] = useState(lineId);
+  if (prevLineId !== lineId) {
+    setPrevLineId(lineId);
     setMode(readMode(lineId));
-  }, [lineId]);
+  }
 
   const set = useCallback(
     (next: ExplainModeChoice): void => {

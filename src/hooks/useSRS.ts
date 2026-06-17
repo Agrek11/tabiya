@@ -40,9 +40,32 @@ export function useSRS(): UseSrsReturn {
     }
   }, []);
 
+  // Initial load. `loading` already starts true, so we do NOT call the
+  // synchronous setLoading(true) inside `refresh` here — that would be a
+  // setState-in-effect cascade. We fetch directly and commit only in the async
+  // continuation, guarded by a cancelled flag (matches OOBWidget/AISection).
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    let cancelled = false;
+    void getSrsRepository()
+      .listAllStates()
+      .then((all) => {
+        if (cancelled) return;
+        const map = new Map<string, SrsState>();
+        for (const s of all) map.set(s.line_id, s);
+        setStates(map);
+        setError(null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err : new Error(String(err)));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const dueLineIds = useMemo(() => {
     const now = new Date();
