@@ -1,27 +1,582 @@
 {
   "fen_hash_algo": "sha1-16",
   "fen_normalization": "drop-counters",
-  "generated_at": "2026-06-11T17:02:21Z",
+  "generated_at": "2026-06-17T05:02:32Z",
   "index": {
+    "007b76ccedfd2afb": [
+      "italian-evans-gambit-main",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4"
+    ],
+    "0628afa8e797e739": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "067054860fec698c": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main"
+    ],
+    "08ec42b99437c094": [
+      "caro-kann-classical-main",
+      "caro-kann-karpov"
+    ],
+    "0e2a195225c3b8f4": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "0f937cdeff620279": [
+      "grunfeld-exchange-main",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main"
+    ],
+    "153c25e45c7bea35": [
+      "catalan-open-main",
+      "grunfeld-exchange-main",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main",
+      "london-anti-kid-main",
+      "nimzo-rubinstein-main",
+      "queens-indian-petrosian-main"
+    ],
+    "15901f6a8a887f37": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "1c8c7e0cb29ec869": [
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "1c99a876717526c1": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "21ce9bb9e5022ab3": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "2520780703681a7e": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "25b0e8fc6e1607df": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "273946ead41d12ef": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "2889b92385259495": [
+      "caro-kann-advance-main",
+      "caro-kann-classical-main",
+      "caro-kann-exchange-main",
+      "caro-kann-karpov"
+    ],
     "2ae4d5322abb0348": [
-      "italian-game-main",
-      "ruy-lopez-main"
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main",
+      "scotch-classical-main",
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "2f9f8b53eae60451": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "377ffa70abec5557": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "3b8888a554d506fb": [
+      "caro-kann-classical-main",
+      "caro-kann-karpov"
+    ],
+    "3cb03dd9a527f8bb": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main"
+    ],
+    "3e871433cc3db63e": [
+      "caro-kann-advance-main",
+      "caro-kann-classical-main",
+      "caro-kann-exchange-main",
+      "caro-kann-karpov"
     ],
     "4146b57281efa85e": [
-      "italian-game-main",
-      "ruy-lopez-main"
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main",
+      "scotch-classical-main",
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main",
+      "vienna-gambit-main"
+    ],
+    "4364bc625e2b97a4": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "49f76dab730d6c40": [
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "4cd6629c2772c495": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "4f0940031780160f": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "4f595a521d1f7bef": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "509a99ddb3336850": [
+      "catalan-open-main",
+      "nimzo-rubinstein-main",
+      "queens-indian-petrosian-main"
+    ],
+    "521d807040a2d4bc": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern"
+    ],
+    "549cc6955a74c76e": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn",
+      "sicilian-sveshnikov-main"
+    ],
+    "54a6fccecf2f2399": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main"
+    ],
+    "5ab8c18ef0474107": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "603d3abff4d955ea": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "604deb630498e859": [
+      "catalan-open-main",
+      "grunfeld-exchange-main",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main",
+      "nimzo-rubinstein-main",
+      "queens-indian-petrosian-main"
+    ],
+    "618d5201b089c033": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "64e02cae36f8f681": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main"
     ],
     "66be37feb35e7d6a": [
-      "italian-game-main",
-      "ruy-lopez-main"
+      "alekhine-modern-main",
+      "caro-kann-advance-main",
+      "caro-kann-classical-main",
+      "caro-kann-exchange-main",
+      "caro-kann-karpov",
+      "catalan-open-main",
+      "dutch-stonewall-main",
+      "english-symmetrical-main",
+      "french-advance-main",
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional",
+      "grunfeld-exchange-main",
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main",
+      "kia-main-line",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main",
+      "london-anti-kid-main",
+      "london-jobava-main",
+      "london-modern-main",
+      "nimzo-rubinstein-main",
+      "pirc-classical-main",
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main",
+      "queens-indian-petrosian-main",
+      "scandinavian-qa5-main",
+      "scotch-classical-main",
+      "semi-slav-meran-main",
+      "sicilian-alapin-main",
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn",
+      "sicilian-sveshnikov-main",
+      "slav-main-line",
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main",
+      "vienna-gambit-main"
+    ],
+    "66f9d0088e8c55b0": [
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "6892444f42df9c9b": [
+      "spanish-berlin-anti",
+      "spanish-berlin-main"
+    ],
+    "6f6a02f904b1263d": [
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "71f5a21fee1b7ed8": [
+      "sicilian-alapin-main",
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn",
+      "sicilian-sveshnikov-main"
+    ],
+    "74d3c6f40257d02f": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "75cec5e91863ed8c": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "7887cb4b7242ecd5": [
+      "french-advance-main",
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "78e1f7309da2fe0e": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "7b1615cfb9c6b676": [
+      "caro-kann-advance-main",
+      "caro-kann-classical-main",
+      "caro-kann-exchange-main",
+      "caro-kann-karpov"
+    ],
+    "7b54af3e4c7fe9c7": [
+      "catalan-open-main",
+      "dutch-stonewall-main",
+      "grunfeld-exchange-main",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main",
+      "london-anti-kid-main",
+      "london-jobava-main",
+      "london-modern-main",
+      "nimzo-rubinstein-main",
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main",
+      "queens-indian-petrosian-main",
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "7f6a3230f42010d8": [
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "811487733903745b": [
+      "italian-fried-liver",
+      "italian-two-knights-main"
+    ],
+    "879f7caac8749b7e": [
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main",
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "8ff4b996f0ece66f": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "9030d66d7eed40ac": [
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "9853fac2369c2ea2": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "99b6b922c3f30e5b": [
+      "caro-kann-classical-main",
+      "caro-kann-karpov"
     ],
     "9d7e79c348ea1b8d": [
-      "italian-game-main",
-      "ruy-lopez-main"
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main",
+      "scotch-classical-main",
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "a3d498e65a5388bf": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "aed078426e50d969": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "af0a0552a8753821": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "b0882b2517747d1c": [
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "b473c5034570dd07": [
+      "italian-fried-liver",
+      "italian-two-knights-main"
+    ],
+    "bbdf3a0d2ae4fea6": [
+      "italian-fried-liver",
+      "italian-two-knights-main"
+    ],
+    "bc8f8469f3dee937": [
+      "french-advance-main",
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "c198a6c6aaa62876": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "c615f68610ab695a": [
+      "italian-fried-liver",
+      "italian-two-knights-main"
+    ],
+    "c73eeb903927b538": [
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main"
+    ],
+    "c741c4a34a517bea": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "c7ceaf96017eb054": [
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav"
+    ],
+    "cea00d4440428c8c": [
+      "grunfeld-exchange-main",
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main"
+    ],
+    "cee00dc74c26dc6a": [
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "d36c4e4cae5484da": [
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main"
+    ],
+    "d6fefd8aa198d538": [
+      "london-jobava-main",
+      "london-modern-main",
+      "qgd-exchange-main",
+      "qgd-orthodox-main",
+      "qgd-orthodox-modern",
+      "qgd-tartakower-main",
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "d7a1787f88285244": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "e3c3da23375de217": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main"
+    ],
+    "e3f56b00d5ee2678": [
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn"
+    ],
+    "e52cb9e1054e87a0": [
+      "semi-slav-meran-main",
+      "slav-main-line"
+    ],
+    "e5a0b8f0807dae17": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
     ],
     "e62700d17daea9b3": [
-      "italian-game-main",
-      "ruy-lopez-main"
+      "alekhine-modern-main",
+      "caro-kann-advance-main",
+      "caro-kann-classical-main",
+      "caro-kann-exchange-main",
+      "caro-kann-karpov",
+      "french-advance-main",
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional",
+      "italian-evans-gambit-main",
+      "italian-fried-liver",
+      "italian-giuoco-pianissimo-main",
+      "italian-modern-d4",
+      "italian-two-knights-main",
+      "pirc-classical-main",
+      "scandinavian-qa5-main",
+      "scotch-classical-main",
+      "sicilian-alapin-main",
+      "sicilian-dragon-classical",
+      "sicilian-dragon-yugoslav",
+      "sicilian-najdorf-classical",
+      "sicilian-najdorf-english-attack",
+      "sicilian-najdorf-poisoned-pawn",
+      "sicilian-sveshnikov-main",
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main",
+      "vienna-gambit-main"
+    ],
+    "e8999a30fcd36150": [
+      "kid-bayonet",
+      "kid-mar-del-plata-main"
+    ],
+    "ea9b844e22c8bd78": [
+      "french-advance-main",
+      "french-classical-main",
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "f25adc19d7a414fd": [
+      "spanish-berlin-anti",
+      "spanish-berlin-main",
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "f7658a07dc899dd6": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "f8e185de6c348477": [
+      "french-winawer-main",
+      "french-winawer-positional"
+    ],
+    "fbb1581c97b376cd": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main",
+      "spanish-marshall-anti-a4",
+      "spanish-marshall-main"
+    ],
+    "fcc079736170d4ea": [
+      "spanish-closed-chigorin",
+      "spanish-closed-main"
+    ],
+    "ff8e816f40eee633": [
+      "kid-bayonet",
+      "kid-fianchetto-main",
+      "kid-mar-del-plata-main",
+      "kid-saemisch-main"
     ]
   },
   "schema_version": 1
