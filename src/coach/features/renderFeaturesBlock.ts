@@ -135,9 +135,20 @@ function geometryLines(t: PositionFeatures['tactics_geometry']): string[] {
   return out;
 }
 
+/** 4c.2 — center type + named structures as a leading frame line. */
+function classificationLines(c: PositionFeatures['classification']): string[] {
+  if (!c) return [];
+  const out: string[] = [];
+  const center = `${c.center.type} center`;
+  const struct = c.structures.length ? `; ${c.structures.join(', ')}` : '';
+  out.push(`${center}${struct}`);
+  return out;
+}
+
 /** Full features block. Returns '' when nothing notable (caller may skip). */
 export function renderFeaturesBlock(f: PositionFeatures): string {
   const sections: Array<[string, string[]]> = [
+    ['Position type', classificationLines(f.classification)],
     ['Material', f.material.imbalance !== 'none' ? [`imbalance: ${f.material.imbalance}`] : []],
     ['Pawns', pawnLines(f.pawns)],
     ['King safety', bothSides(f.king_safety, kingLine)],

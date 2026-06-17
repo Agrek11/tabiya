@@ -149,6 +149,23 @@ export interface MotifFeatures {
   hanging: HangingMotif[];
 }
 
+// --- 4c.2 position classification ------------------------------------------
+
+export type CenterType = 'open' | 'closed' | 'fixed' | 'tension' | 'fluid';
+
+export interface CenterClassification {
+  type: CenterType;
+  open_files_central: string[];
+  space_edge: Side | null;
+}
+
+export interface ClassificationFeatures {
+  center: CenterClassification;
+  /** Named pawn structures, exact-match only (may be empty). */
+  structures: string[];
+  character: 'open-tactical' | 'closed-maneuvering' | 'balanced' | 'sharp-imbalanced';
+}
+
 export interface PositionFeatures {
   version: number;
   material: MaterialFeatures;
@@ -160,6 +177,8 @@ export interface PositionFeatures {
   tactics_geometry: TacticsGeometryFeatures;
   /** 4c.1 — validated, named motifs (optional: absent on pre-v4 sidecars). */
   motifs?: MotifFeatures;
+  /** 4c.2 — center type + named structures (optional: absent pre-v5). */
+  classification?: ClassificationFeatures;
 }
 
 export interface FeaturesSidecar {

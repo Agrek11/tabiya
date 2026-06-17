@@ -87,6 +87,29 @@ describe('renderFeaturesBlock', () => {
     expect(renderFeaturesBlock(f)).toContain('absolute pin: Bg5 pins Nf6 to Kd8');
   });
 
+  it('leads with the 4c.2 position type (center + named structures)', () => {
+    const f = base();
+    f.classification = {
+      center: { type: 'fixed', open_files_central: [], space_edge: 'white' },
+      structures: ['isolated-queens-pawn'],
+      character: 'closed-maneuvering',
+    };
+    const block = renderFeaturesBlock(f);
+    expect(block).toContain('Position type: fixed center; isolated-queens-pawn');
+    // Comes first so the narrator frames the position before details.
+    expect(block.startsWith('Position type:')).toBe(true);
+  });
+
+  it('renders center type alone when no named structure matches', () => {
+    const f = base();
+    f.classification = {
+      center: { type: 'open', open_files_central: ['d', 'e'], space_edge: null },
+      structures: [],
+      character: 'open-tactical',
+    };
+    expect(renderFeaturesBlock(f)).toContain('Position type: open center');
+  });
+
   it('prefers validated 4c.1 motifs over raw geometry and hedges speculative ones', () => {
     const f = base();
     // Raw geometry present...

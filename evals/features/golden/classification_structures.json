@@ -1,0 +1,15 @@
+{
+  "feature": "classification.structures",
+  "positions": [
+    { "name": "isolated queen's pawn (white d4 isolated)", "fen": "rnbqkbnr/pp3ppp/4p3/8/3P4/8/PP3PPP/RNBQKBNR w KQkq - 0 6",
+      "expected": ["isolated-queens-pawn"] },
+    { "name": "stonewall white wall c3/d4/e3/f4", "fen": "4k3/8/8/8/3P1P2/2P1P3/8/4K3 w - - 0 1",
+      "expected": ["stonewall-white"] },
+    { "name": "maroczy bind white c4+e4, no d-pawn; (black d6 is also an IQP)", "fen": "4k3/pp3ppp/3p4/8/2P1P3/8/PP3PPP/4K3 w - - 0 1",
+      "expected": ["isolated-queens-pawn", "maroczy-bind-white"] },
+    { "name": "true symmetry: start position mirrors", "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+      "expected": ["symmetric"] },
+    { "name": "no named structure in a plain developed position", "fen": "r1bqk2r/pp2bppp/2n1pn2/8/3N4/2N1B3/PPP2PPP/R2QKB1R w KQkq - 0 8",
+      "expected": [] }
+  ]
+}

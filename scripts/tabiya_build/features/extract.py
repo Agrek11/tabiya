@@ -14,6 +14,7 @@ import chess
 
 from .activity import activity
 from .center_space import center_space
+from .classification import classification
 from .files_diagonals import files_diagonals
 from .king_safety import king_safety
 from .material import material
@@ -21,7 +22,7 @@ from .motifs import motifs
 from .pawns import pawn_structure
 from .tactics_geometry import tactics_geometry
 
-EXTRACTOR_VERSION = 4  # v4: 4c.1 validated `motifs` group
+EXTRACTOR_VERSION = 5  # v5: 4c.2 `classification` group (center type + structures)
 
 
 def extract_features(board: chess.Board) -> dict[str, Any]:
@@ -35,4 +36,5 @@ def extract_features(board: chess.Board) -> dict[str, Any]:
         "activity": activity(board),
         "tactics_geometry": tactics_geometry(board),
         "motifs": motifs(board),
+        "classification": classification(board),
     }
