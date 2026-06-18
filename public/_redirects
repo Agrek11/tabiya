@@ -1,0 +1,4 @@
+# SPA fallback for react-router BrowserRouter — deep links (/drill,
+# /lichess/oob/:id/:ply, /settings) must serve index.html on hard refresh.
+# 200 = rewrite (not redirect) so the URL is preserved for the client router.
+/*  /index.html  200
