@@ -4,25 +4,50 @@
  * Renders per-route navigation content. Route resolution = first matching
  * prefix in PAGE_SIDEBAR_CONTENT, falling back to "/" (home).
  *
- * Source of truth: specs/wireframes/tabiya-v1-preview.html `SIDEBAR_CONTENT`
- * mapping. Item copy is hardcoded to match the preview verbatim. Wiring item
- * onClick to real filters/views is a follow-up — for now items are visual
- * placeholders. Active state is currently static-per-section ("first item")
- * to mirror the preview; a future pass will key off URL state (e.g. ?view=).
- *
- * "Current Weakness" card text is hardcoded placeholder copy. Wire from
- * Phase 1.5 events in a follow-up.
+ * Items are a static navigational index per route — plain, non-interactive
+ * labels (no onClick wired yet, so they render with a default cursor, not a
+ * pointer). No fabricated stats and no fictional "Current Weakness" card: the
+ * only data-backed entry is the home "Due Drills" badge. Wiring items to real
+ * filters/views (e.g. ?view=) is a follow-up.
  */
 
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/tokens';
 import { useSRS } from '../../hooks/useSRS';
+import { getRepository } from '../../storage';
+import type { Family, FamilyCategory } from '../../storage/types';
+
+// Consolidated category buckets for the Repertoire sidebar — far fewer entries
+// than the 30 raw families. Gambits get their own bucket; families with no
+// known category fall under "Others". Search handles precise per-opening jumps.
+const CATEGORY_ORDER: FamilyCategory[] = [
+  'open',
+  'semi-open',
+  'closed',
+  'indian',
+  'flank',
+  'gambit',
+  'uncategorized',
+];
+const CATEGORY_SIDEBAR_LABELS: Record<FamilyCategory, string> = {
+  open: 'Open Games',
+  'semi-open': 'Semi-Open',
+  closed: 'Closed',
+  indian: 'Indian',
+  flank: 'Flank',
+  gambit: 'Gambits',
+  uncategorized: 'Others',
+};
 
 type Item = {
   label: string;
   badge?: string | number;
-  active?: boolean;
+  /** Scrolls to this element id on the current page. */
+  anchor?: string;
+  /** Navigates to this route (query params honored by the target page). */
+  to?: string;
 };
 
 type Section = {
@@ -32,7 +57,6 @@ type Section = {
 
 type PageDef = {
   sections: Section[];
-  weakness?: string; // shows the Current Weakness card with this copy
 };
 
 /**
@@ -40,84 +64,22 @@ type PageDef = {
  * first match. Always include "/" last as fallback.
  */
 function buildDefs(dueCount: number): Record<string, PageDef> {
+  // Every item does something real: `to` navigates (query params honored by the
+  // target page's filters), `anchor` scrolls to a section on the current page.
+  // No fabricated stats, no fictional weakness cards.
   return {
-    '/repertoire': {
-      sections: [
-        {
-          title: 'Families',
-          items: [
-            { label: 'Open Games', active: true },
-            { label: 'Sicilian' },
-            { label: 'French' },
-            { label: 'Caro-Kann' },
-            { label: 'Indian' },
-          ],
-        },
-      ],
-      weakness: 'Kingside attacks against Sicilian structures.',
-    },
     '/drill': {
       sections: [
         {
-          title: 'Opening Families',
+          title: 'Jump to',
           items: [
-            { label: 'Open Games', active: true },
-            { label: 'Sicilian Defense' },
-            { label: 'French Defense' },
-            { label: 'Caro-Kann' },
-            { label: 'Indian Defenses' },
+            { label: 'Due queue', badge: dueCount, to: '/drill?queue=due' },
+            { label: 'Spanish', to: '/drill?family=spanish' },
+            { label: 'Italian', to: '/drill?family=italian' },
+            { label: 'Sicilian', to: '/drill?family=sicilian' },
+            { label: 'French', to: '/drill?family=french' },
+            { label: 'Caro-Kann', to: '/drill?family=caro-kann' },
           ],
-        },
-        {
-          title: 'Quick Filters',
-          items: [
-            { label: 'Due Today' },
-            { label: 'Weak Lines' },
-            { label: 'Recently Missed' },
-            { label: 'Mastered' },
-          ],
-        },
-      ],
-      weakness: 'Kingside pawn storms in Sicilian structures.',
-    },
-    '/insights': {
-      sections: [
-        {
-          title: 'View',
-          items: [
-            { label: 'Overview', active: true },
-            { label: 'By Opening' },
-            { label: 'Recurring Mistakes' },
-            { label: 'Time of Day' },
-          ],
-        },
-      ],
-    },
-    '/games': {
-      sections: [
-        {
-          title: 'Sources',
-          items: [
-            { label: 'All Platforms', active: true },
-            { label: 'Lichess only' },
-            { label: 'Chess.com only' },
-          ],
-        },
-        {
-          title: 'Lens',
-          items: [
-            { label: 'Recent' },
-            { label: 'Out of Book' },
-            { label: 'Losses' },
-          ],
-        },
-      ],
-    },
-    '/coach': {
-      sections: [
-        {
-          title: 'Sessions',
-          items: [{ label: 'No chats yet', active: true }],
         },
       ],
     },
@@ -126,52 +88,87 @@ function buildDefs(dueCount: number): Record<string, PageDef> {
         {
           title: 'Sections',
           items: [
-            { label: 'Appearance', active: true },
-            { label: 'Sound' },
-            { label: 'Repertoire Preset' },
-            { label: 'Danger Zone' },
-            { label: 'About' },
+            { label: 'Appearance', anchor: 'settings-appearance' },
+            { label: 'Sound', anchor: 'settings-sound' },
+            { label: 'Engine', anchor: 'settings-engine' },
+            { label: 'AI Coach', anchor: 'settings-ai' },
+            { label: 'Lichess', anchor: 'settings-lichess' },
+            { label: 'Chess.com', anchor: 'settings-chesscom' },
+            { label: 'Repertoire Preset', anchor: 'settings-preset' },
+            { label: 'Danger Zone', anchor: 'settings-danger' },
           ],
         },
       ],
-    },
-    '/': {
-      sections: [
-        {
-          title: 'Today',
-          items: [
-            {
-              label: `${dueCount} Due Drills`,
-              badge: dueCount,
-              active: true,
-            },
-            { label: '2 Weak Lines' },
-            { label: '82% Retention' },
-          ],
-        },
-      ],
-      weakness: 'Kingside attacks against Sicilian structures.',
     },
   };
 }
 
-function routeFor(pathname: string, defs: Record<string, PageDef>): PageDef {
-  // Longest-prefix match, but explicit list (drill before repertoire etc.).
-  const orderedKeys = ['/repertoire', '/drill', '/insights', '/games', '/coach', '/settings'];
+// Repertoire filter is catalog-driven + consolidated into categories (only the
+// categories actually present in the repertoire are shown). Each seeds the
+// page's ?category filter; "All openings" clears it.
+function buildRepertoireDef(families: Family[]): PageDef {
+  const present = new Set(families.map((f) => f.category));
+  const cats = CATEGORY_ORDER.filter((c) => present.has(c));
+  return {
+    sections: [
+      {
+        title: 'Filter by category',
+        items: [
+          { label: 'All openings', to: '/repertoire' },
+          ...cats.map((c) => ({
+            label: CATEGORY_SIDEBAR_LABELS[c],
+            to: `/repertoire?category=${c}`,
+          })),
+        ],
+      },
+    ],
+  };
+}
+
+// Sidebar shows ONLY where it navigates/filters: Repertoire (family filter),
+// Drill (family/queue jumps), Settings (section anchors). Single-screen pages
+// (Home, Insights, Games, Coach) get no sidebar — `routeFor` returns null and
+// the aside is not rendered, so `main` takes the full width.
+function routeFor(pathname: string, defs: Record<string, PageDef>): PageDef | null {
+  const orderedKeys = ['/drill', '/settings'];
   for (const key of orderedKeys) {
     const def = defs[key];
     if (def && (pathname === key || pathname.startsWith(key + '/'))) {
       return def;
     }
   }
-  return defs['/']!;
+  return null;
 }
 
 export function PageSidebar() {
   const t = useTokens();
   const location = useLocation();
   const { dueLineIds } = useSRS();
-  const def = routeFor(location.pathname, buildDefs(dueLineIds.length));
+  const [families, setFamilies] = useState<Family[]>([]);
+
+  const onRepertoire =
+    location.pathname === '/repertoire' || location.pathname.startsWith('/repertoire/');
+
+  // Load the catalog's families once (drives the Repertoire family filter).
+  useEffect(() => {
+    let cancelled = false;
+    void getRepository()
+      .listFamilies()
+      .then((f) => {
+        if (!cancelled) setFamilies(f);
+      })
+      .catch(() => {
+        /* sidebar filter degrades to empty — search still works */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const def = onRepertoire
+    ? buildRepertoireDef(families)
+    : routeFor(location.pathname, buildDefs(dueLineIds.length));
+  if (!def) return null;
 
   return (
     <aside
@@ -206,62 +203,63 @@ export function PageSidebar() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {section.items.map((item) => (
-              <SidebarItem key={item.label} item={item} />
+              <SidebarItem
+                key={item.label}
+                item={item}
+                active={item.to !== undefined && location.pathname + location.search === item.to}
+              />
             ))}
           </div>
         </div>
       ))}
-
-      {def.weakness && (
-        <div
-          style={{
-            marginTop: 'auto',
-            background: t.brandSoft,
-            border: `0.5px solid ${t.brandSoftBorder}`,
-            borderRadius: 14,
-            padding: 14,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 10,
-              textTransform: 'uppercase',
-              letterSpacing: '0.18em',
-              color: t.brand,
-              fontWeight: 600,
-              marginBottom: 7,
-            }}
-          >
-            Current Weakness
-          </div>
-          <p style={{ fontSize: 12, color: t.ink, lineHeight: 1.55, margin: 0 }}>
-            {def.weakness}
-          </p>
-        </div>
-      )}
     </aside>
   );
 }
 
-function SidebarItem({ item }: { item: Item }) {
+function SidebarItem({ item, active }: { item: Item; active: boolean }) {
   const t = useTokens();
-  const active = !!item.active;
+  const navigate = useNavigate();
+  const [hovered, setHovered] = useState(false);
+  const clickable = item.anchor !== undefined || item.to !== undefined;
+  const activate = (): void => {
+    if (item.to !== undefined) {
+      navigate(item.to);
+    } else if (item.anchor !== undefined) {
+      document.getElementById(item.anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+  const hoverHi = hovered && clickable && !active;
   return (
     <div
+      role={clickable ? 'button' : undefined}
+      tabIndex={clickable ? 0 : undefined}
+      onClick={clickable ? activate : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onKeyDown={
+        clickable
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                activate();
+              }
+            }
+          : undefined
+      }
       style={{
-        background: active ? t.brandSoft : 'transparent',
+        background: active ? t.brandSoft : hoverHi ? t.surfaceAlt : 'transparent',
         border: `0.5px solid ${active ? t.brandSoftBorder : 'transparent'}`,
-        color: active ? t.brand : t.ink,
+        color: active || hoverHi ? t.brand : t.ink,
         padding: '9px 12px',
         borderRadius: 11,
         fontSize: 12.5,
         fontWeight: active ? 600 : 500,
-        cursor: 'pointer',
+        cursor: clickable ? 'pointer' : 'default',
         textAlign: 'left',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        transition: 'all 150ms ease',
+        transition: 'background 120ms ease, color 120ms ease',
       }}
     >
       <span>{item.label}</span>

@@ -77,7 +77,9 @@ export function SettingsPage() {
     setResetMessage('All SRS progress cleared.');
   };
 
-  const sectionStyle: React.CSSProperties = { marginBottom: 18 };
+  // scrollMarginTop clears the sticky 68px TopBar when a sidebar anchor scrolls
+  // a section into view (otherwise its heading hides behind the bar).
+  const sectionStyle: React.CSSProperties = { marginBottom: 18, scrollMarginTop: 84 };
 
   return (
     <PageBody>
@@ -87,7 +89,7 @@ export function SettingsPage() {
       />
 
       {/* APPEARANCE */}
-      <div style={sectionStyle}>
+      <div id="settings-appearance" style={sectionStyle}>
         <Card>
           <CardTitle>Appearance</CardTitle>
 
@@ -211,7 +213,7 @@ export function SettingsPage() {
       </div>
 
       {/* SOUND */}
-      <div style={sectionStyle}>
+      <div id="settings-sound" style={sectionStyle}>
         <Card>
           <CardTitle>Sound</CardTitle>
           <SettingsRow
@@ -293,7 +295,7 @@ export function SettingsPage() {
       </div>
 
       {/* REPERTOIRE PRESET */}
-      <div style={sectionStyle}>
+      <div id="settings-preset" style={sectionStyle}>
         <Card>
           <CardTitle>Repertoire Preset</CardTitle>
           <div
@@ -329,18 +331,18 @@ export function SettingsPage() {
       </div>
 
       {/* ENGINE + AI COACH (Phase 4a) */}
-      <div style={sectionStyle}>
+      <div id="settings-engine" style={sectionStyle}>
         <EngineSection />
       </div>
-      <div style={sectionStyle}>
+      <div id="settings-ai" style={sectionStyle}>
         <AISection />
       </div>
 
       {/* GAME SYNC (Phase 3): Lichess + chess.com */}
-      <div style={sectionStyle}>
+      <div id="settings-lichess" style={sectionStyle}>
         <LichessSection />
       </div>
-      <div style={sectionStyle}>
+      <div id="settings-chesscom" style={sectionStyle}>
         <ChessComSection />
       </div>
 
@@ -350,7 +352,7 @@ export function SettingsPage() {
       </div>
 
       {/* DANGER ZONE */}
-      <div style={sectionStyle}>
+      <div id="settings-danger" style={sectionStyle}>
         <Card style={{ border: `0.5px solid ${t.red}` }}>
           <div
             style={{

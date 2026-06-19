@@ -241,8 +241,8 @@ function DashboardBody() {
         <OOBWidget />
       </div>
 
-      {/* Secondary row ×3 — static v1 placeholders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
+      {/* Secondary row ×2 — static v1 placeholders */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
         <Card>
           <CardTitle>Current Focus</CardTitle>
           <div style={{ fontSize: 13, color: t.ink, lineHeight: 1.65, fontFamily: fonts.sans }}>
@@ -256,14 +256,6 @@ function DashboardBody() {
             {/* Wire in Phase 3/4 — feeds from detected pattern analysis */}
             Connect a game source under Games to detect recurring structural weaknesses.
           </Insight>
-        </Card>
-        <Card>
-          <CardTitle>Quick Actions</CardTitle>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
-            <QuickAction to={drillHref} label="Drill due" />
-            <QuickAction to="/repertoire" label="Browse" />
-            <QuickAction to="/insights" label="Insights" />
-          </div>
         </Card>
       </div>
     </PageBody>
@@ -314,25 +306,3 @@ function KpiCard({
   );
 }
 
-function QuickAction({ to, label }: { to: string; label: string }) {
-  const t = useTokens();
-  return (
-    <Link
-      to={to}
-      style={{
-        padding: '7px 12px',
-        background: t.surfaceAlt,
-        border: `0.5px solid ${t.border}`,
-        borderRadius: 10,
-        fontSize: 12,
-        color: t.ink,
-        fontWeight: 500,
-        fontFamily: fonts.sans,
-        textDecoration: 'none',
-        cursor: 'pointer',
-      }}
-    >
-      {label}
-    </Link>
-  );
-}

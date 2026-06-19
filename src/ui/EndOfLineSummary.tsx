@@ -71,13 +71,7 @@ export function EndOfLineSummary({
           <Stat
             label="Wrong"
             value={String(drillResult.wrong_attempts)}
-            accent={
-              drillResult.wrong_attempts === 0
-                ? t.success
-                : drillResult.wrong_attempts >= 3
-                  ? t.red
-                  : undefined
-            }
+            accent={drillResult.wrong_attempts === 0 ? t.success : t.red}
           />
           <Stat label="Hints" value={String(drillResult.hint_uses)} />
           <Stat label="Time" value={`${seconds}s`} />

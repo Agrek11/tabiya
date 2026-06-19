@@ -88,6 +88,18 @@ export function OOBPositionViewerPage() {
     .map((san) => ({ san, sq: squaresOf(event.fenAtOOB, san) }))
     .filter((x): x is { san: string; sq: { from: string; to: string } } => x.sq !== null);
 
+  // ply is 0-based half-move; a full move number is more intuitive for users.
+  const moveNumber = Math.floor(event.plyIndex / 2) + 1;
+
+  // Native react-chessboard arrows (lichess-style): red = move played,
+  // green = book move (first expected).
+  const arrows: { startSquare: string; endSquare: string; color: string }[] = [];
+  if (played) arrows.push({ startSquare: played.from, endSquare: played.to, color: '#c0392b' });
+  const firstExpected = expected[0];
+  if (firstExpected) {
+    arrows.push({ startSquare: firstExpected.sq.from, endSquare: firstExpected.sq.to, color: '#15803d' });
+  }
+
   // Article 15 — highlights ride the shared squareStyles surface.
   const squareStyles: Record<string, React.CSSProperties> = {};
   for (const { sq } of expected) {
@@ -108,6 +120,7 @@ export function OOBPositionViewerPage() {
             flashOverlay={null}
             boardOrientation={event.color}
             squareStyles={squareStyles}
+            arrows={arrows}
             onPieceDrop={() => false}
           />
         </div>
@@ -127,21 +140,26 @@ export function OOBPositionViewerPage() {
                 {new Date(game.createdAt).toLocaleDateString()} · {game.result}
               </div>
             ) : null}
-            <div>
-              You played:{' '}
-              <b style={{ fontFamily: fonts.mono, color: t.red }}>{event.playedSAN}</b>
+            <div style={{ fontWeight: 600, marginBottom: 6 }}>
+              Left book at move {moveNumber}
             </div>
             <div>
-              Expected:{' '}
+              You played:{' '}
+              <b style={{ fontFamily: fonts.mono, color: t.red }}>{event.playedSAN}</b>{' '}
+              <span style={{ color: t.inkSoft }}>(red arrow)</span>
+            </div>
+            <div>
+              Book move:{' '}
               <b style={{ fontFamily: fonts.mono, color: t.success }}>
                 {event.expectedSANs.join(', ')}
-              </b>
+              </b>{' '}
+              <span style={{ color: t.inkSoft }}>(green arrow)</span>
             </div>
             <div style={{ marginTop: 10, fontSize: 12.5 }}>
               Line:{' '}
               {event.lineId && lineName !== '(line removed)' ? (
-                <Link to="/repertoire" style={{ color: t.brand }}>
-                  {lineName}
+                <Link to={`/drill?line=${event.lineId}`} style={{ color: t.brand, fontWeight: 600 }}>
+                  Drill {lineName} →
                 </Link>
               ) : (
                 <span style={{ color: t.inkSoft }}>{lineName ?? '—'}</span>

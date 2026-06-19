@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/tokens';
 import { Card } from '../../ui/primitives/Card';
@@ -34,6 +35,7 @@ export function OOBWidget() {
   const [rows, setRows] = useState<Row[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const refresh = (): void => setConnected(anySourceConnected());
@@ -95,8 +97,44 @@ export function OOBWidget() {
 
   return (
     <Card>
-      <CardTitle>Out-of-book moments</CardTitle>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
+          cursor: 'pointer',
+          color: t.ink,
+          fontFamily: fonts.sans,
+        }}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>Out-of-book moments</span>
+          <span
+            style={{
+              fontSize: 11,
+              fontWeight: 600,
+              color: t.brand,
+              background: t.brandSoft,
+              borderRadius: 999,
+              padding: '1px 8px',
+            }}
+          >
+            {rows.length}
+            {hasMore ? '+' : ''}
+          </span>
+        </span>
+        {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {expanded ? (
+      <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 12 }}>
         {rows.map((r) => (
           <button
             key={`${r.gameId}:${r.plyIndex}`}
@@ -125,8 +163,8 @@ export function OOBWidget() {
             <span style={{ color: t.inkSoft, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
               {r.openingName ?? '—'}
             </span>
-            <span style={{ fontFamily: fonts.mono, fontSize: 12, flexShrink: 0 }}>
-              ply {r.plyIndex + 1}: played <b>{r.playedSAN}</b>, expected {formatExpected(r.expectedSANs)}
+            <span style={{ fontSize: 12, flexShrink: 0, color: t.inkDim }}>
+              out by move <b style={{ color: t.ink }}>{Math.floor(r.plyIndex / 2) + 1}</b>
             </span>
           </button>
         ))}
@@ -135,6 +173,8 @@ export function OOBWidget() {
         <button onClick={() => void onLoadMore()} style={loadMoreStyle(t)}>
           Load more
         </button>
+      ) : null}
+      </>
       ) : null}
     </Card>
   );
@@ -163,11 +203,6 @@ function toRow(e: OOBEvent, game: LichessGame | null): Row {
     ? new Date(game.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
     : '—';
   return { ...e, opponent, dateLabel, source: game ? gameSource(game) : 'lichess' };
-}
-
-function formatExpected(sans: string[]): string {
-  const shown = sans.slice(0, 2).join(', ');
-  return sans.length > 2 ? `${shown} +${sans.length - 2} more` : shown;
 }
 
 function emptyText(t: ReturnType<typeof useTokens>): React.CSSProperties {

@@ -242,9 +242,9 @@ export function useDrill(
   // -------------------------------------------------------------------------
   const wrongAttemptsRef = useRef(0);
   const hintUsesRef = useRef(0);
-  // Seeded to 0 (not Date.now() — calling it during render is impure). The
-  // mount-time reset effect below stamps the real start time before any drill
-  // move can complete, and resetCounters() re-stamps on every reset.
+  // 0 = "run not started". Stamped lazily on the FIRST player action of a run
+  // (move or step-forward), so the duration measures first-move → completion
+  // and is immune to when reset/restart fires. resetCounters() clears it to 0.
   const startedAtRef = useRef<number>(0);
   const [drillResult, setDrillResult] = useState<DrillResult | null>(null);
 
@@ -254,7 +254,12 @@ export function useDrill(
   const resetCounters = useCallback((): void => {
     wrongAttemptsRef.current = 0;
     hintUsesRef.current = 0;
-    startedAtRef.current = Date.now();
+    startedAtRef.current = 0; // not started — first move stamps the clock
+  }, []);
+
+  /** Stamp the run start on the first player action (idempotent within a run). */
+  const markStartedIfFirst = useCallback((): void => {
+    if (startedAtRef.current === 0) startedAtRef.current = Date.now();
   }, []);
 
   // Clear the emitted result when the active line OR player color changes.
@@ -285,7 +290,7 @@ export function useDrill(
     setDrillResult({
       wrong_attempts: wrongAttemptsRef.current,
       hint_uses: hintUsesRef.current,
-      duration_ms: Date.now() - startedAtRef.current,
+      duration_ms: startedAtRef.current === 0 ? 0 : Date.now() - startedAtRef.current,
       completed_at: new Date().toISOString(),
     });
   }, [state, drillResult]);
@@ -341,6 +346,10 @@ export function useDrill(
     };
 
     const result = compareMove(chess, expectedSan, attempt);
+
+    if (result.kind === 'correct' || result.kind === 'wrong') {
+      markStartedIfFirst();
+    }
 
     if (result.kind === 'correct') {
       chess.move(attempt);
@@ -419,16 +428,21 @@ export function useDrill(
     if (state.kind !== 'awaiting_player') return;
     const san = line[state.lineIndex];
     if (san === undefined) return;
+    markStartedIfFirst();
     chess.move(san);
     playMove();
     dispatch({ type: 'STEP_FORWARD_DONE', newLineIndex: state.lineIndex + 1 });
-  }, [canStepForward, chess, state, line]);
+  }, [canStepForward, chess, state, line, markStartedIfFirst]);
 
   const restart = useCallback((): void => {
     if (!canRestart) return;
     chess.reset();
     dispatch({ type: 'RESET' });
     resetCounters();
+    // Clear the previous run's emitted result — otherwise the completion effect
+    // (guarded on drillResult === null) can't emit fresh stats, so a clean
+    // re-run keeps showing the old wrong-move count.
+    setDrillResult(null);
   }, [canRestart, chess, resetCounters]);
 
   const jumpToPly = useCallback(

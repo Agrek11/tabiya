@@ -33,7 +33,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Inbox, RotateCcw, Search, Swords } from 'lucide-react';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts } from '../theme/tokens';
@@ -90,6 +90,28 @@ function RepertoirePageBody() {
   const [tier, setTier] = useState<'all' | '1' | '2' | '3'>('all');
   const [pickerOpen, setPickerOpen] = useState(false);
   const [resetConfirmFor, setResetConfirmFor] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+
+  // Seed the live search from the sidebar's ?q= family quick-filter. Render-time
+  // adjustment on param change (not an effect); typing afterward stays local
+  // until the next navigation. https://react.dev/learn/you-might-not-need-an-effect
+  const qParam = searchParams.get('q') ?? '';
+  const [prevQParam, setPrevQParam] = useState(qParam);
+  if (prevQParam !== qParam) {
+    setPrevQParam(qParam);
+    setSearch(qParam);
+  }
+
+  // Seed the category chip from the sidebar's ?category= filter (same render-time
+  // pattern). Unknown/absent → 'all'.
+  const catRaw = searchParams.get('category');
+  const catParam: CategoryFilter =
+    catRaw !== null && catRaw in CATEGORY_LABELS ? (catRaw as CategoryFilter) : 'all';
+  const [prevCatParam, setPrevCatParam] = useState(catParam);
+  if (prevCatParam !== catParam) {
+    setPrevCatParam(catParam);
+    setCategory(catParam);
+  }
 
   const { states: srsStates, dueLineIds, refresh: refreshSrs } = useSRS();
   const { effective } = useEffectivePick();

@@ -32,6 +32,8 @@ type ChessBoardPanelProps = {
   darkSquare?: string;
   /** Per-square background overlays (last-move highlight, hint highlight). */
   squareStyles?: Record<string, CSSProperties>;
+  /** Native react-chessboard arrows (lichess-style). */
+  arrows?: { startSquare: string; endSquare: string; color: string }[];
   onPieceDrop: (args: { sourceSquare: string; targetSquare: string }) => boolean;
   /** Click-to-move: square the user clicked first; null if no piece selected. */
   selectedSquare?: string | null;
@@ -109,6 +111,7 @@ export function ChessBoardPanel({
   lightSquare,
   darkSquare,
   squareStyles,
+  arrows,
   onPieceDrop,
   selectedSquare,
   legalDestSquares,
@@ -229,6 +232,7 @@ export function ChessBoardPanel({
           lightSquareStyle: { backgroundColor: lightSq },
           darkSquareStyle: { backgroundColor: darkSq },
           squareStyles: squareStyles ?? {},
+          ...(arrows ? { arrows } : {}),
           squareRenderer,
           ...(onSquareClick ? { onSquareClick } : {}),
           ...(onPieceClick ? { onPieceClick } : {}),

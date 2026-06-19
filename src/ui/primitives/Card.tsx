@@ -9,6 +9,8 @@ type CardProps = PropsWithChildren<{
   padding?: number;
   style?: CSSProperties;
   elevated?: boolean;
+  /** Optional anchor target id (used by the page sidebar's jump-to nav). */
+  id?: string;
 }>;
 
 /**
@@ -18,11 +20,13 @@ type CardProps = PropsWithChildren<{
  * `elevated` swaps the resting shadow to `shadowMd` for cards that float
  * (popovers, summaries).
  */
-export function Card({ children, padding = 20, style, elevated = false }: CardProps) {
+export function Card({ children, padding = 20, style, elevated = false, id }: CardProps) {
   const t = useTokens();
   return (
     <div
+      id={id}
       style={{
+        scrollMarginTop: 16,
         background: t.surface,
         border: `0.5px solid ${t.border}`,
         borderRadius: 18,

@@ -34,7 +34,9 @@ export const BOARD_THEMES: BoardTheme[] = [
   { id: 'slate', label: 'Slate', light: '#E0E0E0', dark: '#5C6873' },
 ];
 
-export const DEFAULT_BOARD_THEME: BoardThemeId = 'auto';
+// Standard tan/brown (Lichess classic) is the default — neutral wood reads as
+// "chess" and lets red/green move arrows stand out (the green board tinted them).
+export const DEFAULT_BOARD_THEME: BoardThemeId = 'lichess-classic';
 
 const KEY = 'tabiya.boardTheme';
 

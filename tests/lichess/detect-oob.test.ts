@@ -131,16 +131,26 @@ describe('detectOOB — golden games', () => {
     });
     expect(withIndex).toBeNull();
 
-    // Graceful degrade (R6 AC4): same game without the index = OOB at ply 0.
+    // Without the index the move-order transposition can't be rescued — but the
+    // divergence is at move 1 (ply 0), now suppressed as noise (MIN_OOB_PLY), so
+    // there is still no event.
     const withoutIndex = await detectOOB({
       game,
       pickedLines: [CARO_WHITE],
       now: () => NOW,
     });
-    expect(withoutIndex).not.toBeNull();
-    expect(withoutIndex!.plyIndex).toBe(0);
-    expect(withoutIndex!.playedSAN).toBe('d4');
-    expect(withoutIndex!.expectedSANs).toEqual(['e4']);
+    expect(withoutIndex).toBeNull();
+  });
+
+  it('6. user diverges at move 1 → suppressed as noise (MIN_OOB_PLY)', async () => {
+    // White prep is the Italian (1.e4) but the user opens 1.d4 — leaving prep at
+    // move 1 is just a different opening choice, not a mid-theory leak.
+    const event = await detectOOB({
+      game: gameOf(['d4', 'd5', 'c4', 'e6']),
+      pickedLines: [ITALIAN],
+      now: () => NOW,
+    });
+    expect(event).toBeNull();
   });
 });
 
@@ -171,13 +181,16 @@ describe('detectOOB — determinism + attribution', () => {
 
   it('grace window expiring still reports the ORIGINAL divergence ply', async () => {
     const index = await sidecarOf([ITALIAN]);
+    // Follows the Italian for two plies, then diverges at ply 2 (Qh5, move 2 so
+    // past MIN_OOB_PLY); no transposition rescues it, the grace window expires,
+    // and the original divergence stands.
     const event = await detectOOB({
-      game: gameOf(['d4', 'd5', 'c4', 'e6', 'Nc3', 'Nf6', 'Bg5', 'Be7']),
+      game: gameOf(['e4', 'e5', 'Qh5', 'Nc6', 'Bc4', 'g6']),
       pickedLines: [ITALIAN],
       transpositionIndex: index,
       now: () => NOW,
     });
-    expect(event!.plyIndex).toBe(0);
-    expect(event!.playedSAN).toBe('d4');
+    expect(event!.plyIndex).toBe(2);
+    expect(event!.playedSAN).toBe('Qh5');
   });
 });

@@ -40,6 +40,7 @@ TIER 1 — the closed loop (ONE shared eval pass over the post-book window):
   5a Ghost Blunders   · 5d Leak Detector · A' Interactive Game Review
 TIER 2 — differentiation:
   B' Opponent Scouting · C Blunder DNA   · D Structure-First Training
+  F  Weakness-Driven Resource Recommendations (consumes C)
 TIER 3 — cheap UX:
   5f-light Silent Coach · 5c Transposition Roulette
 TIER 4 — later / redesign:
@@ -137,6 +138,39 @@ Drill by pawn-structure (4c.2 classification) across openings — "all your IQP
 positions," "all your Carlsbad." Teaches transferable understanding.
 **Lives on a separate "Personal Training" page — it does NOT replace or alter
 the open-drill home, which stays Tabiya's main feature.**
+
+### F — Weakness-Driven Resource Recommendations (consumes C)
+
+Map the user's deterministic weakness tags to targeted study resources — ideally
+the exact chapter/lesson, e.g. "you leak in IQP middlegames → Sadler, *QGD*,
+ch.4"; "Najdorf English Attack OOB → this Chessable course, line 3".
+
+**Hard dependency — DO NOT build before C (Blunder DNA) + 5d (Leak Detector).**
+The recommender is only as good as the weakness signal. Until C/5d produce
+motif/structure tags, the only signal is OOB-frequency-by-opening (shallow — a
+per-opening book list, which is commodity). F consumes C's clustered tags
+(`hangs-to-pins`, `mishandles-IQP`, `weak-dark-squares`, …) and 5d's leaky
+structures. Both are downstream of the runtime extractor.
+
+**Moat (non-negotiable):** the value is the PERSONALIZED tag→resource mapping
+from OUR weakness profile, NOT a generic "popular books per opening" list (that's
+commodity — chess forums already do it). Recommend against a specific detected
+weakness or it adds nothing.
+
+**Data + constitution:**
+- Curated static catalog `scripts/curated/resources.yml` (theme/ECO/structure →
+  `{ title, author, chapter, url, license_note }`), bundled → works offline
+  (Article 11). Live-fetch optional. Ongoing curation burden (quality, link
+  rot, licensing) — same posture as `key_squares/sources.yml`.
+- Mapping is DETERMINISTIC (weakness tag → resource); LLM optional only to
+  phrase *why* a resource fits (Article 4 — never the source of the match).
+
+**Revenue note (business layer, not now):** affiliate links (Chessable /
+Forward Chess / Amazon) are a natural low-friction monetization — less intrusive
+than feature gating; fits the hosted-paywall economics. Flagged, not scoped here.
+
+**Surface:** a "Study next" panel on the weakness/insights surface and/or beside
+a flagged leaky variation (5d) — links out to the mapped resource. Tier 2.
 
 ---
 

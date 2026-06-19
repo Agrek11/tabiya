@@ -1,12 +1,18 @@
 /**
- * GamesPage — chess platform integration surface (Phase 3 PKCE).
+ * GamesPage — chess-platform games surface (Phase 3).
  *
- * Source: specs/wireframes/tabiya-v1-preview.html `data-page="games"`. All
- * values are placeholders until Phase 3 lands Lichess PKCE OAuth and game
- * import. The Sync button shows a "phase pending" toast as a stub.
+ * READ surface over the live sync pipeline: connection status, sync summary,
+ * recent activity, and weakest openings by out-of-book frequency — all from
+ * `LichessRepository` + the OAuth/username state. The actual connect + sync
+ * CONTROLS live in Settings (LichessSection / ChessComSection); this page links
+ * there rather than duplicating the OAuth + cooldown logic.
+ *
+ * No fabricated data: every value derives from synced games / OOB events, with
+ * honest empty states when nothing is connected or synced yet.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts } from '../theme/tokens';
 import { PageBody } from '../ui/primitives/PageBody';
@@ -14,96 +20,199 @@ import { PageHeader } from '../ui/primitives/PageHeader';
 import { Card } from '../ui/primitives/Card';
 import { CardTitle } from '../ui/primitives/CardTitle';
 import { Insight, InsightStack } from '../ui/primitives/Insight';
-import { GameActivityChart } from '../components/games/GameActivityChart';
+import { getLichessRepository } from '../lib/lichess/repository-di';
+import {
+  getStoredToken,
+  isConnected,
+  LICHESS_CONNECTED_EVENT,
+  LICHESS_DISCONNECTED_EVENT,
+} from '../lib/lichess/oauth';
+import { syncRecentGames, syncChessComRecentGames } from '../lib/lichess/sync';
+import { getChessComUsername } from '../lib/chesscom/api';
+import { CHESSCOM_CHANGED_EVENT } from '../components/settings/ChessComSection';
+
+type WeakOpening = { name: string; count: number };
+
+type Summary = {
+  imported: number;
+  analyzed: number;
+  oobCount: number;
+  openings: number;
+  weakOpenings: WeakOpening[];
+};
+
+const EMPTY_SUMMARY: Summary = {
+  imported: 0,
+  analyzed: 0,
+  oobCount: 0,
+  openings: 0,
+  weakOpenings: [],
+};
+
+async function loadSummary(): Promise<Summary> {
+  const repo = getLichessRepository();
+  const games = await repo.listGames({ limit: 200 });
+  const oob = await repo.getOOBEvents({ limit: 500 });
+
+  const openings = new Set<string>();
+  for (const g of games) {
+    if (g.opening?.name) openings.add(g.opening.name);
+  }
+
+  const counts = new Map<string, number>();
+  for (const e of oob) {
+    const name = e.openingName ?? 'Unknown opening';
+    counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  const weakOpenings: WeakOpening[] = [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  return {
+    imported: games.length,
+    analyzed: games.filter((g) => g.oobChecked).length,
+    oobCount: oob.length,
+    openings: openings.size,
+    weakOpenings,
+  };
+}
 
 export function GamesPage() {
+  const t = useTokens();
+  const [lichess, setLichess] = useState(isConnected());
+  const [chesscom, setChesscom] = useState(getChessComUsername());
+  const [summary, setSummary] = useState<Summary>(EMPTY_SUMMARY);
+  const [syncing, setSyncing] = useState<null | 'lichess' | 'chesscom'>(null);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    const refresh = (): void => {
+      setLichess(isConnected());
+      setChesscom(getChessComUsername());
+    };
+    window.addEventListener(LICHESS_CONNECTED_EVENT, refresh);
+    window.addEventListener(LICHESS_DISCONNECTED_EVENT, refresh);
+    window.addEventListener(CHESSCOM_CHANGED_EVENT, refresh);
+    return () => {
+      window.removeEventListener(LICHESS_CONNECTED_EVENT, refresh);
+      window.removeEventListener(LICHESS_DISCONNECTED_EVENT, refresh);
+      window.removeEventListener(CHESSCOM_CHANGED_EVENT, refresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadSummary().then((s) => {
+      if (!cancelled) setSummary(s);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [lichess, chesscom]);
+
+  // Sync runs here so importing is reachable from the page the user actually
+  // lands on (connecting in Settings only links the account — it does not
+  // import). Errors surface inline; the summary reloads when done.
+  const runSync = async (platform: 'lichess' | 'chesscom'): Promise<void> => {
+    setSyncing(platform);
+    setSyncMsg(`Syncing ${platform === 'lichess' ? 'Lichess' : 'chess.com'}…`);
+    try {
+      const result =
+        platform === 'lichess'
+          ? await syncRecentGames(getStoredToken()?.username ?? '')
+          : await syncChessComRecentGames(chesscom ?? '');
+      await result.detectionDone;
+      setSyncMsg(
+        `✓ ${platform === 'lichess' ? 'Lichess' : 'chess.com'}: ${result.synced} new, ${result.known} already known`,
+      );
+      setSummary(await loadSummary());
+    } catch (err) {
+      console.error(`[games] ${platform} sync failed:`, err);
+      setSyncMsg(`✕ ${platform === 'lichess' ? 'Lichess' : 'chess.com'} sync failed — see console`);
+    } finally {
+      setSyncing(null);
+    }
+  };
+
+  const anyConnected = lichess || chesscom !== null;
+
   return (
     <PageBody>
       <PageHeader
         title="Games"
-        subtitle="Connect your chess platforms to import games, detect recurring weaknesses, and generate personalized training."
+        subtitle="Imported games, out-of-book moments, and activity from your connected platforms."
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 18 }}>
-        <Card>
+        <Card id="games-platforms">
           <CardTitle>Connected Platforms</CardTitle>
           <PlatformRow
             name="Lichess"
-            meta="Not connected · sign in to import"
-            action={{ label: 'Sync now', tone: 'primary', toast: 'Phase 3 PKCE pending' }}
+            meta={lichess ? 'Connected' : 'Not connected'}
+            connected={lichess}
+            syncing={syncing === 'lichess'}
+            syncDisabled={syncing !== null}
+            onSync={lichess ? () => void runSync('lichess') : undefined}
           />
           <div style={{ marginTop: 12 }}>
             <PlatformRow
               name="Chess.com"
-              meta="Sync opening performance and rapid games"
-              action={{ label: 'Connect', tone: 'secondary', toast: 'OAuth flow not wired in v1' }}
+              meta={chesscom ? `Linked as ${chesscom}` : 'Not linked'}
+              connected={chesscom !== null}
+              syncing={syncing === 'chesscom'}
+              syncDisabled={syncing !== null}
+              onSync={chesscom ? () => void runSync('chesscom') : undefined}
             />
           </div>
+          {syncMsg ? (
+            <div style={{ fontSize: 12, color: t.inkDim, fontFamily: fonts.sans, marginTop: 12 }}>
+              {syncMsg}
+            </div>
+          ) : null}
         </Card>
 
-        <Card>
+        <Card id="games-summary">
           <CardTitle>Sync Summary</CardTitle>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}
-          >
-            <StatTile label="Imported" value="0" />
-            <StatTile label="Analyzed" value="0" />
-            <StatTile label="Weaknesses" value="0" />
-            <StatTile label="Tracked Openings" value="0" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <StatTile label="Imported" value={String(summary.imported)} />
+            <StatTile label="Analyzed" value={String(summary.analyzed)} />
+            <StatTile label="Out of Book" value={String(summary.oobCount)} />
+            <StatTile label="Tracked Openings" value={String(summary.openings)} />
           </div>
         </Card>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: 18,
-          marginTop: 18,
-        }}
-      >
-        <Card>
-          <CardTitle>Recent Game Activity</CardTitle>
-          <GameActivityChart />
-        </Card>
-        <Card>
-          <CardTitle>Detected Patterns</CardTitle>
+      <div style={{ marginTop: 18 }}>
+        <Card id="games-weak">
+          <CardTitle>Weakest Openings</CardTitle>
           <InsightStack>
-            <Insight>Connect a platform to surface accuracy patterns from your games.</Insight>
-            <Insight>Phase 3 will detect recurring weaknesses across openings.</Insight>
-            <Insight>Sicilian retention trend opens up once Lichess sync is wired.</Insight>
+            {summary.weakOpenings.length > 0 ? (
+              summary.weakOpenings.map((w) => (
+                <Insight key={w.name}>
+                  {w.name} — {w.count} out-of-book {w.count === 1 ? 'moment' : 'moments'}
+                </Insight>
+              ))
+            ) : (
+              <Insight>
+                {anyConnected
+                  ? 'No out-of-book moments detected yet. Sync more games in Settings.'
+                  : 'Connect a platform in Settings to surface your weakest openings.'}
+              </Insight>
+            )}
           </InsightStack>
         </Card>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 18,
-          marginTop: 18,
-        }}
-      >
+      <div style={{ marginTop: 18 }}>
         <Card>
-          <CardTitle>Weakest Openings</CardTitle>
-          <InsightStack>
-            <Insight>—</Insight>
-            <Insight>Wire pending Phase 3 PKCE</Insight>
-          </InsightStack>
-        </Card>
-        <Card>
-          <CardTitle>Most Improved</CardTitle>
-          <InsightStack>
-            <Insight>—</Insight>
-            <Insight>Wire pending Phase 3 PKCE</Insight>
-          </InsightStack>
-        </Card>
-        <Card>
-          <CardTitle>Training Recommendations</CardTitle>
-          <InsightStack>
-            <Insight>—</Insight>
-            <Insight>Wire pending Phase 3 PKCE</Insight>
-          </InsightStack>
+          <CardTitle>Out-of-book moments</CardTitle>
+          <p style={{ fontSize: 12.5, color: t.inkSoft, fontFamily: fonts.sans, lineHeight: 1.6, margin: 0 }}>
+            Review where your games left your prep on the{' '}
+            <Link to="/" style={{ color: t.brand }}>Dashboard</Link>, or manage syncing
+            and connections in{' '}
+            <Link to="/settings" style={{ color: t.brand }}>Settings</Link>.
+          </p>
         </Card>
       </div>
     </PageBody>
@@ -113,29 +222,30 @@ export function GamesPage() {
 function PlatformRow({
   name,
   meta,
-  action,
+  connected,
+  syncing,
+  syncDisabled,
+  onSync,
 }: {
   name: string;
   meta: string;
-  action: { label: string; tone: 'primary' | 'secondary'; toast: string };
+  connected: boolean;
+  syncing?: boolean;
+  syncDisabled?: boolean;
+  onSync?: () => void;
 }) {
   const t = useTokens();
-  const [toast, setToast] = useState<string | null>(null);
-  const onClick = (): void => {
-    setToast(action.toast);
-    window.setTimeout(() => setToast(null), 1800);
-  };
   return (
     <div
       style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: 10,
         padding: 16,
         borderRadius: 14,
         background: t.surfaceAlt,
         border: `0.5px solid ${t.border}`,
-        position: 'relative',
       }}
     >
       <div>
@@ -146,64 +256,62 @@ function PlatformRow({
             color: t.ink,
             marginBottom: 3,
             fontFamily: fonts.sans,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
           {name}
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: connected ? t.success : t.inkSoft,
+              display: 'inline-block',
+            }}
+          />
         </div>
-        <div style={{ fontSize: 12, color: t.inkSoft, fontFamily: fonts.sans }}>
-          {meta}
-        </div>
+        <div style={{ fontSize: 12, color: t.inkSoft, fontFamily: fonts.sans }}>{meta}</div>
       </div>
-      <button
-        onClick={onClick}
-        style={
-          action.tone === 'primary'
-            ? {
-                background: t.brand,
-                color: t.brandInk,
-                border: 'none',
-                padding: '8px 14px',
-                borderRadius: 10,
-                fontSize: 12.5,
-                fontWeight: 600,
-                fontFamily: fonts.sans,
-                cursor: 'pointer',
-              }
-            : {
-                background: t.surface,
-                color: t.ink,
-                border: `0.5px solid ${t.border}`,
-                padding: '8px 14px',
-                borderRadius: 12,
-                fontSize: 12.5,
-                fontWeight: 500,
-                fontFamily: fonts.sans,
-                cursor: 'pointer',
-              }
-        }
-      >
-        {action.label}
-      </button>
-      {toast && (
-        <div
-          role="status"
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+        {connected && onSync ? (
+          <button
+            onClick={onSync}
+            disabled={syncDisabled}
+            style={{
+              background: t.brand,
+              color: t.brandInk,
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: 12,
+              fontSize: 12.5,
+              fontWeight: 600,
+              fontFamily: fonts.sans,
+              cursor: syncDisabled ? 'not-allowed' : 'pointer',
+              opacity: syncDisabled ? 0.6 : 1,
+            }}
+          >
+            {syncing ? 'Syncing…' : 'Sync now'}
+          </button>
+        ) : null}
+        <Link
+          to="/settings"
           style={{
-            position: 'absolute',
-            bottom: -36,
-            right: 8,
-            background: t.ink,
-            color: t.bg,
-            padding: '6px 12px',
-            borderRadius: 8,
-            fontSize: 12,
+            background: t.surface,
+            color: t.ink,
+            border: `0.5px solid ${t.border}`,
+            padding: '8px 14px',
+            borderRadius: 12,
+            fontSize: 12.5,
+            fontWeight: 500,
             fontFamily: fonts.sans,
-            boxShadow: t.shadowMd,
-            zIndex: 5,
+            textDecoration: 'none',
           }}
         >
-          {toast}
-        </div>
-      )}
+          {connected ? 'Manage' : 'Connect in Settings'}
+        </Link>
+      </div>
     </div>
   );
 }
@@ -211,14 +319,7 @@ function PlatformRow({
 function StatTile({ label, value }: { label: string; value: string }) {
   const t = useTokens();
   return (
-    <div
-      style={{
-        background: t.surfaceAlt,
-        borderRadius: 12,
-        padding: 14,
-        fontFamily: fonts.sans,
-      }}
-    >
+    <div style={{ background: t.surfaceAlt, borderRadius: 12, padding: 14, fontFamily: fonts.sans }}>
       <div
         style={{
           fontSize: 10.5,

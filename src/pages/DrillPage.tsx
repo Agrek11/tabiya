@@ -55,6 +55,7 @@ import { useEventEmitter } from '../hooks/useEventEmitter';
 import { useEffectivePick } from '../hooks/useEffectivePick';
 import { useExplainContent } from '../hooks/useExplainContent';
 import { useLinePrefMode } from '../hooks/useLinePrefMode';
+import { useStreaks } from '../hooks/useStreaks';
 import { ExplainView } from '../ui/explain/ExplainView';
 import { ChessBoardPanel } from '../ui/ChessBoardPanel';
 import { useTokens } from '../theme/ThemeContext';
@@ -146,6 +147,7 @@ export function DrillPage() {
   const [searchParams] = useSearchParams();
   const requestedLine = searchParams.get('line');
   const requestedOpening = searchParams.get('opening');
+  const requestedFamily = searchParams.get('family');
   const requestedQueue = searchParams.get('queue');
 
   const [catalog, setCatalog] = useState<CatalogState>({ kind: 'loading' });
@@ -158,7 +160,6 @@ export function DrillPage() {
   const [lineMenuOpen, setLineMenuOpen] = useState(false);
   const [lineSearch, setLineSearch] = useState('');
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
-  const [activeMode, setActiveMode] = useState<ModeId>('drill');
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
   const closeOpeningMenu = useCallback(() => {
@@ -201,6 +202,12 @@ export function DrillPage() {
         if (startLine === null && requestedOpening) {
           startLine = lines.find((l) => l.opening_id === requestedOpening) ?? null;
         }
+        if (startLine === null && requestedFamily) {
+          const famOpeningIds = new Set(
+            openings.filter((o) => o.family_id === requestedFamily).map((o) => o.id),
+          );
+          startLine = lines.find((l) => famOpeningIds.has(l.opening_id)) ?? null;
+        }
         if (startLine === null) {
           startLine = lines[0] ?? null;
         }
@@ -223,7 +230,7 @@ export function DrillPage() {
     return () => {
       cancelled = true;
     };
-  }, [requestedLine, requestedOpening]);
+  }, [requestedLine, requestedOpening, requestedFamily]);
 
   const { dueLineIds, loading: srsLoading } = useSRS();
   const { effective } = useEffectivePick();
@@ -311,6 +318,11 @@ export function DrillPage() {
     expectedLength: drillMoves.length,
   });
   const [explainMode, setExplainMode] = useLinePrefMode(activeLineId);
+  // Pill label derives from the persisted per-line mode, so it re-syncs on line
+  // change / reload — no separate ephemeral state to drift out of sync. Pattern
+  // Viz is a board overlay, not a pill mode, so it never owns this label.
+  const activeMode: ModeId = explainMode === 'explain' ? 'explain' : 'drill';
+  const streaks = useStreaks();
 
   // Drill engine.
   const drill = useDrill(drillMoves, drillColor);
@@ -816,13 +828,20 @@ export function DrillPage() {
               <ModeMenu
                 activeMode={activeMode}
                 explainAvailable={explainContent.kind === 'loaded'}
+                patternVizAvailable={!keySquareToggle.toggleDisabled}
+                patternVizOn={keySquareToggle.visible}
+                patternVizForced={explainModeActive}
                 onPick={(id) => {
                   if (id === 'explain' && explainContent.kind === 'loaded') {
                     setExplainMode('explain');
                   } else if (id === 'drill') {
                     setExplainMode('drill');
+                  } else if (id === 'pattern-viz') {
+                    // Pattern Viz is an overlay on the drill board, not a full
+                    // mode swap — toggle the key-square spotlight, keep the
+                    // active mode (drill/explain) and its pill label intact.
+                    keySquareToggle.toggle();
                   }
-                  setActiveMode(id);
                   setModeMenuOpen(false);
                 }}
               />
@@ -842,8 +861,9 @@ export function DrillPage() {
         {/* Stats strip */}
         <DrillStats
           dueCount={dueLineIds.length}
-          retentionPct={accuracySoFar}
-          hasAccuracy={totalPly > 0}
+          progressPct={accuracySoFar}
+          hasProgress={totalPly > 0}
+          streak={streaks.drillDayStreak}
         />
       </div>
 
@@ -935,7 +955,17 @@ export function DrillPage() {
         }}
       >
         {isExplainViewActive ? (
-          <div>
+          <div
+            style={{
+              // Cap the explain board the same way drill mode does (the board
+              // fills its container width, so an unbounded `1fr` column made it
+              // balloon off-screen and shove the rationale rail below the fold).
+              // Smaller cap than drill's 900 to leave vertical room for the
+              // progress bar + narration rail in one screen.
+              width: 'clamp(280px, calc(100vh - 300px), 560px)',
+              margin: '0 auto',
+            }}
+          >
             <ExplainView
               key={`explain-${activeLine.id}`}
               line={activeLine}
@@ -946,7 +976,6 @@ export function DrillPage() {
               totalPlies={drillMoves.length}
               onSkipToDrill={() => {
                 setExplainMode('drill');
-                setActiveMode('drill');
               }}
               /* R7.3 — Pattern Viz key squares force on for the explain run. */
               patternKeySquares={activeLine.key_squares}
@@ -1133,12 +1162,14 @@ export function DrillPage() {
 
 function DrillStats({
   dueCount,
-  retentionPct,
-  hasAccuracy,
+  progressPct,
+  hasProgress,
+  streak,
 }: {
   dueCount: number;
-  retentionPct: number;
-  hasAccuracy: boolean;
+  progressPct: number;
+  hasProgress: boolean;
+  streak: number;
 }) {
   const t = useTokens();
   return (
@@ -1157,12 +1188,13 @@ function DrillStats({
       </span>
       <span>
         <span style={{ color: t.success, fontWeight: 600 }}>
-          {hasAccuracy ? `${retentionPct}%` : '—'}
+          {hasProgress ? `${progressPct}%` : '—'}
         </span>{' '}
-        retention
+        progress
       </span>
       <span>
-        <span style={{ color: t.brand, fontWeight: 600 }}>—</span> streak
+        <span style={{ color: t.brand, fontWeight: 600 }}>{streak}</span>{' '}
+        day{streak === 1 ? '' : 's'} streak
       </span>
     </div>
   );
@@ -1171,17 +1203,36 @@ function DrillStats({
 function ModeMenu({
   activeMode,
   explainAvailable,
+  patternVizAvailable,
+  patternVizOn,
+  patternVizForced,
   onPick,
 }: {
   activeMode: ModeId;
   explainAvailable: boolean;
+  patternVizAvailable: boolean;
+  patternVizOn: boolean;
+  /** Explain Mode forces the overlay on — the row is on but not clickable. */
+  patternVizForced: boolean;
   onPick: (id: ModeId) => void;
 }) {
   const t = useTokens();
-  const items: Array<{ id: ModeId; label: string; available: boolean }> = [
+  const items: Array<{ id: ModeId; label: string; available: boolean; badge?: string }> = [
     { id: 'drill', label: 'Drill mode', available: true },
-    { id: 'explain', label: 'Explain', available: explainAvailable },
-    { id: 'pattern-viz', label: 'Pattern Viz', available: false },
+    {
+      id: 'explain',
+      label: 'Explain',
+      available: explainAvailable,
+      badge: explainAvailable ? undefined : 'Soon',
+    },
+    {
+      // While Explain forces the overlay on, the row reads as on but is not
+      // clickable (toggling the drill pref would be a silent no-op here).
+      id: 'pattern-viz',
+      label: 'Pattern Viz',
+      available: patternVizAvailable && !patternVizForced,
+      badge: patternVizForced ? 'Explain' : patternVizAvailable ? undefined : 'Soon',
+    },
   ];
   return (
     <div
@@ -1200,7 +1251,10 @@ function ModeMenu({
       }}
     >
       {items.map((m) => {
-        const isActive = m.id === activeMode;
+        // Pattern Viz is a toggle (overlay on/off), not a radio mode — its
+        // "active" highlight reflects whether the spotlight is currently shown.
+        const isActive =
+          m.id === 'pattern-viz' ? patternVizOn : m.id === activeMode;
         return (
           <button
             key={m.id}
@@ -1226,7 +1280,7 @@ function ModeMenu({
             }}
           >
             <span style={{ flex: 1 }}>{m.label}</span>
-            {!m.available && (
+            {m.badge && (
               <span
                 style={{
                   fontSize: 9.5,
@@ -1239,7 +1293,7 @@ function ModeMenu({
                   textTransform: 'uppercase',
                 }}
               >
-                Soon
+                {m.badge}
               </span>
             )}
           </button>

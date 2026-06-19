@@ -34,6 +34,13 @@ import type { LichessGame, OOBEvent, PickedLine } from './types';
 /** Max plies past the first divergence to look for a transposition. */
 export const GRACE_PLIES = 4;
 
+/**
+ * Divergences at move 1 (plyIndex 0 or 1) are noise — they just mean the user
+ * opened with a different first move than their prep, not that they left a line
+ * mid-theory. Suppress them; only emit for divergences at move 2+ (plyIndex ≥ 2).
+ */
+export const MIN_OOB_PLY = 2;
+
 export interface DetectInput {
   game: LichessGame;
   /** Picked repertoire lifted to detector shape; the detector filters to the
@@ -128,9 +135,11 @@ export async function detectOOB(input: DetectInput): Promise<OOBEvent | null> {
     }
 
     // Divergence. Build the event NOW (pre-divergence alive set, R5 AC6) —
-    // emitted only if it was a user move and no transposition rescues it.
-    const event: OOBEvent | null = isUserMove
-      ? {
+    // emitted only if it was a user move at move 2+ (move-1 divergences are
+    // noise, MIN_OOB_PLY) and no transposition rescues it.
+    const event: OOBEvent | null =
+      isUserMove && i >= MIN_OOB_PLY
+        ? {
           gameId: game.id,
           plyIndex: i,
           playedSAN: playedSan,
