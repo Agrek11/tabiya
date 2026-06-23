@@ -2,17 +2,13 @@
  * useKeySquareOverlay — Phase 2b Pattern Viz visibility logic (R7).
  *
  * Owns the rule that decides whether the spotlight overlay is rendered:
- *   visible = hasKeySquares && (explainModeActive || drillPreference)
+ *   visible = hasKeySquares && drillPreference
  *
- * Drill preference persists per-line in localStorage under
+ * Preference persists per-line in localStorage under
  *   `tabiya:linePrefs:<lineId>:keySquareOverlay`
- * matching the Phase 1b mode-pref convention (`useLinePrefMode`).
- *
- * Explain Mode integration (R7.3, R7.4): when the user is inside Explain
- * Mode, the overlay is forced on regardless of the drill toggle. Exiting
- * Explain restores the drill toggle's persisted value. The caller passes
- * `explainModeActive: boolean` — true while Explain Mode is the active
- * mode for the line. Forcing is automatic; DrillPage does not branch.
+ * matching the Phase 1b mode-pref convention (`useLinePrefMode`). It is the
+ * single source of truth for the Pattern Viz overlay (driven by the Mode →
+ * Pattern Viz menu item); Explain Mode does NOT force it on.
  *
  * Graceful degrade (R7.5): when the active opening has no curated
  * `key_squares`, the toggle is reported as disabled and `visible` is
@@ -55,8 +51,6 @@ export interface UseKeySquareOverlayArgs {
   lineId: string | null;
   /** True when the active opening has curated key-square data. */
   hasKeySquares: boolean;
-  /** True while Explain Mode is the active mode for this line. */
-  explainModeActive: boolean;
 }
 
 export interface UseKeySquareOverlayReturn {
@@ -73,7 +67,6 @@ export interface UseKeySquareOverlayReturn {
 export function useKeySquareOverlay({
   lineId,
   hasKeySquares,
-  explainModeActive,
 }: UseKeySquareOverlayArgs): UseKeySquareOverlayReturn {
   const [drillPref, setDrillPref] = useState<boolean>(() => readPref(lineId));
 
@@ -96,8 +89,10 @@ export function useKeySquareOverlay({
   }, [drillPref, hasKeySquares, lineId]);
 
   const toggleDisabled = !hasKeySquares;
-  // R7.3 + R7.4: Explain forces on; otherwise the drill toggle decides.
-  const visible = hasKeySquares && (explainModeActive || drillPref);
+  // Pattern Viz is controlled solely by the toggle (the Mode → Pattern Viz item).
+  // Explain Mode no longer forces it on — narration shouldn't dim the board
+  // unless the user asked for the spotlight.
+  const visible = hasKeySquares && drillPref;
 
   return {
     visible,

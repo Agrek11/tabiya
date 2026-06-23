@@ -78,7 +78,7 @@ export type ExplainBlock = {
   arrows?: Arrow[];
   highlights?: HighlightSquare[];
   threats?: string; // optional 2nd-pass deeper note (e.g., "If ...Nxe4 then Re1 pins")
-  pauseMs?: number; // default 2500; per-move override
+  pauseMs?: number; // default 1200; per-move override
 };
 
 export type Line = {

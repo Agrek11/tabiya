@@ -2,7 +2,7 @@
  * useExplainMode — Phase 1b autoplay state machine for Explain Mode.
  *
  * Walks a `Line` ply-by-ply. For each ply it shows overlays (arrows + key
- * squares) and rationale text for `pauseMs` (default 2500 ms), then plays
+ * squares) and rationale text for `pauseMs` (default 1200 ms), then plays
  * the move on a chess.js instance, pauses briefly, and advances to the next
  * ply. Both colors are auto-played — Explain is narration, not drill.
  *
@@ -42,10 +42,10 @@ import type { ExplainBlock } from '../storage/types';
 // ---------------------------------------------------------------------------
 
 /** Default per-ply overlay dwell time. Per-block `pauseMs` overrides. */
-export const DEFAULT_PAUSE_MS = 2500;
+export const DEFAULT_PAUSE_MS = 1200;
 
 /** Post-move beat between playingMove → awaiting_next → next showOverlays. */
-export const POST_MOVE_BEAT_MS = 300;
+export const POST_MOVE_BEAT_MS = 150;
 
 // ---------------------------------------------------------------------------
 // Types

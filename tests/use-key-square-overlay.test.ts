@@ -32,7 +32,6 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId: 'line-a',
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     expect(result.current.visible).toBe(false);
@@ -45,7 +44,6 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId: 'line-a',
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     act(() => result.current.toggle());
@@ -63,39 +61,23 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId: 'line-x',
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     expect(result.current.drillPreference).toBe(true);
     expect(result.current.visible).toBe(true);
   });
 
-  it('Explain Mode forces visible=true regardless of pref (R7.3)', () => {
+  it('overlay is driven solely by the toggle — nothing forces it on', () => {
     const { result } = renderHook(() =>
       useKeySquareOverlay({
         lineId: 'line-a',
         hasKeySquares: true,
-        explainModeActive: true,
       })
     );
-    expect(result.current.drillPreference).toBe(false);
-    expect(result.current.visible).toBe(true);
-  });
-
-  it('exiting Explain restores persisted drill pref (R7.4)', () => {
-    let explainModeActive = true;
-    const { result, rerender } = renderHook(() =>
-      useKeySquareOverlay({
-        lineId: 'line-a',
-        hasKeySquares: true,
-        explainModeActive,
-      })
-    );
-    expect(result.current.visible).toBe(true);
-    expect(result.current.drillPreference).toBe(false);
-    explainModeActive = false;
-    rerender();
+    // Off by default; only the toggle turns it on.
     expect(result.current.visible).toBe(false);
+    act(() => result.current.toggle());
+    expect(result.current.visible).toBe(true);
   });
 
   it('!hasKeySquares disables toggle and hides overlay (R7.5)', () => {
@@ -104,7 +86,6 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId: 'line-a',
         hasKeySquares: false,
-        explainModeActive: false,
       })
     );
     expect(result.current.toggleDisabled).toBe(true);
@@ -121,14 +102,12 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId: 'line-a',
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     const b = renderHook(() =>
       useKeySquareOverlay({
         lineId: 'line-b',
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     expect(a.result.current.drillPreference).toBe(true);
@@ -143,7 +122,6 @@ describe('useKeySquareOverlay', () => {
       useKeySquareOverlay({
         lineId,
         hasKeySquares: true,
-        explainModeActive: false,
       })
     );
     expect(result.current.drillPreference).toBe(true);

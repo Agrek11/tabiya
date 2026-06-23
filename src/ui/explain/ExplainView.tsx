@@ -31,8 +31,6 @@ import { fonts, radius } from '../../theme/tokens';
 import type { ExplainBlock, KeySquare, Line } from '../../storage/types';
 import { useExplainMode } from '../../hooks/useExplainMode';
 import { useExplainTts } from '../../hooks/useExplainTts';
-import { deriveHighlightStyles } from '../board/HighlightLayer';
-import { ArrowLayer } from '../board/ArrowLayer';
 import { useSpotlightOverlay } from '../board/useSpotlightOverlay';
 import { ExplainRail } from './ExplainRail';
 
@@ -54,6 +52,12 @@ export type ExplainViewProps = {
    * per-ply explain highlights from `blocks` are unaffected).
    */
   patternKeySquares?: readonly KeySquare[];
+};
+
+const ARROW_HEX: Record<'green' | 'red' | 'blue', string> = {
+  green: '#15803d',
+  red: '#c0392b',
+  blue: '#1d4ed8',
 };
 
 export function ExplainView({
@@ -109,58 +113,60 @@ export function ExplainView({
   // Cancel TTS on unmount.
   useEffect(() => () => tts.cancel(), [tts]);
 
+  // Keyboard: ←/→ step prev/next, Space toggles pause. DrillPage's handler
+  // yields the keyboard to Explain Mode while it's active, so no double-firing.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        explain.prev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        explain.next();
+      } else if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        setPaused((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [explain]);
+
   // Overlays — only present during showOverlays. Other states render empty.
   const activeBlock: ExplainBlock | null = explain.currentBlock;
   const arrows = activeBlock?.arrows ?? [];
-  const highlights = activeBlock?.highlights ?? [];
 
-  const { squareStyles } = useMemo(
-    () => deriveHighlightStyles({ mode: 'spotlight', squares: highlights }),
-    [highlights],
-  );
+  // Native react-chessboard arrows (lichess-style), shown only while overlays
+  // are visible for the current ply.
+  const nativeArrows =
+    explain.state.kind === 'showOverlays'
+      ? arrows.map((a) => ({
+          startSquare: a.from,
+          endSquare: a.to,
+          color: ARROW_HEX[a.color ?? 'green'],
+        }))
+      : [];
 
-  // Phase 2b R7.3 — pattern-viz key squares are force-rendered under
-  // the Explain board for the explain run's duration. Stays inert when
-  // the caller passed no `patternKeySquares` (graceful degrade R6.6).
+  // Pattern Viz spotlight — rendered ONLY when the caller passes key squares
+  // (the user toggled Pattern Viz on). Otherwise the board stays clean and the
+  // move arrow carries the point; per-ply move squares are not dimmed.
   const patternOverlay = useSpotlightOverlay({
     keySquares: patternKeySquares,
-    fadePieces: false, // Don't fight the explain-mode highlights with a heavy fade.
+    fadePieces: false,
   });
 
-  // Last-move highlight (light green tint, matches drill's lichess style).
+  // Last-move tint + the toggle-gated pattern spotlight. No block-highlight dim.
   const squareStylesWithLastMove = useMemo<Record<string, CSSProperties>>(() => {
-    const styles: Record<string, CSSProperties> = {
-      ...patternOverlay.squareStyles,
-      ...squareStyles,
-    };
+    const styles: Record<string, CSSProperties> = { ...patternOverlay.squareStyles };
     if (explain.lastMove !== null && explain.state.kind !== 'showOverlays') {
       const lastStyle: CSSProperties = { backgroundColor: 'rgba(155, 199, 0, 0.42)' };
       styles[explain.lastMove.from] = { ...lastStyle, ...(styles[explain.lastMove.from] ?? {}) };
       styles[explain.lastMove.to] = { ...lastStyle, ...(styles[explain.lastMove.to] ?? {}) };
     }
     return styles;
-  }, [squareStyles, patternOverlay.squareStyles, explain.lastMove, explain.state]);
-
-  // Measure board size so ArrowLayer can size its SVG. We use a ResizeObserver
-  // on the board wrapper. Default fallback 480px.
-  const boardWrapperRef = useRef<HTMLDivElement | null>(null);
-  const [boardSize, setBoardSize] = useState<number>(480);
-  useEffect(() => {
-    const el = boardWrapperRef.current;
-    if (el === null) return;
-    if (typeof ResizeObserver === 'undefined') {
-      setBoardSize(el.getBoundingClientRect().width);
-      return;
-    }
-    const obs = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const w = entry.contentRect.width;
-        if (w > 0) setBoardSize(w);
-      }
-    });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+  }, [patternOverlay.squareStyles, explain.lastMove, explain.state]);
 
   const progressPct = totalPlies === 0 ? 0 : ((explain.currentPly + 1) / totalPlies) * 100;
   const isComplete = explain.state.kind === 'complete' && !explain.state.skipped;
@@ -168,54 +174,62 @@ export function ExplainView({
   return (
     <div
       data-testid="explain-view"
-      style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'auto 340px',
+        gap: 16,
+        alignItems: 'start',
+        justifyContent: 'center',
+        minWidth: 0,
+      }}
     >
-      {/* Progress bar */}
-      <div
-        aria-label={`Explain progress ${Math.round(progressPct)}%`}
-        role="progressbar"
-        aria-valuenow={Math.round(progressPct)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        style={{
-          height: 10,
-          background: t.surfaceAlt,
-          borderRadius: 999,
-          overflow: 'hidden',
-        }}
-      >
+      {/* Board column — same size + orientation as drill mode. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
         <div
+          aria-label={`Explain progress ${Math.round(progressPct)}%`}
+          role="progressbar"
+          aria-valuenow={Math.round(progressPct)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          style={{ height: 10, background: t.surfaceAlt, borderRadius: 999, overflow: 'hidden' }}
+        >
+          <div
+            style={{
+              width: `${progressPct}%`,
+              height: '100%',
+              background: t.brand,
+              borderRadius: 999,
+              transition: 'width 300ms ease-out',
+            }}
+          />
+        </div>
+        <div
+          data-testid="explain-board-wrapper"
           style={{
-            width: `${progressPct}%`,
-            height: '100%',
-            background: t.brand,
-            borderRadius: 999,
-            transition: 'width 300ms ease-out',
+            position: 'relative',
+            width: 'min(900px, calc(100vh - 230px))',
+            height: 'min(900px, calc(100vh - 230px))',
+            borderRadius: 16,
+            overflow: 'hidden',
+            border: `0.5px solid ${t.border}`,
+            background: t.surface,
           }}
-        />
+        >
+          <ChessBoardPanel
+            fen={explain.fen}
+            flashOverlay={null}
+            boardOrientation={playerColor}
+            squareStyles={squareStylesWithLastMove}
+            arrows={nativeArrows}
+            onPieceDrop={() => false}
+          />
+          {patternOverlay.tooltip}
+        </div>
       </div>
 
-      {/* Board with overlays */}
-      <div
-        ref={boardWrapperRef}
-        style={{ position: 'relative', width: '100%' }}
-        data-testid="explain-board-wrapper"
-      >
-        <ChessBoardPanel
-          fen={explain.fen}
-          flashOverlay={null}
-          boardOrientation={playerColor}
-          squareStyles={squareStylesWithLastMove}
-          onPieceDrop={() => false}
-        />
-        {explain.state.kind === 'showOverlays' && arrows.length > 0 && (
-          <ArrowLayer arrows={arrows} boardSize={boardSize} isFlipped={playerColor === 'black'} />
-        )}
-        {patternOverlay.tooltip}
-      </div>
-
-      {/* Completion banner OR rail */}
-      {isComplete ? (
+      {/* Right column — narration rail (or completion), like drill's Moves panel. */}
+      <div style={{ minWidth: 0 }}>
+        {isComplete ? (
         <div
           data-testid="explain-complete"
           style={{
@@ -303,6 +317,7 @@ export function ExplainView({
           onToggleLineMute={tts.toggleLineMute}
         />
       )}
+      </div>
     </div>
   );
 }

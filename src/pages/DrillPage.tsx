@@ -53,7 +53,7 @@ import { WhyButton } from '../components/coach/WhyButton';
 import { useSRS } from '../hooks/useSRS';
 import { useEventEmitter } from '../hooks/useEventEmitter';
 import { useEffectivePick } from '../hooks/useEffectivePick';
-import { useExplainContent } from '../hooks/useExplainContent';
+import { useExplainBlocks } from '../hooks/useExplainBlocks';
 import { useLinePrefMode } from '../hooks/useLinePrefMode';
 import { useStreaks } from '../hooks/useStreaks';
 import { ExplainView } from '../ui/explain/ExplainView';
@@ -67,8 +67,6 @@ import { EndOfLineSummary } from '../ui/EndOfLineSummary';
 import { PillTrigger } from '../components/drill/PillTrigger';
 import { SlickMenu, type SlickMenuItem } from '../components/drill/SlickMenu';
 import { MovesRow, type OverflowItem } from '../components/drill/MovesRow';
-import { WhyThisMoveRail } from '../components/drill/WhyThisMoveRail';
-import { DrillModeToggleHeader } from '../components/drill/DrillModeToggleHeader';
 import { TranspositionBanner } from '../components/drill/TranspositionBanner';
 import { useSpotlightOverlay } from '../ui/board/useSpotlightOverlay';
 import { useKeySquareOverlay } from '../hooks/useKeySquareOverlay';
@@ -311,12 +309,10 @@ export function DrillPage() {
   );
   const drillColor: 'white' | 'black' = activeOpening?.color ?? 'white';
 
-  // Explain Mode sidecar.
+  // Explain Mode v2 — runtime-generated grounded blocks (every line covered).
   const activeLineId: string | null = activeLine?.id ?? null;
-  const explainContent = useExplainContent({
-    lineId: activeLineId,
-    expectedLength: drillMoves.length,
-  });
+  const explainBlocks = useExplainBlocks(activeLine);
+  const explainReady = explainBlocks.length > 0;
   const [explainMode, setExplainMode] = useLinePrefMode(activeLineId);
   // Pill label derives from the persisted per-line mode, so it re-syncs on line
   // change / reload — no separate ephemeral state to drift out of sync. Pattern
@@ -506,17 +502,11 @@ export function DrillPage() {
     [state, selectedSquare, legalDestSquares, onPieceDrop]
   );
 
-  // Phase 2b — Pattern Viz overlay (R6/R7).
-  // The drill-mode toggle persists per-line; Explain Mode force-on is
-  // handled inside the hook. ExplainView is rendered in a separate branch
-  // below — `explainModeActive=true` here applies when the user picked
-  // explain mode for this line but the explain content didn't load
-  // (graceful degrade) OR before the explain branch renders.
-  const explainModeActive = explainMode === 'explain';
+  // Phase 2b — Pattern Viz overlay (R6/R7). Controlled solely by the Mode →
+  // Pattern Viz toggle, persisted per-line; Explain Mode no longer forces it.
   const keySquareToggle = useKeySquareOverlay({
     lineId: activeLineId,
     hasKeySquares: (activeLine?.key_squares?.length ?? 0) > 0,
-    explainModeActive,
   });
   const spotlight = useSpotlightOverlay({
     keySquares: keySquareToggle.visible ? activeLine?.key_squares : undefined,
@@ -576,6 +566,9 @@ export function DrillPage() {
     const handler = (e: KeyboardEvent): void => {
       const tag = (e.target as HTMLElement | null)?.tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      // Explain Mode owns the keyboard while active (prev/next/pause handled in
+      // ExplainView) — don't drive the hidden drill underneath.
+      if (explainMode === 'explain' && explainReady) return;
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
@@ -608,7 +601,7 @@ export function DrillPage() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [drill, restart, showHintWithEmit, queueState.kind, exitQueue]);
+  }, [drill, restart, showHintWithEmit, queueState.kind, exitQueue, explainMode, explainReady]);
 
   // Confetti on completion.
   const prevStateKindRef = useRef<string | null>(null);
@@ -701,9 +694,7 @@ export function DrillPage() {
   const accuracySoFar = totalPly > 0 ? Math.round((currentPly / totalPly) * 100) : 0;
 
   const isExplainViewActive =
-    explainMode === 'explain' &&
-    explainContent.kind === 'loaded' &&
-    activeLine !== null;
+    explainMode === 'explain' && explainReady && activeLine !== null;
 
   const overflowItems: OverflowItem[] = [
     {
@@ -827,12 +818,11 @@ export function DrillPage() {
             {modeMenuOpen && (
               <ModeMenu
                 activeMode={activeMode}
-                explainAvailable={explainContent.kind === 'loaded'}
+                explainAvailable={explainReady}
                 patternVizAvailable={!keySquareToggle.toggleDisabled}
                 patternVizOn={keySquareToggle.visible}
-                patternVizForced={explainModeActive}
                 onPick={(id) => {
-                  if (id === 'explain' && explainContent.kind === 'loaded') {
+                  if (id === 'explain' && explainReady) {
                     setExplainMode('explain');
                   } else if (id === 'drill') {
                     setExplainMode('drill');
@@ -847,24 +837,17 @@ export function DrillPage() {
               />
             )}
           </div>
-          {/* Phase 2b — Key squares overlay toggle (R7). Hidden when the
-              active opening has no curated key_squares (graceful degrade). */}
-          {!keySquareToggle.toggleDisabled && (
-            <DrillModeToggleHeader
-              active={keySquareToggle.drillPreference}
-              forcedByExplain={explainModeActive && keySquareToggle.visible}
-              onClick={keySquareToggle.toggle}
-            />
-          )}
         </div>
 
-        {/* Stats strip */}
-        <DrillStats
-          dueCount={dueLineIds.length}
-          progressPct={accuracySoFar}
-          hasProgress={totalPly > 0}
-          streak={streaks.drillDayStreak}
-        />
+        {/* Stats strip — drill only; Explain has its own progress bar. */}
+        {!isExplainViewActive && (
+          <DrillStats
+            dueCount={dueLineIds.length}
+            progressPct={accuracySoFar}
+            hasProgress={totalPly > 0}
+            streak={streaks.drillDayStreak}
+          />
+        )}
       </div>
 
       {/* PILLS ROW (queue chip only — Box pill removed per UI fix 2026-05-15) */}
@@ -955,32 +938,21 @@ export function DrillPage() {
         }}
       >
         {isExplainViewActive ? (
-          <div
-            style={{
-              // Cap the explain board the same way drill mode does (the board
-              // fills its container width, so an unbounded `1fr` column made it
-              // balloon off-screen and shove the rationale rail below the fold).
-              // Smaller cap than drill's 900 to leave vertical room for the
-              // progress bar + narration rail in one screen.
-              width: 'clamp(280px, calc(100vh - 300px), 560px)',
-              margin: '0 auto',
+          <ExplainView
+            key={`explain-${activeLine.id}`}
+            line={activeLine}
+            blocks={explainBlocks}
+            playerColor={drillColor}
+            totalPlies={drillMoves.length}
+            onSkipToDrill={() => {
+              setExplainMode('drill');
             }}
-          >
-            <ExplainView
-              key={`explain-${activeLine.id}`}
-              line={activeLine}
-              blocks={
-                explainContent.kind === 'loaded' ? explainContent.data : []
-              }
-              playerColor={drillColor}
-              totalPlies={drillMoves.length}
-              onSkipToDrill={() => {
-                setExplainMode('drill');
-              }}
-              /* R7.3 — Pattern Viz key squares force on for the explain run. */
-              patternKeySquares={activeLine.key_squares}
-            />
-          </div>
+            /* Spotlight only when the user has Pattern Viz toggled on — Explain
+               no longer forces it. */
+            patternKeySquares={
+              keySquareToggle.visible ? activeLine.key_squares : undefined
+            }
+          />
         ) : (
           <>
             {/* COL 1 — board + inline actions */}
@@ -1098,10 +1070,6 @@ export function DrillPage() {
                   onJumpToPly={(ply) => jumpToPly(ply + 1)}
                 />
               </Card>
-              <WhyThisMoveRail
-                notes={activeLine?.strategic_notes ?? []}
-                keySquares={(activeLine?.key_squares ?? []).map((k) => k.square)}
-              />
             </aside>
 
             {/* COL 3 — End-of-line summary (only when complete + non-queue) */}
@@ -1114,6 +1082,7 @@ export function DrillPage() {
                     line={activeLine}
                     drillResult={drillResult}
                     dueCount={dueLineIds.length}
+                    playerColor={drillColor}
                     nextLineInFamily={(() => {
                       if (catalog.kind !== 'ready' || activeFamily === null) return null;
                       const famOpIds = new Set(
@@ -1205,15 +1174,12 @@ function ModeMenu({
   explainAvailable,
   patternVizAvailable,
   patternVizOn,
-  patternVizForced,
   onPick,
 }: {
   activeMode: ModeId;
   explainAvailable: boolean;
   patternVizAvailable: boolean;
   patternVizOn: boolean;
-  /** Explain Mode forces the overlay on — the row is on but not clickable. */
-  patternVizForced: boolean;
   onPick: (id: ModeId) => void;
 }) {
   const t = useTokens();
@@ -1226,12 +1192,10 @@ function ModeMenu({
       badge: explainAvailable ? undefined : 'Soon',
     },
     {
-      // While Explain forces the overlay on, the row reads as on but is not
-      // clickable (toggling the drill pref would be a silent no-op here).
       id: 'pattern-viz',
       label: 'Pattern Viz',
-      available: patternVizAvailable && !patternVizForced,
-      badge: patternVizForced ? 'Explain' : patternVizAvailable ? undefined : 'Soon',
+      available: patternVizAvailable,
+      badge: patternVizAvailable ? undefined : 'Soon',
     },
   ];
   return (
