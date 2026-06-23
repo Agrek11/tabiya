@@ -31,21 +31,21 @@ Mode: finish scoped phases, no net-new scope, no quality compromise.
 ## Stage 0: Baseline Stabilization (Immediate)
 
 ### 0.1 Checkpoint current uncommitted work
-- [ ] Slice and commit:
+- [x] Slice and commit:
   - Explain v2 deterministic core.
   - Play-vs-engine plumbing.
   - UX/stability sweep.
 - [ ] Ensure no accidental coupling or cross-cutting regressions.
-- [ ] Preserve all existing user edits not in scope.
+- [x] Preserve all existing user edits not in scope.
 
 ### 0.2 Remove Explain v1 legacy
-- [ ] Remove `build_explain.py` path and legacy authored explain sidecar usage.
-- [ ] Remove dead hooks/components tied only to Explain v1.
-- [ ] Verify Explain v2 is sole active path for all lines.
+- [x] Remove `build_explain.py` path and legacy authored explain sidecar usage.
+- [x] Remove dead hooks/components tied only to Explain v1.
+- [x] Verify Explain v2 is sole active path for all lines.
 
 Exit criteria:
 - [ ] Drill explain path works end-to-end with deterministic blocks only.
-- [ ] No references to retired explain pipeline remain in runtime path.
+- [x] No references to retired explain pipeline remain in runtime path.
 
 ---
 

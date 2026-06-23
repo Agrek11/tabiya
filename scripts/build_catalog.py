@@ -56,11 +56,6 @@ from .tabiya_build.transposition import (  # noqa: E402
     write_transposition_sidecar,
 )
 from .tabiya_build.tsv import TsvRow, download_all, parse_all  # noqa: E402
-from .tabiya_build.validate_explain import (  # noqa: E402
-    ExplainValidationError,
-    copy_explain_to_public,
-    validate_all_explain_sidecars,
-)
 from .tabiya_build.whitelist import (  # noqa: E402
     TARGET_FAMILIES,
     OpeningSpec,
@@ -84,8 +79,6 @@ DEFAULT_FAMILIES = REPO_ROOT / "scripts" / "curated" / "families.yml"
 DEFAULT_VARIATIONS = REPO_ROOT / "scripts" / "curated" / "variations.yml"
 DEFAULT_LINES = REPO_ROOT / "scripts" / "curated" / "lines.yml"
 DEFAULT_PRESETS = REPO_ROOT / "scripts" / "curated" / "presets.yml"
-DEFAULT_EXPLAIN_SRC = REPO_ROOT / "data" / "explain"
-DEFAULT_EXPLAIN_DST = REPO_ROOT / "public" / "explain"
 DEFAULT_KEY_SQUARES = REPO_ROOT / "scripts" / "curated" / "key_squares.yml"
 DEFAULT_SOURCES_YML = REPO_ROOT / "scripts" / "key_squares" / "sources.yml"
 DEFAULT_TRANSPOSITIONS_OUT = REPO_ROOT / "public" / "transpositions.json"
@@ -115,23 +108,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--variations", type=Path, default=DEFAULT_VARIATIONS)
     p.add_argument("--lines", type=Path, default=DEFAULT_LINES)
     p.add_argument("--presets", type=Path, default=DEFAULT_PRESETS)
-    p.add_argument(
-        "--skip-explain",
-        action="store_true",
-        help="Skip Phase 1b explain sidecar validate + copy step.",
-    )
-    p.add_argument(
-        "--explain-src",
-        type=Path,
-        default=DEFAULT_EXPLAIN_SRC,
-        help="Source dir for explain sidecars (default: data/explain).",
-    )
-    p.add_argument(
-        "--explain-dst",
-        type=Path,
-        default=DEFAULT_EXPLAIN_DST,
-        help="Destination dir for explain sidecars (default: public/explain).",
-    )
     p.add_argument(
         "--key-squares",
         type=Path,
@@ -246,27 +222,6 @@ def _emit_features_sidecar(lines: list[Line], args: argparse.Namespace) -> int:
     previous = read_previous_sidecar(args.features_out)
     index = build_features_index(lines, previous)
     write_features_sidecar(index, args.features_out)
-    return 0
-
-
-def _process_explain_sidecars(catalog: Catalog, args: argparse.Namespace) -> int:
-    """Validate + copy explain sidecars. Returns 0 on success, 1 on failure."""
-    if args.skip_explain:
-        logger.info("Skipping explain sidecar validate + copy (--skip-explain)")
-        return 0
-    try:
-        sidecars = validate_all_explain_sidecars(args.explain_src, catalog)
-    except ExplainValidationError as e:
-        logger.error("Explain sidecar validation failed: %s", e)
-        return 1
-    if sidecars:
-        copied = copy_explain_to_public(args.explain_src, args.explain_dst)
-        logger.info(
-            "Validated %d explain sidecar(s); copied %d to %s",
-            len(sidecars),
-            copied,
-            args.explain_dst,
-        )
     return 0
 
 
@@ -394,8 +349,6 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         if _emit_features_sidecar(lines, args) != 0:
             return 1
-        if _process_explain_sidecars(catalog, args) != 0:
-            return 1
         return 0
     if args.source == "flat-tsv":
         # Bulk path — every TSV row becomes one Opening + one Line. No
@@ -449,8 +402,6 @@ def main(argv: list[str] | None = None) -> int:
     if _emit_transposition_sidecar(lines, args) != 0:
         return 1
     if _emit_features_sidecar(lines, args) != 0:
-        return 1
-    if _process_explain_sidecars(catalog, args) != 0:
         return 1
     return 0
 

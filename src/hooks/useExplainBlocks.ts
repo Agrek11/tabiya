@@ -2,8 +2,8 @@
  * useExplainBlocks — Explain Mode v2 content hook.
  *
  * Generates grounded per-ply ExplainBlocks at runtime for the active line
- * (move semantics + precomputed feature enrichment). Replaces the per-line
- * authored-sidecar fetch (useExplainContent): every catalog line is covered,
+ * (move semantics + precomputed feature enrichment). Replaces the old per-line
+ * authored-sidecar fetch path: every catalog line is covered,
  * no network round-trip beyond the one-time features sidecar load.
  *
  * Returns blocks ONLY when they correspond to the current line (avoids a stale

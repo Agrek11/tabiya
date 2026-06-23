@@ -68,11 +68,7 @@ export type HighlightSquare = {
   intent?: HighlightIntent; // styling hint
 };
 
-/**
- * Per-ply "why this move" payload. Loaded as a sidecar from
- * `public/explain/<lineId>.json` on Explain Mode entry. When attached to a
- * `Line.explain` array, `explain.length === moves.length` (one block per ply).
- */
+/** Per-ply deterministic "why this move" payload (Explain v2 runtime). */
 export type ExplainBlock = {
   rationale: string; // 1-3 sentence "why this move"
   arrows?: Arrow[];
@@ -94,12 +90,7 @@ export type Line = {
   strategic_notes: string[];
   key_squares: KeySquare[];
   forks: ForkAnnotation[];
-  /**
-   * Phase 1b — optional per-ply explain blocks, hydrated from sidecar on
-   * Explain Mode entry. When present, length matches `moves`. The sidecar
-   * itself lives at `public/explain/<id>.json` and is fetched lazily by
-   * `useExplainContent` — this field on `Line` is the in-memory landing zone.
-   */
+  /** Optional in-memory explain blocks for the active line/session. */
   explain?: ExplainBlock[];
 };
 

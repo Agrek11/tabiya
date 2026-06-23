@@ -187,11 +187,10 @@ class Catalog(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Phase 1b — Explain Mode (R2)
+# Phase 1b — Explain Mode (legacy sidecar schema).
 #
-# Sidecar shape lives in data/explain/<line_id>.json and is build-validated
-# against a Catalog before being copied to public/explain/. Frontend lazy-
-# loads these on Explain Mode entry; bundle stays lean.
+# Explain v2 is runtime-generated in the frontend. These models are kept only
+# for backward compatibility with any archived sidecar artifacts.
 # ---------------------------------------------------------------------------
 
 # Single algebraic square, e.g. "e2", "d5". Strict lowercase a-h + 1-8.

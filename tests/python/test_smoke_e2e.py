@@ -74,10 +74,6 @@ def test_smoke_two_openings(tmp_path: Path) -> None:
         "--out", str(out),
         "--notes", str(notes),
         "--log-level", "WARNING",
-        # Phase 1b: real data/explain/ holds sidecars keyed on lines not
-        # present in this 2-opening smoke build. Skip the validate-and-copy
-        # step to keep the smoke focused on catalog build correctness.
-        "--skip-explain",
     ])
     assert rc == 0
     assert out.exists()

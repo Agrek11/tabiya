@@ -88,9 +88,9 @@ Locked moat principle (2026-06-17): do not rebuild commodity infra; only add val
 
 - `Insights` mostly placeholder panels.
 - `/coach` route still placeholder.
-- Legacy explain authoring teardown pending (`build_explain.py`, legacy sidecars, old hooks).
+- Explain v1 sidecar authoring/fetch pipeline has been removed in favor of Explain v2 runtime generation.
 - Facts are catalog-only until runtime extractor ships.
-- Large uncommitted changes require checkpoint commit + deploy cycle.
+- Remaining major gate is runtime extractor parity and the downstream universal coach phases.
 
 ## Quality bar and testing gates
 

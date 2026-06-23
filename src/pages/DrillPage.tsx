@@ -12,7 +12,7 @@
  *
  * Behavior preserved from the prior implementation:
  *   - useDrill + ChessBoardPanel (untouched)
- *   - useExplainContent + useLinePrefMode + ExplainView
+ *   - useExplainBlocks + useLinePrefMode + ExplainView
  *   - SRS write on completion + fire-and-forget guard
  *   - Queue mode init from ?queue=due, advance on completion, exhausted state
  *   - useEventEmitter telemetry (Phase 1.5 R7.5)
