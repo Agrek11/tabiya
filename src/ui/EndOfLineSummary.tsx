@@ -10,7 +10,8 @@
  */
 
 import { Link } from 'react-router-dom';
-import { CheckCircle2, RotateCw, Calendar, ChevronRight } from 'lucide-react';
+import { CheckCircle2, RotateCw, Calendar, ChevronRight, Swords } from 'lucide-react';
+import { Chess } from 'chess.js';
 import { useTokens } from '../theme/ThemeContext';
 import { fonts } from '../theme/tokens';
 import { Card } from './primitives/Card';
@@ -22,6 +23,7 @@ export function EndOfLineSummary({
   drillResult,
   dueCount,
   nextLineInFamily,
+  playerColor,
   onRestart,
   onPickLine,
 }: {
@@ -29,10 +31,23 @@ export function EndOfLineSummary({
   drillResult: DrillResult;
   dueCount: number;
   nextLineInFamily: Line | null;
+  /** Drill color — the side the user plays out vs the engine. */
+  playerColor: 'white' | 'black';
   onRestart: () => void;
   onPickLine: (lineId: string) => void;
 }) {
   const t = useTokens();
+
+  // Replay the line to its final position so the user can play it out vs engine.
+  const endFen = ((): string | null => {
+    try {
+      const b = new Chess();
+      for (const m of line.moves) b.move(m);
+      return b.fen();
+    } catch {
+      return null;
+    }
+  })();
   const seconds = Math.round(drillResult.duration_ms / 1000);
 
   return (
@@ -109,6 +124,16 @@ export function EndOfLineSummary({
             <Link to="/drill?queue=due" style={{ textDecoration: 'none' }}>
               <button style={summaryPrimaryBtn(t)}>
                 <Calendar size={13} /> Drill {dueCount} due
+              </button>
+            </Link>
+          )}
+          {endFen && (
+            <Link
+              to={`/play?fen=${encodeURIComponent(endFen)}&color=${playerColor}&label=${encodeURIComponent(line.name)}`}
+              style={{ textDecoration: 'none' }}
+            >
+              <button style={summarySoftBtn(t)}>
+                <Swords size={13} /> Play vs engine
               </button>
             </Link>
           )}

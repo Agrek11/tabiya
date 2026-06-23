@@ -30,13 +30,21 @@ type AnalyzeMsg = {
   fen: string;
   opts: { depth?: number; multipv?: number; movetimeMs?: number };
 };
+type PlayMsg = {
+  type: 'play';
+  id: string;
+  fen: string;
+  elo: number;
+  movetimeMs?: number;
+};
 type StopMsg = { type: 'stop' };
-type InboundMsg = InitMsg | AnalyzeMsg | StopMsg;
+type InboundMsg = InitMsg | AnalyzeMsg | PlayMsg | StopMsg;
 
 type ReadyMsg = { type: 'ready' };
 type AnalysisMsg = { type: 'analysis'; id: string; analysis: EngineAnalysis };
+type MoveMsg = { type: 'move'; id: string; bestmove: string };
 type ErrorMsg = { type: 'error'; id?: string; message: string };
-type OutboundMsg = ReadyMsg | AnalysisMsg | ErrorMsg;
+type OutboundMsg = ReadyMsg | AnalysisMsg | MoveMsg | ErrorMsg;
 
 const ctx = self as unknown as Worker;
 function post(msg: OutboundMsg): void {
@@ -50,10 +58,13 @@ let engineName = 'Stockfish';
 
 type Job = {
   id: string;
+  kind: 'analyze' | 'play';
   fen: string;
   depth: number;
   multipv: number;
   movetimeMs?: number;
+  /** Target Elo for 'play' jobs. */
+  elo?: number;
 };
 
 const queue: Job[] = [];
@@ -100,9 +111,24 @@ function onLine(line: string): void {
     return;
   }
   if (line.startsWith('bestmove')) {
-    finishJob();
+    if (running?.kind === 'play') finishPlay(line);
+    else finishJob();
     return;
   }
+}
+
+/** Resolve a 'play' job from the `bestmove <uci>` line → SAN move. */
+function finishPlay(line: string): void {
+  const job = running;
+  if (!job) return;
+  const uci = line.split(/\s+/)[1];
+  let bestmove = '';
+  if (uci && uci !== '(none)') bestmove = uciLineToSan(job.fen, [uci])[0] ?? '';
+  post({ type: 'move', id: job.id, bestmove });
+  running = null;
+  pvByIndex = new Map();
+  seenDepth = 0;
+  drain();
 }
 
 /** Parse one `info ... multipv K ... score cp|mate V ... pv m1 m2 ...` line. */
@@ -193,10 +219,35 @@ function drain(): void {
   running = job;
   pvByIndex = new Map();
   seenDepth = 0;
+  if (job.kind === 'play') {
+    applyStrength(job.elo ?? 1500);
+    engine.postMessage(`position fen ${job.fen}`);
+    engine.postMessage(`go movetime ${job.movetimeMs ?? 400}`);
+    return;
+  }
+  // analyze — always reset to full strength; the worker is shared with the
+  // Coach, and a prior 'play' job may have capped UCI_Elo / Skill Level.
+  engine.postMessage('setoption name UCI_LimitStrength value false');
+  engine.postMessage('setoption name Skill Level value 20');
   engine.postMessage(`setoption name MultiPV value ${job.multipv}`);
   engine.postMessage(`position fen ${job.fen}`);
   const movetime = job.movetimeMs ? ` movetime ${job.movetimeMs}` : '';
   engine.postMessage(`go depth ${job.depth}${movetime}`);
+}
+
+/** Map a target Elo to Stockfish strength options. UCI_Elo's floor is ~1320;
+ *  weaker tiers fall back to Skill Level (0–5) since UCI_Elo can't go lower. */
+function applyStrength(elo: number): void {
+  if (!engine) return;
+  if (elo >= 1320) {
+    engine.postMessage('setoption name Skill Level value 20');
+    engine.postMessage('setoption name UCI_LimitStrength value true');
+    engine.postMessage(`setoption name UCI_Elo value ${Math.min(elo, 3190)}`);
+  } else {
+    engine.postMessage('setoption name UCI_LimitStrength value false');
+    const skill = elo <= 800 ? 0 : Math.round(((elo - 800) / (1320 - 800)) * 5);
+    engine.postMessage(`setoption name Skill Level value ${skill}`);
+  }
 }
 
 // --- inbound dispatch ------------------------------------------------------
@@ -210,10 +261,24 @@ ctx.addEventListener('message', (e: MessageEvent<InboundMsg>) => {
   if (msg.type === 'analyze') {
     queue.push({
       id: msg.id,
+      kind: 'analyze',
       fen: msg.fen,
       depth: msg.opts.depth ?? 20,
       multipv: msg.opts.multipv ?? 3,
       movetimeMs: msg.opts.movetimeMs,
+    });
+    drain();
+    return;
+  }
+  if (msg.type === 'play') {
+    queue.push({
+      id: msg.id,
+      kind: 'play',
+      fen: msg.fen,
+      depth: 0,
+      multipv: 1,
+      movetimeMs: msg.movetimeMs,
+      elo: msg.elo,
     });
     drain();
     return;

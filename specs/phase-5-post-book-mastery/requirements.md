@@ -190,17 +190,59 @@ Use the existing transposition index to drill a known position reached via an
 alternate move order; on failure, contrast the move orders (same structure,
 same plan). Content-limited to catalog transpositions (~85 shared positions).
 
----
+### 5g — Gambit branches / diversions (drill immersion) — idea 2026-06-19
 
-## TIER 4 (later)
+While drilling/explaining a mainline, surface "⚔ Gambit available here" at any
+position from which a **gambit-category** line branches — a fun, immersive
+divert into a sharper continuation of the *same* opening (e.g. Italian Two
+Knights → Fried Liver; Italian → Evans Gambit).
 
-### 5b — Stress Test (sparring) — REDESIGN REQUIRED
+**Mechanism (reuses the moat):** per ply, hash the position → query the Phase-2
+transposition index (`fen-hash → lineIds through that position`) → filter the
+hits to lines whose family/line is gambit-category → render a chip linking to
+`/drill?line=<gambitId>` (or a future in-place branch). Deterministic, no new
+infra — just the transposition index + the catalog's gambit tagging.
 
-Play a chosen variation vs the engine for ~10 plies past book. **Difficulty
-must NOT be peak Stockfish** (3600 Elo crushes everyone → demoralizing). Cap
-strength (UCI_LimitStrength ~2000–2200) and make the win condition "stay above
-−1.5 / don't blunder," not "beat the engine." Biggest build (a new
-play-vs-engine loop). Decide after Tier 1–2.
+**Caveats:** (a) coverage — needs gambit lines that actually share early
+positions with the drilled mainlines; may require curating a few branch points
+into the catalog. (b) the index keys by exact position, so a gambit that
+*diverges* (different move) from a shared position is found at the shared node;
+a gambit reachable only by a different earlier move order won't show. Tier 3,
+post-MVP.
+
+### 5b — Play vs Engine / Stress Test (sparring)
+
+**Entry point (requested 2026-06-19):** from the end-of-line summary, a "Play
+this out vs the engine" CTA — once a drill completes, the user keeps playing the
+position against Stockfish instead of stopping at book end. (Also reachable as a
+standalone "play any position" later, shared with the universal coach surface.)
+
+**Strength tiers** via Stockfish WASM `UCI_LimitStrength` + `UCI_Elo`:
+
+```
+Tier        UCI_Elo        notes
+Beginner    800            blunders freely
+Casual      1200
+Club        1700
+Strong      2000
+Expert      2200
+Master+     2500+ (cap)    LimitStrength off above this = full engine
+```
+
+A dropdown picks the tier (mirrors the engine-preset pattern). Default to a
+mid tier (~1500–1700), not peak — 3600 Elo crushes everyone and demoralizes.
+
+**Win condition** is "stay above −1.5 / don't blunder" or "convert your edge",
+NOT "beat the engine" — keeps it instructive, not punishing. Show the eval bar
++ per-move cp-loss feedback (reuses the 5a/5d eval pass) so the user sees where
+they slipped.
+
+**Build:** a new interactive play-vs-engine loop (the biggest single Phase-5
+build): board accepts user moves, engine replies at the chosen Elo via the
+existing Stockfish worker, with resign/restart/take-back. Independent of the
+runtime extractor (pure engine play) — could even ship earlier than the
+analysis features if prioritized. Tier the difficulty UI first, deepen feedback
+(cp-loss, "you could have played X") after.
 
 ### 5e — Feature-Tag Search
 

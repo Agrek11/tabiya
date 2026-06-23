@@ -8,6 +8,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { RepertoirePage } from './pages/RepertoirePage';
 import { GambitsPage } from './pages/GambitsPage';
 import { DrillPage } from './pages/DrillPage';
+import { PlayPage } from './pages/PlayPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LichessCallbackPage } from './pages/LichessCallbackPage';
 import { OOBPositionViewerPage } from './pages/OOBPositionViewerPage';
@@ -38,6 +39,7 @@ function App() {
                 <Route path="/repertoire" element={<RepertoirePage />} />
                 <Route path="/repertoire/gambits" element={<GambitsPage />} />
                 <Route path="/drill" element={<DrillPage />} />
+                <Route path="/play" element={<PlayPage />} />
                 {/* Orphaned placeholder route — analytics live on /insights. */}
                 <Route path="/progress" element={<Navigate to="/insights" replace />} />
                 <Route path="/insights" element={<InsightsPage />} />

@@ -41,6 +41,23 @@ export type EnginePv = {
   depth: number;
 };
 
+/** Options for a single Elo-limited engine move (play-vs-engine, 5b). */
+export type PlayOpts = {
+  /** Target playing strength in Elo. The worker maps this to UCI options
+   *  (UCI_Elo for ≥1320, Skill Level for weaker tiers). */
+  elo: number;
+  /** Think time per move in ms. Default supplied by the worker. */
+  movetimeMs?: number;
+  /** Cancellation — aborting drops this move request. */
+  signal?: AbortSignal;
+};
+
+/** Result of one `play` call. `bestmove` is SAN, or '' when no legal move
+ *  (game already over). */
+export type EngineMove = {
+  bestmove: string;
+};
+
 /** The full result of one `analyze` call. SAN at every move field. */
 export type EngineAnalysis = {
   /** The position analyzed (echoed back for cache-key + traceability). */
@@ -62,6 +79,9 @@ export type EngineAnalysis = {
 export interface ChessEngine {
   /** Analyze a FEN; resolves with SAN PVs. Rejects only on hard engine failure. */
   analyze(fen: string, opts: EngineOpts): Promise<EngineAnalysis>;
+  /** Play one move at a target Elo (play-vs-engine, 5b). Resolves with the SAN
+   *  move, or `bestmove: ''` if the position has no legal move. */
+  play(fen: string, opts: PlayOpts): Promise<EngineMove>;
   /** Stop the current search. Idempotent; safe to call when idle. */
   stop(): void;
   /** Resolves when the engine has finished its handshake and is ready. */
