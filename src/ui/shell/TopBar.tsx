@@ -20,11 +20,11 @@ import { useSRS } from '../../hooks/useSRS';
 type NavSpec = { to: string; label: string; end?: boolean };
 
 const NAV: NavSpec[] = [
-  { to: '/', label: 'Home', end: true },
-  { to: '/repertoire', label: 'Repertoire' },
-  { to: '/insights', label: 'Insights' },
+  { to: '/', label: 'Today', end: true },
+  { to: '/drill', label: 'Train' },
   { to: '/games', label: 'Games' },
-  { to: '/coach', label: 'Coach' },
+  { to: '/progress', label: 'Progress' },
+  { to: '/settings', label: 'Settings' },
 ];
 
 export function TopBar() {
@@ -94,7 +94,7 @@ export function TopBar() {
       </div>
 
       {/* CENTER — nav */}
-      <nav
+      <nav className="tabiya-primary-nav" aria-label="Primary navigation"
         style={{
           flex: 1,
           display: 'flex',

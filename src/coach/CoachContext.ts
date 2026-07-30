@@ -11,6 +11,8 @@
 import type { EngineAnalysis } from '../engine/ChessEngine';
 import type { EnginePresetName } from '../engine/presets';
 import type { PositionFeatures } from './features/PositionFeatures';
+import type { SemanticContext } from './semantic/extractSemanticContext';
+import type { OpeningKgNode } from './kg/lookupKgNode';
 
 export type PlyHistoryEntry = {
   san: string;
@@ -37,9 +39,9 @@ export type CoachContext = {
   /** 4c — tactical + positional motifs. */
   motifs?: unknown;
   /** 4d — move-purpose taxonomy tags. */
-  semanticTags?: unknown;
+  semanticTags?: SemanticContext['purposes'];
   /** 4d — multi-ply plan from deep-PV walk. */
-  plan?: unknown;
+  plan?: SemanticContext['shortPlan'];
   /** 4d — opening Knowledge-Graph node. */
-  kgNode?: unknown;
+  kgNode?: OpeningKgNode | null;
 };

@@ -73,12 +73,8 @@ def _adjacent_files(
 ) -> list[str]:
     result = []
     for f in range(max(0, chess.square_file(king) - 1), min(7, chess.square_file(king) + 1) + 1):
-        white_pawns = any(
-            chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.WHITE)
-        )
-        black_pawns = any(
-            chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.BLACK)
-        )
+        white_pawns = any(chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.WHITE))
+        black_pawns = any(chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.BLACK))
         if kind == "open" and not white_pawns and not black_pawns:
             result.append(chess.FILE_NAMES[f])
         elif kind == "half-open" and color is not None:

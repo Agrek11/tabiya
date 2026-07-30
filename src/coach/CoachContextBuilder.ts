@@ -10,6 +10,8 @@ import type { EngineAnalysis } from '../engine/ChessEngine';
 import type { EnginePresetName } from '../engine/presets';
 import type { CoachContext, PlyHistoryEntry } from './CoachContext';
 import type { PositionFeatures } from './features/PositionFeatures';
+import { extractSemanticContext } from './semantic/extractSemanticContext';
+import type { OpeningKgNode } from './kg/lookupKgNode';
 
 export const MAX_HISTORY_PLIES = 6;
 
@@ -22,11 +24,13 @@ export type CoachContextInput = {
   plyIndex?: number;
   /** 4b — precomputed features for this position, or null when off-book. */
   features?: PositionFeatures | null;
+  kgNode?: OpeningKgNode | null;
 };
 
 export const CoachContextBuilder = {
   build(input: CoachContextInput): CoachContext {
     const history = input.history.slice(-MAX_HISTORY_PLIES);
+    const semantic = extractSemanticContext(input.engine);
     return {
       engine: input.engine,
       history,
@@ -34,6 +38,9 @@ export const CoachContextBuilder = {
       lineId: input.lineId,
       plyIndex: input.plyIndex,
       features: input.features ?? null,
+      semanticTags: semantic.purposes,
+      plan: semantic.shortPlan,
+      kgNode: input.kgNode ?? null,
     };
   },
 };

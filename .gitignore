@@ -57,3 +57,5 @@ Screenshot*.jpeg
 /test-results/
 /playwright-report/
 /playwright/.cache/
+# Wrangler local state
+.wrangler/

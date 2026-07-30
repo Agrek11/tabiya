@@ -58,9 +58,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    print(
-        f"GATE OK: {count}/{args.threshold} openings approved in {args.curated}."
-    )
+    print(f"GATE OK: {count}/{args.threshold} openings approved in {args.curated}.")
     return 0
 
 

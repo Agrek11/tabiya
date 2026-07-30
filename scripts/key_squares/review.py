@@ -55,8 +55,8 @@ class Decision:
     """One reviewer decision for one draft."""
 
     kind: Literal["accept", "reject", "skip"]
-    draft: dict[str, Any]            # KeySquareDraft.model_dump()
-    note: str = ""                   # reject-only free-text note
+    draft: dict[str, Any]  # KeySquareDraft.model_dump()
+    note: str = ""  # reject-only free-text note
 
 
 @dataclass
@@ -95,10 +95,10 @@ def save_state(state: ReviewState, path: Path = STATE_FILE) -> None:
 # ANSI 256-color background codes for each role. Falls back to bracket markers
 # when TERM doesn't advertise color (R3.3).
 ROLE_BG_COLOR: dict[str, int] = {
-    "outpost": 22,    # green
-    "control": 27,    # blue
-    "tension": 178,   # amber
-    "weak": 196,      # red
+    "outpost": 22,  # green
+    "control": 27,  # blue
+    "tension": 178,  # amber
+    "weak": 196,  # red
 }
 
 ROLE_LABEL: dict[str, str] = {
@@ -241,9 +241,7 @@ def commit_decisions(
         }
         # De-dup on (square, role, for_color) tuple — re-running review never
         # silently doubles entries.
-        existing_keys = {
-            (s["square"], s["role"], s["for_color"]) for s in entry.get("squares", [])
-        }
+        existing_keys = {(s["square"], s["role"], s["for_color"]) for s in entry.get("squares", [])}
         for d in accepts:
             key = (d.draft["square"], d.draft["role"], d.draft["for_color"])
             if key in existing_keys:
@@ -277,7 +275,7 @@ def _prompt_action(input_fn: Any, draft: KeySquareDraft) -> str:
     print(f"  Draft: {draft.square} {draft.role} for_color={draft.for_color}")
     print(f"    {draft.rationale}")
     print(f"    source: {draft.source_url}")
-    return (input_fn("  [a]ccept / [e]dit / [r]eject / [s]kip / [q]uit: ").strip().lower() or "s")
+    return input_fn("  [a]ccept / [e]dit / [r]eject / [s]kip / [q]uit: ").strip().lower() or "s"
 
 
 def review_one(
@@ -304,9 +302,7 @@ def review_one(
     ]
 
     print(f"\n== {record['opening_slug']} — {record.get('opening_name', '')} ==")
-    print(
-        render_with_highlights(record.get("fen_canonical", ""), drafts)
-    )
+    print(render_with_highlights(record.get("fen_canonical", ""), drafts))
     print()
 
     for i, draft in enumerate(drafts):
@@ -324,15 +320,12 @@ def review_one(
                     decisions.append(Decision(kind="accept", draft=edited.model_dump()))
                 case "r":
                     note = input_fn("  note: ")
-                    decisions.append(
-                        Decision(kind="reject", draft=draft.model_dump(), note=note)
-                    )
+                    decisions.append(Decision(kind="reject", draft=draft.model_dump(), note=note))
                 case "s":
                     decisions.append(Decision(kind="skip", draft=draft.model_dump()))
                 case "q":
                     state.partial[str(path)] = [
-                        {"kind": d.kind, "draft": d.draft, "note": d.note}
-                        for d in decisions
+                        {"kind": d.kind, "draft": d.draft, "note": d.note} for d in decisions
                     ]
                     save_state(state, state_path)
                     return False
@@ -346,9 +339,7 @@ def review_one(
         save_state(state, state_path)
 
     if not dry_run:
-        commit_decisions(
-            record, decisions, curated_path=curated_path, rejected_dir=rejected_dir
-        )
+        commit_decisions(record, decisions, curated_path=curated_path, rejected_dir=rejected_dir)
     state.completed.append(str(path))
     state.partial.pop(str(path), None)
     save_state(state, state_path)

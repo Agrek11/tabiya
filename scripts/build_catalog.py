@@ -32,6 +32,11 @@ from pathlib import Path  # noqa: E402
 from .tabiya_build.curated_v2_builder import build as build_curated_v2  # noqa: E402
 from .tabiya_build.explorer import ExplorerClient  # noqa: E402
 from .tabiya_build.extender import extend_with_branch, seed_to_san  # noqa: E402
+from .tabiya_build.features.sidecar import (  # noqa: E402
+    build_features_index,
+    read_previous_sidecar,
+    write_features_sidecar,
+)
 from .tabiya_build.flat_tsv_builder import build_from_tsv_rows  # noqa: E402
 from .tabiya_build.key_squares import BuildError as KeySquaresBuildError  # noqa: E402
 from .tabiya_build.key_squares import (  # noqa: E402
@@ -60,11 +65,6 @@ from .tabiya_build.whitelist import (  # noqa: E402
     TARGET_FAMILIES,
     OpeningSpec,
     filter_openings,
-)
-from .tabiya_build.features.sidecar import (  # noqa: E402
-    build_features_index,
-    read_previous_sidecar,
-    write_features_sidecar,
 )
 from .tabiya_build.writer import build_version, print_summary, write_catalog  # noqa: E402
 
@@ -150,9 +150,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
-def _attach_key_squares(
-    openings: list[Opening], args: argparse.Namespace
-) -> int:
+def _attach_key_squares(openings: list[Opening], args: argparse.Namespace) -> int:
     """Phase 2a — load curated key_squares.yml, license-audit, join onto Openings.
 
     Returns 0 on success, 1 on a build invariant violation. Skips silently when
@@ -185,15 +183,11 @@ def _attach_key_squares(
     for slug, records in joined.items():
         opening = by_id[slug]
         opening.key_squares = [OpeningKeySquare.model_validate(r) for r in records]
-    logger.info(
-        "Attached key_squares to %d opening(s) from %s", len(joined), args.key_squares
-    )
+    logger.info("Attached key_squares to %d opening(s) from %s", len(joined), args.key_squares)
     return 0
 
 
-def _emit_transposition_sidecar(
-    lines: list[Line], args: argparse.Namespace
-) -> int:
+def _emit_transposition_sidecar(lines: list[Line], args: argparse.Namespace) -> int:
     """Phase 2a — build + write public/transpositions.json sidecar.
 
     Returns 0 on success. Skipped when --skip-transpositions is set.

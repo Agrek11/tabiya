@@ -25,7 +25,7 @@ from typing import Any
 
 import chess
 
-from .tactics_geometry import _ray_between, _slides_along, _overloaded, _pins_and_xrays
+from .tactics_geometry import _overloaded, _pins_and_xrays, _ray_between, _slides_along
 from .util import PIECE_VALUES_CP, piece_ref
 
 SLIDERS = (chess.BISHOP, chess.ROOK, chess.QUEEN)
@@ -40,8 +40,13 @@ def motifs(board: chess.Board) -> dict[str, Any]:
         "skewers": _skewers(board),
         "batteries": _batteries(board),
         "pins": [
-            {"by": p["by"], "pinned": p["pinned"], "to": p["to"],
-             "kind": "absolute" if p["absolute"] else "relative", "confidence": HIGH}
+            {
+                "by": p["by"],
+                "pinned": p["pinned"],
+                "to": p["to"],
+                "kind": "absolute" if p["absolute"] else "relative",
+                "confidence": HIGH,
+            }
             for p in pins
         ],
         "removing_defender": _removing_defender(board),
@@ -50,6 +55,7 @@ def motifs(board: chess.Board) -> dict[str, Any]:
 
 
 # --- static validation helpers ---------------------------------------------
+
 
 def _value(board: chess.Board, sq: chess.Square) -> int:
     piece = board.piece_at(sq)
@@ -92,6 +98,7 @@ def _is_hanging(board: chess.Board, target: chess.Square, by_color: chess.Color)
 
 # --- motifs -----------------------------------------------------------------
 
+
 def _is_valuable_target(board: chess.Board, sq: chess.Square, attacker_color: chess.Color) -> bool:
     piece = board.piece_at(sq)
     if piece is None or piece.color == attacker_color:
@@ -107,12 +114,12 @@ def _forks(board: chess.Board) -> list[dict[str, Any]]:
     for sq, piece in board.piece_map().items():
         if piece.piece_type in (chess.KING,):
             continue
-        targets = sorted(
-            t for t in board.attacks(sq) if _is_valuable_target(board, t, piece.color)
-        )
+        targets = sorted(t for t in board.attacks(sq) if _is_valuable_target(board, t, piece.color))
         # count "valuable enough": pieces (non-pawn) + king; need ≥2 with at
         # least one a real piece (pawn-only double-attack is weak).
-        strong = [t for t in targets if (board.piece_at(t) and board.piece_at(t).piece_type != chess.PAWN)]  # type: ignore[union-attr]
+        strong = [
+            t for t in targets if (board.piece_at(t) and board.piece_at(t).piece_type != chess.PAWN)
+        ]  # type: ignore[union-attr]
         if len(targets) >= 2 and len(strong) >= 1:
             out.append(
                 {
@@ -160,8 +167,8 @@ def _first_behind(
     board: chess.Board, slider: chess.Square, front: chess.Square, color: chess.Color
 ) -> chess.Square | None:
     """First piece of `color` continuing past `front` away from `slider`."""
-    df = (chess.square_file(front) - chess.square_file(slider))
-    dr = (chess.square_rank(front) - chess.square_rank(slider))
+    df = chess.square_file(front) - chess.square_file(slider)
+    dr = chess.square_rank(front) - chess.square_rank(slider)
     step_f = (df > 0) - (df < 0)
     step_r = (dr > 0) - (dr < 0)
     f, r = chess.square_file(front) + step_f, chess.square_rank(front) + step_r
@@ -199,7 +206,9 @@ def _batteries(board: chess.Board) -> list[dict[str, Any]]:
                 if target is None:
                     continue
                 pieces = sorted([piece_ref(board, a), piece_ref(board, b)])
-                out.append({"pieces": pieces, "target": piece_ref(board, target), "confidence": HIGH})
+                out.append(
+                    {"pieces": pieces, "target": piece_ref(board, target), "confidence": HIGH}
+                )
     return sorted(out, key=lambda m: tuple(m["pieces"]))
 
 
@@ -239,5 +248,11 @@ def _hanging(board: chess.Board) -> list[dict[str, Any]]:
         enemy = not piece.color
         if _is_hanging(board, sq, enemy):
             attacker = min(board.attackers(enemy, sq), key=lambda a: _value(board, a))
-            out.append({"piece": piece_ref(board, sq), "by": piece_ref(board, attacker), "confidence": HIGH})
+            out.append(
+                {
+                    "piece": piece_ref(board, sq),
+                    "by": piece_ref(board, attacker),
+                    "confidence": HIGH,
+                }
+            )
     return sorted(out, key=lambda m: m["piece"])

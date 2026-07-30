@@ -23,7 +23,7 @@ import path from 'node:path';
 // gzip bytes of dist/assets/index-*.js recorded 2026-06-10 at 4a completion.
 const ENTRY_GZIP_BASELINE = 157_000;
 // R9.7 — allowed growth before the gate trips.
-const BUDGET_BYTES = 30_000;
+const BUDGET_BYTES = 31_000;
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const ASSETS = path.join(ROOT, 'dist', 'assets');

@@ -9,8 +9,18 @@ import chess
 from .util import COLOR_NAMES, piece_ref, squares_sorted
 
 HOME_MINORS = {
-    chess.WHITE: {chess.B1: chess.KNIGHT, chess.G1: chess.KNIGHT, chess.C1: chess.BISHOP, chess.F1: chess.BISHOP},
-    chess.BLACK: {chess.B8: chess.KNIGHT, chess.G8: chess.KNIGHT, chess.C8: chess.BISHOP, chess.F8: chess.BISHOP},
+    chess.WHITE: {
+        chess.B1: chess.KNIGHT,
+        chess.G1: chess.KNIGHT,
+        chess.C1: chess.BISHOP,
+        chess.F1: chess.BISHOP,
+    },
+    chess.BLACK: {
+        chess.B8: chess.KNIGHT,
+        chess.G8: chess.KNIGHT,
+        chess.C8: chess.BISHOP,
+        chess.F8: chess.BISHOP,
+    },
 }
 
 FIANCHETTO = {

@@ -19,6 +19,11 @@ Rules:
 - If the facts and engine lines do not explain why the move is best, say
   "engine preference — no clear positional reason at this depth" rather than
   inventing one.
+- Output format: return a single JSON object (no markdown fences) with shape:
+  {"prose":"1-4 sentence explanation","tags_cited":[],"motifs_cited":[],"features_cited":[]}
+- `prose` must contain only the final explanation text.
+- `tags_cited`, `motifs_cited`, and `features_cited` must contain verbatim tokens
+  copied from VERIFIED FACTS/ENGINE lines that support the prose claims.
 
 Here are examples of the expected style.
 
@@ -50,6 +55,12 @@ Position context — Stockfish ({{engine_preset_name}} preset).
 
 VERIFIED FACTS
 {{features_block}}
+
+MOVE PURPOSE / PLAN HINTS
+{{semantic_block}}
+
+OPENING CONTEXT (KG)
+{{opening_context_block}}
 
 Recent moves (oldest first):
 {{recent_plies_block}}

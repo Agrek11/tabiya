@@ -88,4 +88,35 @@ describe('TranspositionBanner', () => {
     fireEvent.click(getByTestId('transposition-dismiss'));
     expect(queryByTestId('transposition-banner')).toBeNull();
   });
+
+  it('renders roulette action when multiple matches exist', () => {
+    const onRoulette = vi.fn();
+    const { getByTestId } = renderWithProviders(
+      <TranspositionBanner
+        matches={[
+          { lineId: 'line-a', displayName: 'Line A' },
+          { lineId: 'line-b', displayName: 'Line B' },
+        ]}
+        truncatedCount={0}
+        onJump={() => {}}
+        onRoulette={onRoulette}
+      />
+    );
+    fireEvent.click(getByTestId('transposition-roulette'));
+    expect(onRoulette).toHaveBeenCalledOnce();
+  });
+
+  it('renders gambit diversion action when callback provided', () => {
+    const onDiversion = vi.fn();
+    const { getByTestId } = renderWithProviders(
+      <TranspositionBanner
+        matches={[{ lineId: 'line-a', displayName: 'Line A' }]}
+        truncatedCount={0}
+        onJump={() => {}}
+        onDiversion={onDiversion}
+      />
+    );
+    fireEvent.click(getByTestId('transposition-diversion'));
+    expect(onDiversion).toHaveBeenCalledOnce();
+  });
 });

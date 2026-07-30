@@ -14,6 +14,7 @@ import { Sparkles } from 'lucide-react';
 import { useTokens } from '../../theme/ThemeContext';
 import { fonts } from '../../theme/tokens';
 import { CoachModal } from './CoachModal';
+import { WhyNotMovePanel } from './WhyNotMovePanel';
 
 export interface CoachSlotProps {
   gameId: string;
@@ -62,6 +63,11 @@ export function CoachSlot(props: CoachSlotProps) {
           onClose={() => setOpen(false)}
         />
       ) : null}
+      <WhyNotMovePanel
+        fenAtOOB={props.fenAtOOB}
+        playedSAN={props.playedSAN}
+        expectedSANs={props.expectedSANs}
+      />
     </div>
   );
 }

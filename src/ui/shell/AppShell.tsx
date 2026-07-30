@@ -15,6 +15,7 @@ import { type PropsWithChildren } from 'react';
 import { useTokens } from '../../theme/ThemeContext';
 import { PageSidebar } from './PageSidebar';
 import { TopBar } from './TopBar';
+import { MobileNavigation } from './MobileNavigation';
 
 export function AppShell({ children }: PropsWithChildren) {
   const t = useTokens();
@@ -29,10 +30,11 @@ export function AppShell({ children }: PropsWithChildren) {
         color: t.ink,
       }}
     >
+      <a className="tabiya-skip-link" href="#main-content">Skip to main content</a>
       <TopBar />
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <PageSidebar />
-        <main
+        <main id="main-content" tabIndex={-1}
           style={{
             flex: 1,
             display: 'flex',
@@ -44,6 +46,7 @@ export function AppShell({ children }: PropsWithChildren) {
           {children}
         </main>
       </div>
+      <MobileNavigation />
     </div>
   );
 }

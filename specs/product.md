@@ -35,3 +35,16 @@ Not targeted: tournament platforms, multiplayer chess, broadcast tools.
 - Weekend-only build pace; never blocks anything else
 - AI features must be real model work, not GPT API wrapper
 - Phase 5+ stretch: Confidential Containers (Kata/CoCo) variant for confidential AI inference — synergy with OSS lane work
+
+## Deferred UX Note (Post-hardening)
+
+To improve perceived "wow" simplicity after current hardening/validation work:
+
+- Add a single primary first-session CTA (`Start 3-minute training`).
+- Keep first flow opinionated (preselected line, minimal choices).
+- Hide advanced setup until first success (progressive disclosure).
+- Keep one clear next action per screen.
+- Rename technical labels to user-outcome language (e.g., "Mistakes to fix now").
+- End first loop with an immediate payoff card (`You improved X` + next step).
+
+Status: intentionally deferred until product validation and reliability pass are complete.

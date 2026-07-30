@@ -48,8 +48,7 @@ def files_diagonals(board: chess.Board) -> dict[str, Any]:
         "rooks_on_half_open": rooks_half,
         "rook_on_seventh": seventh,
         "long_diagonals": {
-            diag: _diagonal_control(board, squares)
-            for diag, squares in LONG_DIAGONALS.items()
+            diag: _diagonal_control(board, squares) for diag, squares in LONG_DIAGONALS.items()
         },
     }
 

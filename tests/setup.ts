@@ -1,3 +1,5 @@
+import 'fake-indexeddb/auto';
+
 /**
  * Vitest test setup — runs once before any test file loads.
  *

@@ -80,8 +80,7 @@ def _backward(board: chess.Board, color: chess.Color) -> list[chess.Square]:
             continue
         stop = chess.square(file, stop_rank)
         attacked_by_enemy_pawn = any(
-            board.piece_at(a)
-            and board.piece_at(a).piece_type == chess.PAWN  # type: ignore[union-attr]
+            board.piece_at(a) and board.piece_at(a).piece_type == chess.PAWN  # type: ignore[union-attr]
             for a in board.attackers(not color, stop)
         )
         if not attacked_by_enemy_pawn:
@@ -136,7 +135,7 @@ def _islands(board: chess.Board, color: chess.Color) -> int:
     if not files:
         return 0
     islands = 1
-    for prev, cur in zip(files, files[1:]):
+    for prev, cur in zip(files, files[1:], strict=False):
         if cur - prev > 1:
             islands += 1
     return islands
@@ -163,9 +162,7 @@ def _chains(board: chess.Board, color: chess.Color) -> list[dict[str, str]]:
         while path[-1] in links:
             path.append(sorted(links[path[-1]])[0])
         if len(path) >= 2:
-            chains.append(
-                {"base": chess.square_name(base), "head": chess.square_name(path[-1])}
-            )
+            chains.append({"base": chess.square_name(base), "head": chess.square_name(path[-1])})
     return sorted(chains, key=lambda c: c["base"])
 
 
@@ -185,7 +182,10 @@ def _iqp(board: chess.Board) -> str | None:
     for color, name in COLOR_NAMES.items():
         isolated = _isolated(board, color)
         d_isolated = [s for s in isolated if chess.square_file(s) == 3]
-        if d_isolated and len([s for s in pawns_of(board, color) if chess.square_file(s) == 3]) == 1:
+        if (
+            d_isolated
+            and len([s for s in pawns_of(board, color) if chess.square_file(s) == 3]) == 1
+        ):
             return name
     return None
 
@@ -199,8 +199,10 @@ def _hanging_duo(board: chess.Board) -> str | None:
             continue
         c_pawns = [s for s in pawns_of(board, color) if chess.square_file(s) == 2]
         d_pawns = [s for s in pawns_of(board, color) if chess.square_file(s) == 3]
-        if len(c_pawns) == 1 and len(d_pawns) == 1 and (
-            chess.square_rank(c_pawns[0]) == chess.square_rank(d_pawns[0])
+        if (
+            len(c_pawns) == 1
+            and len(d_pawns) == 1
+            and (chess.square_rank(c_pawns[0]) == chess.square_rank(d_pawns[0]))
         ):
             return name
     return None

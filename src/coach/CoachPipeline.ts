@@ -18,15 +18,23 @@ import type { PlyHistoryEntry } from './CoachContext';
 import { getLLMClient } from './container';
 import type { LLMResponse } from './LLMClient';
 import { SidecarFeatureExtractor } from './features/SidecarFeatureExtractor';
+import { RuntimeFeatureExtractor } from './features/RuntimeFeatureExtractor';
+import { CompositeFeatureExtractor } from './features/CompositeFeatureExtractor';
 import type { FeatureExtractor } from './features/FeatureExtractor';
 import { renderFeaturesBlock } from './features/renderFeaturesBlock';
+import { validateCitations } from './CitationValidator';
+import { renderSemanticBlock } from './semantic/extractSemanticContext';
+import { lookupKgNode, renderKgBlock } from './kg/lookupKgNode';
 import promptV1Raw from '../../prompts/coach/v1.txt?raw';
 import promptV2Raw from '../../prompts/coach/v2.txt?raw';
 
 export type PromptVersion = 'v1' | 'v2';
 
 /** Module-level singleton; swappable for tests. */
-let featureExtractor: FeatureExtractor = new SidecarFeatureExtractor();
+let featureExtractor: FeatureExtractor = new CompositeFeatureExtractor(
+  new SidecarFeatureExtractor(),
+  new RuntimeFeatureExtractor(),
+);
 export function _setFeatureExtractorForTesting(fx: FeatureExtractor): void {
   featureExtractor = fx;
 }
@@ -94,13 +102,23 @@ function renderUserPrompt(
     recent_plies_block: string;
     engine_preset_name: string;
     features_block?: string;
+    semantic_block?: string;
+    opening_context_block?: string;
   },
 ): string {
   return template
     .replaceAll('{{engine_block}}', vars.engine_block)
     .replaceAll('{{recent_plies_block}}', vars.recent_plies_block)
     .replaceAll('{{engine_preset_name}}', vars.engine_preset_name)
-    .replaceAll('{{features_block}}', vars.features_block ?? '');
+    .replaceAll('{{features_block}}', vars.features_block ?? '')
+    .replaceAll('{{semantic_block}}', vars.semantic_block ?? '')
+    .replaceAll('{{opening_context_block}}', vars.opening_context_block ?? '(none)');
+}
+
+function preferStructuredProse(resp: LLMResponse): LLMResponse {
+  const prose = resp.parsed?.prose?.trim();
+  if (!prose) return resp;
+  return { ...resp, text: prose };
 }
 
 // --- pipeline --------------------------------------------------------------
@@ -129,6 +147,7 @@ export const CoachPipeline = {
     }
 
     // Step 3 — context.
+    const kgNode = await lookupKgNode(input.lineId);
     const ctx = CoachContextBuilder.build({
       engine,
       history: input.history,
@@ -136,10 +155,16 @@ export const CoachPipeline = {
       lineId: input.lineId,
       plyIndex: input.plyIndex,
       features,
+      kgNode,
     });
 
     // Prompt selection: v2 when we have a non-empty features block, else v1.
     const featuresBlock = ctx.features ? renderFeaturesBlock(ctx.features) : '';
+    const semanticBlock = renderSemanticBlock({
+      purposes: ctx.semanticTags ?? [],
+      shortPlan: ctx.plan ?? [],
+    });
+    const openingContextBlock = renderKgBlock(ctx.kgNode ?? null);
     const useV2 = featuresBlock.length > 0;
     const tpl = useV2 ? V2 : V1;
     const promptVersion: PromptVersion = useV2 ? 'v2' : 'v1';
@@ -147,21 +172,39 @@ export const CoachPipeline = {
     // Step 4 — optional LLM narration (degraded path = llm undefined).
     let llm: LLMResponse | undefined;
     const client = getLLMClient();
+    const engineBlock = renderEngineBlock(ctx.engine);
     if (client) {
       try {
         if (await client.available()) {
           const userPrompt = renderUserPrompt(tpl.userTemplate, {
-            engine_block: renderEngineBlock(ctx.engine),
+            engine_block: engineBlock,
             recent_plies_block: renderPliesBlock(ctx.history),
             engine_preset_name: ctx.enginePresetName,
             features_block: useV2 ? featuresBlock : undefined,
+            semantic_block: semanticBlock,
+            opening_context_block: openingContextBlock,
           });
-          llm = await client.complete({
+          llm = preferStructuredProse(await client.complete({
             systemPrompt: tpl.systemPrompt,
             userPrompt,
             maxTokens: 400,
             temperature: 0.6,
-          });
+          }));
+          const firstPass = validateCitations(llm, { featuresBlock, engineBlock });
+          // 4e behavior: if structured citations are present but invalid, retry once.
+          if (!firstPass.ok && firstPass.checked) {
+            const retryPrompt = `${userPrompt}
+
+Retry rule: every cited token in tags_cited/motifs_cited/features_cited must appear verbatim in VERIFIED FACTS or ENGINE LINES.`;
+            const retried = preferStructuredProse(await client.complete({
+              systemPrompt: tpl.systemPrompt,
+              userPrompt: retryPrompt,
+              maxTokens: 400,
+              temperature: 0.2,
+            }));
+            const secondPass = validateCitations(retried, { featuresBlock, engineBlock });
+            llm = secondPass.ok ? retried : undefined;
+          }
         }
       } catch (err) {
         // Article 11 — narration failure must not break the surface.

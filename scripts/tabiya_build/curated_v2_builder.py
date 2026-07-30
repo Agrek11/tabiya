@@ -21,8 +21,9 @@ import logging
 import re
 from pathlib import Path
 
-import chess
 import yaml
+
+import chess
 
 from .schema import Catalog, Family, ForkAnnotation, Line, Opening, Preset, Variation
 from .slug import IdMinter, slugify
@@ -133,8 +134,7 @@ def load_lines(path: Path) -> list[tuple[str, Line]]:
         san_moves = _parse_pgn_to_san(entry["pgn"])
         if len(san_moves) > MAX_PLY:
             raise ValueError(
-                f"line {entry['id']!r} exceeds Article 8 cap "
-                f"({len(san_moves)} > {MAX_PLY} ply)"
+                f"line {entry['id']!r} exceeds Article 8 cap ({len(san_moves)} > {MAX_PLY} ply)"
             )
         forks = [
             ForkAnnotation(
@@ -186,14 +186,10 @@ def build(
     # Validate cross-refs
     for v in variations:
         if v.family_id not in family_by_id:
-            raise ValueError(
-                f"variation {v.id!r} references unknown family_id {v.family_id!r}"
-            )
+            raise ValueError(f"variation {v.id!r} references unknown family_id {v.family_id!r}")
     for variation_id, line in line_pairs:
         if variation_id not in variation_by_id:
-            raise ValueError(
-                f"line {line.id!r} references unknown variation_id {variation_id!r}"
-            )
+            raise ValueError(f"line {line.id!r} references unknown variation_id {variation_id!r}")
 
     # Synthesize Opening per Variation
     minter = IdMinter()
@@ -225,9 +221,7 @@ def build(
     # Wire variation_ids onto Family.opening_ids in declared order
     for fam in families:
         fam.opening_ids = [
-            opening_by_variation[v.id].id
-            for v in variations
-            if v.family_id == fam.id
+            opening_by_variation[v.id].id for v in variations if v.family_id == fam.id
         ]
 
     presets = load_presets(presets_path) if presets_path is not None else []
@@ -248,9 +242,7 @@ def build_catalog(
     lines_path: Path,
     version: str,
 ) -> Catalog:
-    families, variations, openings, lines = build(
-        families_path, variations_path, lines_path
-    )
+    families, variations, openings, lines = build(families_path, variations_path, lines_path)
     return Catalog(
         version=version,
         families=families,

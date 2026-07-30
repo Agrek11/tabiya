@@ -20,31 +20,12 @@
 import { Chess } from 'chess.js';
 import Stockfish, { type StockfishInstance } from 'stockfish.wasm';
 import type { EngineAnalysis, EnginePv } from './ChessEngine';
+import type { EngineWorkerRequest, EngineWorkerResponse } from './workerProtocol';
 
 // --- message protocol (mirrored in StockfishWasmEngine) --------------------
 
-type InitMsg = { type: 'init' };
-type AnalyzeMsg = {
-  type: 'analyze';
-  id: string;
-  fen: string;
-  opts: { depth?: number; multipv?: number; movetimeMs?: number };
-};
-type PlayMsg = {
-  type: 'play';
-  id: string;
-  fen: string;
-  elo: number;
-  movetimeMs?: number;
-};
-type StopMsg = { type: 'stop' };
-type InboundMsg = InitMsg | AnalyzeMsg | PlayMsg | StopMsg;
-
-type ReadyMsg = { type: 'ready' };
-type AnalysisMsg = { type: 'analysis'; id: string; analysis: EngineAnalysis };
-type MoveMsg = { type: 'move'; id: string; bestmove: string };
-type ErrorMsg = { type: 'error'; id?: string; message: string };
-type OutboundMsg = ReadyMsg | AnalysisMsg | MoveMsg | ErrorMsg;
+type InboundMsg = EngineWorkerRequest;
+type OutboundMsg = EngineWorkerResponse;
 
 const ctx = self as unknown as Worker;
 function post(msg: OutboundMsg): void {
@@ -63,8 +44,12 @@ type Job = {
   depth: number;
   multipv: number;
   movetimeMs?: number;
+  /** Optional SAN move restriction for analyze jobs. */
+  searchMovesSan?: string[];
   /** Target Elo for 'play' jobs. */
   elo?: number;
+  cancelled?: boolean;
+  cancellationNotified?: boolean;
 };
 
 const queue: Job[] = [];
@@ -121,6 +106,10 @@ function onLine(line: string): void {
 function finishPlay(line: string): void {
   const job = running;
   if (!job) return;
+  if (job.cancelled) {
+    finishCancelled(job);
+    return;
+  }
   const uci = line.split(/\s+/)[1];
   let bestmove = '';
   if (uci && uci !== '(none)') bestmove = uciLineToSan(job.fen, [uci])[0] ?? '';
@@ -189,9 +178,29 @@ function uciLineToSan(fen: string, uciMoves: string[]): string[] {
   return san;
 }
 
+/** Convert SAN moves to UCI moves from `fen`; invalid SANs are skipped. */
+function sanToUciMoves(fen: string, sans: string[]): string[] {
+  const board = new Chess(fen);
+  const out: string[] = [];
+  for (const san of sans) {
+    try {
+      const mv = board.move(san);
+      out.push(`${mv.from}${mv.to}${mv.promotion ?? ''}`);
+      board.undo();
+    } catch {
+      // ignore invalid SAN entries for this position
+    }
+  }
+  return out;
+}
+
 function finishJob(): void {
   const job = running;
   if (!job) return;
+  if (job.cancelled) {
+    finishCancelled(job);
+    return;
+  }
 
   const pvs = [...pvByIndex.entries()]
     .sort((a, b) => a[0] - b[0])
@@ -213,6 +222,39 @@ function finishJob(): void {
   drain();
 }
 
+function finishCancelled(job: Job): void {
+  if (!job.cancellationNotified) post({ type: 'cancelled', id: job.id });
+  running = null;
+  pvByIndex = new Map();
+  seenDepth = 0;
+  drain();
+}
+
+function cancelJob(id: string): void {
+  const queuedIndex = queue.findIndex((job) => job.id === id);
+  if (queuedIndex >= 0) {
+    const [job] = queue.splice(queuedIndex, 1);
+    if (job) post({ type: 'cancelled', id: job.id });
+    return;
+  }
+  if (running?.id === id && !running.cancelled) {
+    running.cancelled = true;
+    running.cancellationNotified = true;
+    post({ type: 'cancelled', id: running.id });
+    engine?.postMessage('stop');
+  }
+}
+
+function cancelAll(): void {
+  for (const job of queue.splice(0)) post({ type: 'cancelled', id: job.id });
+  if (running && !running.cancelled) {
+    running.cancelled = true;
+    running.cancellationNotified = true;
+    post({ type: 'cancelled', id: running.id });
+    engine?.postMessage('stop');
+  }
+}
+
 function drain(): void {
   if (running || queue.length === 0 || !engine) return;
   const job = queue.shift()!;
@@ -232,7 +274,10 @@ function drain(): void {
   engine.postMessage(`setoption name MultiPV value ${job.multipv}`);
   engine.postMessage(`position fen ${job.fen}`);
   const movetime = job.movetimeMs ? ` movetime ${job.movetimeMs}` : '';
-  engine.postMessage(`go depth ${job.depth}${movetime}`);
+  const restricted = job.searchMovesSan ?? [];
+  const uciRestricted = restricted.length > 0 ? sanToUciMoves(job.fen, restricted) : [];
+  const searchMoves = uciRestricted.length > 0 ? ` searchmoves ${uciRestricted.join(' ')}` : '';
+  engine.postMessage(`go depth ${job.depth}${movetime}${searchMoves}`);
 }
 
 /** Map a target Elo to Stockfish strength options. UCI_Elo's floor is ~1320;
@@ -266,6 +311,7 @@ ctx.addEventListener('message', (e: MessageEvent<InboundMsg>) => {
       depth: msg.opts.depth ?? 20,
       multipv: msg.opts.multipv ?? 3,
       movetimeMs: msg.opts.movetimeMs,
+      searchMovesSan: msg.opts.searchMovesSan,
     });
     drain();
     return;
@@ -283,9 +329,11 @@ ctx.addEventListener('message', (e: MessageEvent<InboundMsg>) => {
     drain();
     return;
   }
-  if (msg.type === 'stop') {
-    queue.length = 0;
-    engine?.postMessage('stop');
+  if (msg.type === 'cancel') {
+    cancelJob(msg.id);
     return;
+  }
+  if (msg.type === 'stop') {
+    cancelAll();
   }
 });

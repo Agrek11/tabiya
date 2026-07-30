@@ -1,3 +1,5 @@
+import type { StructuredCoachResponse } from './parseStructuredResponse';
+
 /**
  * LLMClient — provider-agnostic narration surface (Phase 4a, Design §3).
  *
@@ -36,8 +38,8 @@ export type LLMResponse = {
   text: string;
   modelName: string;
   usage?: TokenUsage;
-  /** 4e JSON payload (tags_cited / motifs_cited / features_cited). Unused in 4a. */
-  parsed?: unknown;
+  /** 4e JSON payload (prose + tags_cited / motifs_cited / features_cited). */
+  parsed?: StructuredCoachResponse;
 };
 
 export type LLMChunk = { delta: string };

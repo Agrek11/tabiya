@@ -67,14 +67,22 @@ def test_smoke_two_openings(tmp_path: Path) -> None:
     _seed_tsv_cache(cache)
     _seed_explorer_cache(cache, selected)
 
-    rc = build_main([
-        "--source", "curated",
-        "--openings", ",".join(selected),
-        "--cache-dir", str(cache),
-        "--out", str(out),
-        "--notes", str(notes),
-        "--log-level", "WARNING",
-    ])
+    rc = build_main(
+        [
+            "--source",
+            "curated",
+            "--openings",
+            ",".join(selected),
+            "--cache-dir",
+            str(cache),
+            "--out",
+            str(out),
+            "--notes",
+            str(notes),
+            "--log-level",
+            "WARNING",
+        ]
+    )
     assert rc == 0
     assert out.exists()
 
@@ -105,12 +113,20 @@ def test_smoke_unknown_opening_id_exits_non_zero(tmp_path: Path) -> None:
     cache = tmp_path / "cache"
     _seed_tsv_cache(cache)
 
-    rc = build_main([
-        "--source", "curated",
-        "--openings", "nonexistent-opening-id",
-        "--cache-dir", str(cache),
-        "--out", str(tmp_path / "out.json"),
-        "--notes", str(tmp_path / "absent.yml"),
-        "--log-level", "ERROR",
-    ])
+    rc = build_main(
+        [
+            "--source",
+            "curated",
+            "--openings",
+            "nonexistent-opening-id",
+            "--cache-dir",
+            str(cache),
+            "--out",
+            str(tmp_path / "out.json"),
+            "--notes",
+            str(tmp_path / "absent.yml"),
+            "--log-level",
+            "ERROR",
+        ]
+    )
     assert rc == 1

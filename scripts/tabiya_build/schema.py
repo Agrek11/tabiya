@@ -24,13 +24,13 @@ FamilyCategory = Literal[
 
 
 KeySquareRole = Literal[
-    "outpost",   # safe square in enemy half, knight-friendly
-    "weak",      # square opponent cannot defend with a pawn
-    "target",    # weak pawn or known tactical pressure point
-    "break",     # pawn-break destination / lever square
-    "tension",   # central square where pawns/pieces clash
-    "control",   # influenced but not occupied — strategic sphere
-    "pivot",     # piece reroute hub
+    "outpost",  # safe square in enemy half, knight-friendly
+    "weak",  # square opponent cannot defend with a pawn
+    "target",  # weak pawn or known tactical pressure point
+    "break",  # pawn-break destination / lever square
+    "tension",  # central square where pawns/pieces clash
+    "control",  # influenced but not occupied — strategic sphere
+    "pivot",  # piece reroute hub
 ]
 
 

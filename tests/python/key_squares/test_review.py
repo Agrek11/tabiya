@@ -152,11 +152,7 @@ def test_review_resumes_from_partial_state(tmp_path: Path) -> None:
     )
     state_path = tmp_path / ".review_state.json"
     state = ReviewState(
-        partial={
-            str(pending): [
-                {"kind": "accept", "draft": _draft(square="d5"), "note": ""}
-            ]
-        }
+        partial={str(pending): [{"kind": "accept", "draft": _draft(square="d5"), "note": ""}]}
     )
     save_state(state, state_path)
     curated = tmp_path / "key_squares.yml"

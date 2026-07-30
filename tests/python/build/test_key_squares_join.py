@@ -178,9 +178,7 @@ def test_join_attaches_records_to_known_openings() -> None:
 def test_join_fails_on_unknown_slug() -> None:
     openings = [_opening("italian-game-main")]
     curated = {
-        "ghost-opening": OpeningKeySquares.model_validate(
-            {"fen_canonical": "fen", "squares": []}
-        )
+        "ghost-opening": OpeningKeySquares.model_validate({"fen_canonical": "fen", "squares": []})
     }
     with pytest.raises(BuildError, match="unknown opening_slug"):
         join_to_openings(openings, curated)
@@ -188,8 +186,6 @@ def test_join_fails_on_unknown_slug() -> None:
 
 def test_join_leaves_openings_without_entry_untouched() -> None:
     openings = [_opening("a"), _opening("b")]
-    curated = {
-        "a": OpeningKeySquares.model_validate({"fen_canonical": "fen", "squares": []})
-    }
+    curated = {"a": OpeningKeySquares.model_validate({"fen_canonical": "fen", "squares": []})}
     out = join_to_openings(openings, curated)
     assert "b" not in out

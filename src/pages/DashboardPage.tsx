@@ -15,9 +15,9 @@
  *   - Accuracy = useAccuracy().allTime (Phase 1.5)
  *   - Mastered = count(SrsState.box >= 4) / catalog.lines.length
  *
- * Unwired surfaces (Current Focus, Weak Structures, hero subtitle) show static
- * v1 copy. They light up post-Phase 3/4 with detected weaknesses and saved
- * focus state.
+ * Current Focus persists locally. Recommended Study Plan prioritizes the
+ * selected focus, due reviews, and detected correction signals; Weak Structures
+ * is derived from correction-drill tags created from game analysis.
  */
 
 import { useEffect, useState } from 'react';
@@ -29,14 +29,18 @@ import { PageBody } from '../ui/primitives/PageBody';
 import { PageHeader } from '../ui/primitives/PageHeader';
 import { Card } from '../ui/primitives/Card';
 import { CardTitle } from '../ui/primitives/CardTitle';
-import { Insight } from '../ui/primitives/Insight';
 import { useSRS } from '../hooks/useSRS';
 import { useStreaks } from '../hooks/useStreaks';
 import { useAccuracy } from '../hooks/useAccuracy';
 import { getRepository } from '../storage';
 import { EventsContextProvider } from '../state/EventsContext';
 import { OOBWidget } from '../components/dashboard/OOBWidget';
+import { buildStudyPlan } from '../analytics/studyPlan';
+import { useStudyFocus, STUDY_FOCUS_OPTIONS } from '../hooks/useStudyFocus';
+import { useStudySignals } from '../hooks/useStudySignals';
 
+
+const ONBOARDING_DISMISS_KEY = 'tabiya.onboarding.v1.dismissed';
 export function DashboardPage() {
   return (
     <EventsContextProvider>
@@ -50,7 +54,10 @@ function DashboardBody() {
   const { states, dueLineIds, loading } = useSRS();
   const streaks = useStreaks();
   const accuracy = useAccuracy();
+  const signals = useStudySignals();
+  const [focus, setFocus] = useStudyFocus();
   const [totalLines, setTotalLines] = useState<number | null>(null);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(() => window.localStorage.getItem(ONBOARDING_DISMISS_KEY) === '1');
 
   useEffect(() => {
     const repo = getRepository();
@@ -68,11 +75,16 @@ function DashboardBody() {
       cancelled = true;
     };
   }, []);
+  const dismissOnboarding = (): void => {
+    window.localStorage.setItem(ONBOARDING_DISMISS_KEY, '1');
+    setOnboardingDismissed(true);
+  };
 
   const masteredCount = Array.from(states.values()).filter((s) => s.box >= 4).length;
   const dueCount = dueLineIds.length;
   const totalLinesValue = totalLines ?? 0;
   const drillHref = dueCount > 0 ? '/drill?queue=due' : '/drill';
+  const studyPlan = buildStudyPlan(focus, dueCount, signals);
 
   const accAllTime = accuracy.allTime.accuracy;
   const accuracyText = accAllTime !== null ? `${(accAllTime * 100).toFixed(1)}%` : null;
@@ -101,6 +113,32 @@ function DashboardBody() {
         title="Continue Your Training"
         subtitle="Focused, long-term chess improvement through guided learning."
       />
+      {states.size === 0 && !onboardingDismissed && (
+        <Card>
+          <CardTitle>Welcome to Tabiya</CardTitle>
+          <p style={{ margin: '0 0 14px', color: t.inkDim, fontFamily: fonts.sans, lineHeight: 1.6 }}>
+            Start with an opening you want to own. Tabiya will turn each drill into a local review schedule; game sync is optional.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
+            <Link to="/repertoire" style={{ color: t.brand, fontFamily: fonts.sans, fontWeight: 600 }}>
+              1. Choose a repertoire
+            </Link>
+            <Link to="/drill" style={{ color: t.brand, fontFamily: fonts.sans, fontWeight: 600 }}>
+              2. Drill your first line
+            </Link>
+            <Link to="/games" style={{ color: t.ink, fontFamily: fonts.sans }}>
+              3. Connect games (optional)
+            </Link>
+            <button
+              type="button"
+              onClick={dismissOnboarding}
+              style={{ border: 0, background: 'transparent', color: t.inkSoft, cursor: 'pointer', fontFamily: fonts.sans }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </Card>
+      )}
 
       {/* Hero row 2:1 — Up Next + Recent Improvement */}
       <div
@@ -242,20 +280,68 @@ function DashboardBody() {
       </div>
 
       {/* Secondary row ×2 — static v1 placeholders */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 14 }}>
         <Card>
           <CardTitle>Current Focus</CardTitle>
-          <div style={{ fontSize: 13, color: t.ink, lineHeight: 1.65, fontFamily: fonts.sans }}>
-            {/* Wire in Phase 3/4 — drives off detected weakness + saved focus state */}
-            Pick a study focus to spotlight specific patterns in your drilling.
+          <p style={{ margin: '0 0 10px', color: t.inkDim, fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 1.55 }}>
+            Saved on this device. Your plan updates immediately.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {STUDY_FOCUS_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setFocus(option.id)}
+                aria-pressed={focus === option.id}
+                style={{
+                  border: '0.5px solid ' + (focus === option.id ? t.brand : t.border),
+                  background: focus === option.id ? t.brandSoft : t.surfaceAlt,
+                  color: t.ink,
+                  borderRadius: 999,
+                  padding: '5px 8px',
+                  cursor: 'pointer',
+                  fontFamily: fonts.sans,
+                  fontSize: 11.5,
+                  fontWeight: focus === option.id ? 600 : 500,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </Card>
         <Card>
+        <Card>
+          <CardTitle>Recommended Study Plan</CardTitle>
+          <div style={{ color: t.ink, fontFamily: fonts.sans, fontSize: 13, fontWeight: 600, lineHeight: 1.45 }}>
+            {studyPlan.title}
+          </div>
+          <p style={{ margin: '6px 0 10px', color: t.inkDim, fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 1.55 }}>
+            {studyPlan.reason}
+          </p>
+          <Link to={studyPlan.href} style={{ color: t.brand, fontFamily: fonts.sans, fontSize: 12.5, fontWeight: 600 }}>
+            {studyPlan.action}
+          </Link>
+        </Card>
           <CardTitle>Weak Structures</CardTitle>
-          <Insight>
-            {/* Wire in Phase 3/4 — feeds from detected pattern analysis */}
-            Connect a game source under Games to detect recurring structural weaknesses.
-          </Insight>
+          {signals.structureSignals.length === 0 ? (
+            <div style={{ color: t.inkSoft, fontFamily: fonts.sans, fontSize: 12.5, lineHeight: 1.55 }}>
+              Review a game and add correction drills to reveal recurring structures.
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontFamily: fonts.sans, fontSize: 12.5, color: t.ink }}>
+                {signals.structureSignals.slice(0, 3).map((signal) => (
+                  <div key={signal.label}>
+                    <b>{signal.label}</b> · {signal.count} correction{signal.count === 1 ? '' : 's'}
+                  </div>
+                ))}
+              </div>
+              <Link to="/training/structures" style={{ display: 'inline-block', marginTop: 10, color: t.brand, fontFamily: fonts.sans, fontSize: 12.5, fontWeight: 600 }}>
+                Train structures
+              </Link>
+            </>
+          )}
         </Card>
       </div>
     </PageBody>

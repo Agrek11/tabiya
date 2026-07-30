@@ -105,4 +105,54 @@ describe('CoachPipeline prompt selection', () => {
     expect(result.promptVersion).toBe('v1');
     expect(result.engine).toEqual(ENGINE);
   });
+
+  it('retries once when structured citations fail validation', async () => {
+    _setFeatureExtractorForTesting(fx(featuresWith(true)));
+    completeMock
+      .mockResolvedValueOnce({
+        text: 'bad',
+        modelName: 'm',
+        parsed: { tags_cited: ['not-in-context'] },
+      })
+      .mockResolvedValueOnce({
+        text: 'good',
+        modelName: 'm',
+        parsed: { tags_cited: ['relative pin'] },
+      });
+    const result = await CoachPipeline.run({ fen: 'x', history: [] });
+    expect(completeMock).toHaveBeenCalledTimes(2);
+    expect(result.llm?.text).toBe('good');
+  });
+
+  it('drops llm narration when retry still fails citations', async () => {
+    _setFeatureExtractorForTesting(fx(featuresWith(true)));
+    completeMock
+      .mockResolvedValueOnce({
+        text: 'bad1',
+        modelName: 'm',
+        parsed: { tags_cited: ['not-in-context'] },
+      })
+      .mockResolvedValueOnce({
+        text: 'bad2',
+        modelName: 'm',
+        parsed: { tags_cited: ['still-missing'] },
+      });
+    const result = await CoachPipeline.run({ fen: 'x', history: [] });
+    expect(completeMock).toHaveBeenCalledTimes(2);
+    expect(result.llm).toBeUndefined();
+  });
+
+  it('uses structured prose text when provider returns it', async () => {
+    _setFeatureExtractorForTesting(fx(featuresWith(true)));
+    completeMock.mockResolvedValueOnce({
+      text: '{"prose":"raw"}',
+      modelName: 'm',
+      parsed: {
+        prose: 'Structured explanation',
+        tags_cited: ['relative pin'],
+      },
+    });
+    const result = await CoachPipeline.run({ fen: 'x', history: [] });
+    expect(result.llm?.text).toBe('Structured explanation');
+  });
 });

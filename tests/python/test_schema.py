@@ -78,7 +78,9 @@ class TestCatalog:
         cat = Catalog(
             version="2026-05-10",
             families=[Family(id="f", name="F", category="open", eco_range="A00")],
-            openings=[Opening(id="x", family_id="f", name="X", eco="A00", color="white", line_ids=[])],
+            openings=[
+                Opening(id="x", family_id="f", name="X", eco="A00", color="white", line_ids=[])
+            ],
             lines=[],
         )
         body = cat.model_dump_json()

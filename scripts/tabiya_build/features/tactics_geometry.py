@@ -43,6 +43,7 @@ def _ray_between(a: chess.Square, b: chess.Square) -> list[chess.Square] | None:
         f, r = f + step_f, r + step_r
     return out
 
+
 def _slides_along(piece_type: chess.PieceType, a: chess.Square, b: chess.Square) -> bool:
     df = abs(chess.square_file(b) - chess.square_file(a))
     dr = abs(chess.square_rank(b) - chess.square_rank(a))
@@ -84,7 +85,8 @@ def _pins_and_xrays(board: chess.Board) -> tuple[list[dict[str, Any]], list[dict
                         if (
                             mid_piece.color != color
                             and PIECE_VALUES_CP[mid_piece.piece_type]
-                            < PIECE_VALUES_CP[target_type] + (10_000 if target_type == chess.KING else 0)
+                            < PIECE_VALUES_CP[target_type]
+                            + (10_000 if target_type == chess.KING else 0)
                             and mid_piece.piece_type != chess.KING
                         ):
                             pins.append(
@@ -119,9 +121,7 @@ def _overloaded(board: chess.Board) -> list[dict[str, Any]]:
                 if set(defenders) == {defender_sq}:
                     duties.append(chess.square_name(protected))
             if len(duties) >= 2:
-                result.append(
-                    {"piece": piece_ref(board, defender_sq), "defends": sorted(duties)}
-                )
+                result.append({"piece": piece_ref(board, defender_sq), "defends": sorted(duties)})
     return sorted(result, key=lambda d: d["piece"])
 
 

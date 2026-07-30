@@ -15,13 +15,12 @@ Build and drill a chess opening repertoire, import your Chess.com / Lichess game
 
 ## AI Approach
 
-The coach is AI-native, not a thin API wrapper. Candidate approaches under evaluation:
+Coach quality is grounded by deterministic chess facts first, then narrated by an optional LLM:
 
-- Fine-tuned small model on personal opening prep + master middlegame annotations
-- RAG over annotated game corpus + strategic notes (current lean)
-- Agent that selects tools (Stockfish, opening DB) per question
-
-First AI feature target: **middlegame plan recommendations from end-of-line position** (typical pawn breaks, piece placement, tactical motifs).
+- Stockfish worker provides PV/eval baseline.
+- Deterministic feature extraction (`features.json` sidecar + runtime fallback extractor) provides verified facts.
+- LLM providers (Anthropic/OpenAI/Ollama/WebLLM) are optional polish layers; engine and deterministic facts remain primary.
+- "Why not this move?" uses constrained `searchmoves` comparisons to avoid speculative branches.
 
 ## Stack
 
@@ -48,27 +47,31 @@ Leitner system, 5 boxes (daily → 3 days → 1 week → 2 weeks → 1 month). W
 
 ## Status
 
-Active development. Phase 0d.2 (drill UX hardening) in flight.
+Active development with most Stage 2 feature work shipped locally.
 
-### Phase progress
+### Implemented now
 
-| Phase | Status | What shipped |
-| --- | --- | --- |
-| 0a — Skeleton | ✅ done | Vite/React/TS, drill state machine, sounds, themes, confetti, tick/cross overlays, Docker compose |
-| 0b — Catalog build | ✅ done | Python `build_catalog.py`, Pydantic schema, Lichess Explorer client, 18 openings × 19 lines |
-| 0c — Storage interface | ✅ done | `OpeningRepository` interface + `JsonOpeningRepository`, catalog-driven drill, keyboard nav (←/→/H/R), one-shot Hint, last-move highlights |
-| 0d.1 — v1 design system | ✅ done | Theme tokens (light/dark), `lucide-react` icons, `react-router-dom` v7, 5 routed pages, app shell (Sidebar + TopBar + AppShell), 4 primitives (Card/Button/PageHeader/StateMessage), v1 wireframe locked as design destination |
-| 0d.2 — UX hardening | 🚧 in flight | Sound module v2 (audio pool, persisted settings, global unlock), move-history rail collapse + next-move accent, status strip primitive, board theme picker (6 presets, drill quick-toggle + Settings), two-tier Hint UX, board-flip animation, lichess-style last-move highlight |
-| 0d.3 — Catalog v2 + Repertoire | 📝 specced | Family schema layer, gambits cross-cut, repertoire restructure |
-| 1 — SRS data layer | 📝 specced | IndexedDB schema, Leitner scheduler, mastery bars |
-| 1.5 — Session event log | planned | Heatmap, accuracy %, streak, suggested-for-you |
-| 2 — Pattern Viz + end-of-line plans | planned | KeySquareOverlay, hand-curated key squares, Stockfish + LLM pre-computed plans baked into catalog |
-| 3 — Lichess + Chess.com sync | planned | FastAPI backend, Postgres + pgvector, OAuth, "out of book by move N", auto-drills |
-| 4 — AI Coach v1 | planned | Q&A `/coach`, game review, dynamic plan AI (Stockfish + RAG + frontier LLM with prompt caching) |
-| 5 — Polish + Deploy + Blog | planned | Live URL, demo GIF, blog post, soft launch |
-| 6 — Stretch | optional | Engine-stress, CoCo confidential containers, multi-user |
+- Drill + SRS loop with queue mode and pattern overlays.
+- Deterministic Explain v2.
+- Play-vs-engine route with strength tiers + post-move feedback.
+- Lichess + Chess.com sync and out-of-book surfacing.
+- Review workflow with ghost candidate synthesis/injection.
+- Insights surfaces: Blunder DNA, leak signals, and recommendations.
+- Tier 2/3/4 product surfaces:
+  - Opponent scouting (`/scout`)
+  - Structure-first training (`/training/structures`)
+  - Feature/tag search (`/search/features`)
+  - Transposition roulette + gambit diversion
+  - Silent coach ticker
 
-See [specs/](./specs/) for full per-phase requirements + design + tasks.
+### Still pending (human/external gating)
+
+- Manual 4b evidence sign-off: `evals/coach/4b-walkthrough.md`.
+- Live provider/account validation pass.
+- Hosted deploy execution and post-deploy verification.
+- External UX intake + triage.
+
+See [specs/master-execution-checklist.md](./specs/master-execution-checklist.md) for the current source-of-truth checklist.
 
 ## Getting Started
 
@@ -122,11 +125,13 @@ docker compose down
 ```
 src/
 ├── drill/        # state machine, move comparator, sample line, useDrill hook, rail-collapsed hook
-├── pages/        # DashboardPage, RepertoirePage, DrillPage, ProgressPage, SettingsPage
+├── pages/        # Dashboard, Repertoire, Drill, Play, Games, Review, Insights, Coach, Settings, Scout, StructureTraining, FeatureSearch
 ├── sound/        # move sound module v2 (audio pool, persisted settings, global unlock)
-├── storage/      # OpeningRepository interface + JsonOpeningRepository impl
+├── storage/      # repository interfaces + JSON/IndexedDB implementations
 ├── theme/        # ThemeContext (light/dark), BoardThemeContext (board presets), tokens
-├── ui/           # ChessBoardPanel + primitives (Card/Button/PageHeader/StateMessage/StatusStrip) + shell (AppShell/Sidebar/TopBar)
+├── analysis/     # game analysis queue, ghost synthesis, leak detector, recommendations
+├── coach/        # pipeline, feature extractors, citation validation, provider clients
+├── ui/           # board panels + primitives + app shell
 └── App.tsx, main.tsx
 
 scripts/          # offline catalog build (Phase 0b) — Python + uv

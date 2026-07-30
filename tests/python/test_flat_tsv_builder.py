@@ -33,7 +33,9 @@ def test_assigns_uncategorized_family() -> None:
 def test_flags_gambit_by_name_substring() -> None:
     rows = [
         _row("C20", "King's Gambit", "1. e4 e5 2. f4", ("e4", "e5", "f4")),
-        _row("C50", "Italian Game", "1. e4 e5 2. Nf3 Nc6 3. Bc4", ("e4", "e5", "Nf3", "Nc6", "Bc4")),
+        _row(
+            "C50", "Italian Game", "1. e4 e5 2. Nf3 Nc6 3. Bc4", ("e4", "e5", "Nf3", "Nc6", "Bc4")
+        ),
     ]
     openings, _ = build_from_tsv_rows(rows)
     by_name = {o.name: o for o in openings}

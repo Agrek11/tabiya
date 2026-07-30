@@ -7,59 +7,46 @@ on:
 
 jobs:
   frontend:
-    name: Frontend (lint + test + build)
+    name: Frontend quality gate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-        continue-on-error: true
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npx vite build
+          node-version: 22.12.0
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run build
+      - run: npm run check:bundle
+      - run: npm run check:assets
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e:wrangler
+      - run: npx wrangler deploy --dry-run
 
   catalog:
-    name: Python catalog build (lint + test)
+    name: Python catalog quality gate
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+      - uses: astral-sh/setup-uv@v3
         with:
           enable-cache: true
-
-      - name: Install Python deps
-        working-directory: scripts/tabiya_build
-        run: uv sync --all-extras
-        continue-on-error: true
-
-      - name: Ruff lint
-        working-directory: scripts/tabiya_build
-        run: uv run ruff check .
-        continue-on-error: true
-
-      - name: Pytest
-        run: uv run --directory scripts/tabiya_build pytest ../../tests/python
-        continue-on-error: true
+          python-version: '3.12'
+      - run: uv sync --all-extras --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest
 
   docker:
     name: Docker image build
     runs-on: ubuntu-latest
     needs: frontend
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Build frontend image
-        run: docker build -f docker/frontend.Dockerfile -t tabiya/frontend:ci .
+      - run: docker build -f docker/frontend.Dockerfile -t tabiya/frontend:ci .

@@ -12,9 +12,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-import chess
 import pytest
 
+import chess
 from scripts.tabiya_build.features import extract_features
 
 GOLDEN_DIR = Path(__file__).resolve().parents[3] / "evals" / "features" / "golden"

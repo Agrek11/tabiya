@@ -69,9 +69,7 @@ def load_curated_key_squares(path: Path) -> dict[str, OpeningKeySquares]:
         try:
             out[slug] = OpeningKeySquares.model_validate(payload)
         except ValidationError as e:
-            raise BuildError(
-                f"key_squares.yml: malformed entry {slug!r}: {e}"
-            ) from e
+            raise BuildError(f"key_squares.yml: malformed entry {slug!r}: {e}") from e
     return out
 
 
@@ -92,25 +90,19 @@ def _load_permissive_hosts(sources_yml: Path) -> set[str]:
     return hosts
 
 
-def license_audit(
-    curated: dict[str, OpeningKeySquares], sources_yml: Path
-) -> None:
+def license_audit(curated: dict[str, OpeningKeySquares], sources_yml: Path) -> None:
     """Article 1: every source_url host must trace to a permissive sources.yml entry.
 
     Raises :class:`BuildError` with explicit context on the first violation.
     """
     permissive_hosts = _load_permissive_hosts(sources_yml)
     if not permissive_hosts:
-        raise BuildError(
-            f"sources.yml at {sources_yml} declares no permissive hosts"
-        )
+        raise BuildError(f"sources.yml at {sources_yml} declares no permissive hosts")
     for slug, rec in curated.items():
         for sq in rec.squares:
             host = urlparse(sq.source_url).netloc
             if not host:
-                raise BuildError(
-                    f"{slug}: empty host in source_url {sq.source_url!r}"
-                )
+                raise BuildError(f"{slug}: empty host in source_url {sq.source_url!r}")
             if host not in permissive_hosts:
                 raise BuildError(
                     f"{slug}: unaudited host {host!r} in source_url "
@@ -136,8 +128,7 @@ def join_to_openings(
     unknown = [slug for slug in curated if slug not in known_slugs]
     if unknown:
         raise BuildError(
-            "key_squares.yml references unknown opening_slug(s): "
-            + ", ".join(sorted(unknown))
+            "key_squares.yml references unknown opening_slug(s): " + ", ".join(sorted(unknown))
         )
 
     out: dict[str, list[dict]] = {}

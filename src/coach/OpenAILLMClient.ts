@@ -5,6 +5,7 @@
  */
 
 import type { LLMClient, LLMResponse, PromptPayload, ProviderName } from './LLMClient';
+import { parseStructuredResponse } from './parseStructuredResponse';
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-4o-mini';
 
@@ -41,6 +42,7 @@ export class OpenAILLMClient implements LLMClient {
     const text = res.choices[0]?.message.content ?? '';
     return {
       text,
+      parsed: parseStructuredResponse(text) ?? undefined,
       modelName: res.model,
       usage: res.usage
         ? { input: res.usage.prompt_tokens, output: res.usage.completion_tokens }

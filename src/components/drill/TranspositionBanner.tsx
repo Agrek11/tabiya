@@ -27,12 +27,18 @@ export interface TranspositionBannerProps {
   truncatedCount: number;
   /** Jump to the picked line via the drill route (R8.4). */
   onJump(lineId: string): void;
+  /** Optional quick random jump across visible transposition matches. */
+  onRoulette?(): void;
+  /** Optional CTA to jump to a gambit transposition branch. */
+  onDiversion?(): void;
 }
 
 export function TranspositionBanner({
   matches,
   truncatedCount,
   onJump,
+  onRoulette,
+  onDiversion,
 }: TranspositionBannerProps): React.JSX.Element | null {
   const t = useTokens();
   const [dismissed, setDismissed] = useState(false);
@@ -88,6 +94,46 @@ export function TranspositionBanner({
           +{truncatedCount} more
         </span>
       )}
+      {onRoulette && matches.length > 1 ? (
+        <button
+          type="button"
+          data-testid="transposition-roulette"
+          onClick={onRoulette}
+          style={{
+            background: t.surface,
+            border: `0.5px solid ${t.border}`,
+            color: t.brand,
+            padding: '3px 10px',
+            borderRadius: 999,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: fonts.sans,
+          }}
+        >
+          Roulette
+        </button>
+      ) : null}
+      {onDiversion ? (
+        <button
+          type="button"
+          data-testid="transposition-diversion"
+          onClick={onDiversion}
+          style={{
+            background: t.surface,
+            border: `0.5px solid ${t.border}`,
+            color: t.brand,
+            padding: '3px 10px',
+            borderRadius: 999,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontFamily: fonts.sans,
+          }}
+        >
+          Try gambit diversion
+        </button>
+      ) : null}
       <button
         type="button"
         aria-label="Dismiss transposition banner"

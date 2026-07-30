@@ -14,6 +14,7 @@
 
 import type Anthropic from '@anthropic-ai/sdk';
 import type { LLMClient, LLMResponse, PromptPayload, ProviderName } from './LLMClient';
+import { parseStructuredResponse } from './parseStructuredResponse';
 
 export const DEFAULT_ANTHROPIC_MODEL = 'claude-haiku-4-5-20251001';
 
@@ -52,6 +53,7 @@ export class AnthropicLLMClient implements LLMClient {
 
     return {
       text,
+      parsed: parseStructuredResponse(text) ?? undefined,
       modelName: res.model,
       usage: {
         input: res.usage.input_tokens,

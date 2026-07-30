@@ -141,8 +141,7 @@ def _build_adapter(entry: SourceEntry) -> SourceAdapter:
     cls = ADAPTER_REGISTRY.get(entry.adapter)
     if cls is None:
         raise ValueError(
-            f"Unknown adapter {entry.adapter!r} in sources.yml; "
-            "add it to ADAPTER_REGISTRY"
+            f"Unknown adapter {entry.adapter!r} in sources.yml; add it to ADAPTER_REGISTRY"
         )
     return cls()
 
@@ -192,9 +191,7 @@ def scrape_one(
             if chunk is None:
                 continue
             if chunk.license not in PERMISSIVE_SPDX:
-                logger.warning(
-                    "non-permissive license %s for %s — skipping", chunk.license, url
-                )
+                logger.warning("non-permissive license %s for %s — skipping", chunk.license, url)
                 continue
             if not is_substantive(chunk.text):
                 continue

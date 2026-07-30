@@ -89,9 +89,7 @@ class WikipediaAdapter:
         if resp.status_code == 404:
             return None
         if resp.status_code != 200:
-            logger.warning(
-                "wikipedia non-200 (%d) for %s — skipping", resp.status_code, url
-            )
+            logger.warning("wikipedia non-200 (%d) for %s — skipping", resp.status_code, url)
             return None
 
         html = resp.text
@@ -120,7 +118,7 @@ class WikipediaAdapter:
     def _extract_paragraphs(html: str) -> list[str]:
         """Very light extraction: collect <p>...</p> blocks before the references."""
         # Cut after References / External links — those sections are usually noise.
-        cutoffs = ("id=\"References\"", "id=\"External_links\"", "id=\"Notes\"")
+        cutoffs = ('id="References"', 'id="External_links"', 'id="Notes"')
         cut_at = len(html)
         for marker in cutoffs:
             idx = html.find(marker)

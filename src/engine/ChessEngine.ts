@@ -25,6 +25,8 @@ export type EngineOpts = {
   multipv?: number;
   /** Soft cap on think time in milliseconds. */
   movetimeMs?: number;
+  /** Restrict the search to these SAN candidate moves (5a/5d cp-loss path). */
+  searchMovesSan?: string[];
   /** Cancellation — aborting stops the in-flight search for this call. */
   signal?: AbortSignal;
 };

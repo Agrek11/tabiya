@@ -16,16 +16,15 @@ import logging
 from dataclasses import dataclass
 from pathlib import Path
 
-import chess
 import chess.pgn
 import httpx
+
+import chess
 
 logger = logging.getLogger(__name__)
 
 TSV_LETTERS = ("a", "b", "c", "d", "e")
-TSV_BASE_URL = (
-    "https://raw.githubusercontent.com/lichess-org/chess-openings/master/{letter}.tsv"
-)
+TSV_BASE_URL = "https://raw.githubusercontent.com/lichess-org/chess-openings/master/{letter}.tsv"
 USER_AGENT = "tabiya-build/0.1 (+https://github.com/Agrek11/tabiya)"
 
 

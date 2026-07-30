@@ -10,9 +10,13 @@ import { IndexedDbSrsRepository } from './srs/IndexedDbSrsRepository';
 import { InMemorySrsRepository } from './srs/InMemorySrsRepository';
 import { IndexedDbEventsRepository } from './events/IndexedDbEventsRepository';
 import { IndexedDbRepertoireRepository } from './repertoire/IndexedDbRepertoireRepository';
+import { IndexedDbGameAnalysisRepository } from './analysis/IndexedDbGameAnalysisRepository';
+import { IndexedDbGhostLineRepository } from './ghost/IndexedDbGhostLineRepository';
 import { createEventsBus, type EventsBus } from './events/EventsBus';
 import type { EventsRepository } from './events/EventsRepository';
 import type { RepertoireRepository } from './repertoire/RepertoireRepository';
+import type { GameAnalysisRepository } from './analysis/GameAnalysisRepository';
+import type { GhostLineRepository } from './ghost/GhostLineRepository';
 import type { OpeningRepository, SrsRepository } from './types';
 
 let _repo: OpeningRepository | null = null;
@@ -20,6 +24,8 @@ let _srsRepo: SrsRepository | null = null;
 let _eventsRepo: EventsRepository | null = null;
 let _repertoireRepo: RepertoireRepository | null = null;
 let _eventsBus: EventsBus | null = null;
+let _gameAnalysisRepo: GameAnalysisRepository | null = null;
+let _ghostLineRepo: GhostLineRepository | null = null;
 
 export function getRepository(): OpeningRepository {
   if (_repo === null) {
@@ -84,6 +90,32 @@ export function _setRepertoireRepositoryForTesting(
   repo: RepertoireRepository | null
 ): void {
   _repertoireRepo = repo;
+}
+
+export function getGameAnalysisRepository(): GameAnalysisRepository {
+  if (_gameAnalysisRepo === null) {
+    _gameAnalysisRepo = new IndexedDbGameAnalysisRepository();
+  }
+  return _gameAnalysisRepo;
+}
+
+export function _setGameAnalysisRepositoryForTesting(
+  repo: GameAnalysisRepository | null
+): void {
+  _gameAnalysisRepo = repo;
+}
+
+export function getGhostLineRepository(): GhostLineRepository {
+  if (_ghostLineRepo === null) {
+    _ghostLineRepo = new IndexedDbGhostLineRepository();
+  }
+  return _ghostLineRepo;
+}
+
+export function _setGhostLineRepositoryForTesting(
+  repo: GhostLineRepository | null
+): void {
+  _ghostLineRepo = repo;
 }
 
 export function _resetEventsBusForTesting(): void {
@@ -164,3 +196,9 @@ export type { EventsBus } from './events/EventsBus';
 export type { RepertoireRepository } from './repertoire/RepertoireRepository';
 export { InMemoryEventsRepository } from './events/InMemoryEventsRepository';
 export { InMemoryRepertoireRepository } from './repertoire/InMemoryRepertoireRepository';
+export type { GameAnalysisRepository } from './analysis/GameAnalysisRepository';
+export { InMemoryGameAnalysisRepository } from './analysis/InMemoryGameAnalysisRepository';
+export type { GameAnalysis } from '../types/analysis';
+export type { GhostLineRepository } from './ghost/GhostLineRepository';
+export { InMemoryGhostLineRepository } from './ghost/InMemoryGhostLineRepository';
+export type { GhostLineRecord } from '../types/ghost';

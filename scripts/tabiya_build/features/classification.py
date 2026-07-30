@@ -13,7 +13,7 @@ from typing import Any
 import chess
 
 from .center_space import CENTER, _locked
-from .util import COLOR_NAMES, files_with_pawns, pawns_of
+from .util import COLOR_NAMES, pawns_of
 
 # Re-expose for callers that pass an already-computed pawn-structure dict.
 
@@ -27,6 +27,7 @@ def classification(board: chess.Board) -> dict[str, Any]:
 
 
 # --- center type ------------------------------------------------------------
+
 
 def _center_pawns(board: chess.Board) -> list[chess.Square]:
     return [s for s in CENTER if (p := board.piece_at(s)) and p.piece_type == chess.PAWN]
@@ -48,8 +49,9 @@ def _center_capture_available(board: chess.Board) -> bool:
 def _central_open_files(board: chess.Board) -> list[str]:
     out = []
     for f in (3, 4):  # d, e
-        if not any(chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.WHITE)) and \
-           not any(chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.BLACK)):
+        if not any(
+            chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.WHITE)
+        ) and not any(chess.square_file(s) == f for s in board.pieces(chess.PAWN, chess.BLACK)):
             out.append(chess.FILE_NAMES[f])
     return out
 
@@ -106,6 +108,7 @@ def _space(board: chess.Board, color: chess.Color) -> int:
 
 # --- named structures (exact match only) ------------------------------------
 
+
 def _has(board: chess.Board, color: chess.Color, square_name: str) -> bool:
     sq = chess.parse_square(square_name)
     p = board.piece_at(sq)
@@ -113,7 +116,7 @@ def _has(board: chess.Board, color: chess.Color, square_name: str) -> bool:
 
 
 def _structures(board: chess.Board) -> list[str]:
-    from .pawns import _iqp, _hanging_duo  # local import avoids a cycle at load
+    from .pawns import _hanging_duo, _iqp  # local import avoids a cycle at load
 
     out: list[str] = []
     if _iqp(board) is not None:
@@ -170,11 +173,15 @@ def _symmetric(board: chess.Board) -> bool:
     pawn on (file, 7-rank). File-count parity is not enough — most opening
     positions have one pawn per file yet are not symmetric."""
     white = pawns_of(board, chess.WHITE)
-    black = {chess.square(chess.square_file(s), 7 - chess.square_rank(s)) for s in pawns_of(board, chess.BLACK)}
+    black = {
+        chess.square(chess.square_file(s), 7 - chess.square_rank(s))
+        for s in pawns_of(board, chess.BLACK)
+    }
     return len(white) > 0 and set(white) == black
 
 
 # --- game character (soft descriptor) ---------------------------------------
+
 
 def _character(board: chess.Board) -> str:
     ctype = _center(board)["type"]

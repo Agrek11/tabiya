@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import chess
-
 from scripts.tabiya_build.whitelist import (
     DEFAULT_DEPTH,
     TARGET_FAMILIES,
@@ -139,7 +138,14 @@ def test_all_openings_typed_correctly() -> None:
 class TestFamilyLayer:
     def test_families_seeded(self) -> None:
         ids = {f.id for f in TARGET_FAMILIES}
-        assert {"open-games", "semi-open", "closed-games", "indian-defenses", "flank", "gambits"} <= ids
+        assert {
+            "open-games",
+            "semi-open",
+            "closed-games",
+            "indian-defenses",
+            "flank",
+            "gambits",
+        } <= ids
 
     def test_family_spec_typed_correctly(self) -> None:
         for fam in TARGET_FAMILIES:

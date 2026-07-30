@@ -391,12 +391,12 @@ export function useExplainMode({
   const currentBlock: ExplainBlock | null =
     state.kind === 'showOverlays' ? (blocks[state.lineIndex] ?? null) : null;
 
-  const lastMove: { from: string; to: string } | null = useMemo(() => {
+  const lastMove: { from: string; to: string } | null = (() => {
     const hist = chess.history({ verbose: true });
     if (hist.length === 0) return null;
     const last = hist[hist.length - 1]!;
     return { from: last.from, to: last.to };
-  }, [state, chess]); // depend on state — chess is mutable
+  })();
 
   const canPrev =
     state.kind !== 'idle' &&

@@ -66,7 +66,11 @@ def _resp(moves: list[ExplorerMove]) -> ExplorerResponse:
 class TestSeedToSan:
     def test_parses_classic_seed(self) -> None:
         assert seed_to_san("1. e4 e5 2. Nf3 Nc6 3. Bb5") == [
-            "e4", "e5", "Nf3", "Nc6", "Bb5",
+            "e4",
+            "e5",
+            "Nf3",
+            "Nc6",
+            "Bb5",
         ]
 
     def test_handles_no_move_numbers(self) -> None:
@@ -137,11 +141,13 @@ class TestExtendLine:
     def test_low_popularity_stops(self) -> None:
         # Top continuation is 10% of total → below threshold (15%).
         responses = {
-            self.SEED_FEN: _resp([
-                _move("Nf3", white=10, draws=0, black=0),
-                _move("Bc4", white=20, draws=0, black=0),
-                _move("d4", white=70, draws=0, black=0),
-            ]),
+            self.SEED_FEN: _resp(
+                [
+                    _move("Nf3", white=10, draws=0, black=0),
+                    _move("Bc4", white=20, draws=0, black=0),
+                    _move("d4", white=70, draws=0, black=0),
+                ]
+            ),
         }
         explorer = FakeExplorer(responses=responses)
         result = extend_line(self._spec(), self.SEED, explorer)
@@ -166,10 +172,12 @@ class TestExtendLine:
 
     def test_appends_top_continuation(self) -> None:
         responses = {
-            self.SEED_FEN: _resp([
-                _move("Nf3", white=80, draws=0, black=0),
-                _move("Bc4", white=20, draws=0, black=0),
-            ]),
+            self.SEED_FEN: _resp(
+                [
+                    _move("Nf3", white=80, draws=0, black=0),
+                    _move("Bc4", white=20, draws=0, black=0),
+                ]
+            ),
         }
         explorer = FakeExplorer(responses=responses)
         # Depth 3 → seed (2) + 1 extension
@@ -214,11 +222,13 @@ class TestExtendWithBranch:
     def test_returns_only_main_when_gap_too_large(self) -> None:
         # Top 80%, second 10% → gap = 70pp >> 5pp.
         responses = {
-            self.SEED_FEN: _resp([
-                _move("Nf3", white=80),
-                _move("Bc4", white=10),
-                _move("d4", white=10),
-            ]),
+            self.SEED_FEN: _resp(
+                [
+                    _move("Nf3", white=80),
+                    _move("Bc4", white=10),
+                    _move("d4", white=10),
+                ]
+            ),
         }
         explorer = FakeExplorer(responses=responses)
         result = extend_with_branch(self._spec(), self.SEED, explorer)
@@ -227,11 +237,13 @@ class TestExtendWithBranch:
     def test_returns_two_lines_when_gap_within_threshold(self) -> None:
         # Top 50%, second 48% → gap = 2pp < 5pp.
         responses = {
-            self.SEED_FEN: _resp([
-                _move("Nf3", white=50, draws=0, black=0),
-                _move("Bc4", white=48, draws=0, black=0),
-                _move("d4", white=2, draws=0, black=0),
-            ]),
+            self.SEED_FEN: _resp(
+                [
+                    _move("Nf3", white=50, draws=0, black=0),
+                    _move("Bc4", white=48, draws=0, black=0),
+                    _move("d4", white=2, draws=0, black=0),
+                ]
+            ),
         }
         explorer = FakeExplorer(responses=responses)
         result = extend_with_branch(self._spec(), self.SEED, explorer)
@@ -242,10 +254,12 @@ class TestExtendWithBranch:
         # Exactly 5pp apart → NOT below threshold (gap > MAX is the exclusion rule).
         # gap = SECOND_BRANCH_GAP_MAX exactly → still includes branch (uses `>` strict).
         responses = {
-            self.SEED_FEN: _resp([
-                _move("Nf3", white=int((0.50 + SECOND_BRANCH_GAP_MAX) * 1000)),
-                _move("Bc4", white=500),
-            ]),
+            self.SEED_FEN: _resp(
+                [
+                    _move("Nf3", white=int((0.50 + SECOND_BRANCH_GAP_MAX) * 1000)),
+                    _move("Bc4", white=500),
+                ]
+            ),
         }
         explorer = FakeExplorer(responses=responses)
         result = extend_with_branch(self._spec(), self.SEED, explorer)

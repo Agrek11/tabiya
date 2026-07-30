@@ -1,31 +1,24 @@
-# Cloudflare Pages headers (copied verbatim into dist/ from public/).
-#
-# Cross-origin isolation is REQUIRED for stockfish.wasm's threaded build
-# (SharedArrayBuffer needs document.crossOriginIsolated). Same pair the dev +
-# preview servers set in vite.config.ts. Article 11: if a host omits these,
-# the engine load rejects and the Coach degrades to "engine unavailable" — the
-# trainer itself still works.
 /*
+  Cache-Control: no-cache
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://lichess.org https://api.lichess.org https://api.chess.com https://www.chess.com https://api.openai.com https://api.anthropic.com http://localhost:11434 http://127.0.0.1:11434; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
 
-# Hashed build assets are content-addressed → cache forever.
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Sidecars are regenerated per build but unhashed; revalidate.
+/catalog.json
+  Cache-Control: public, max-age=0, must-revalidate
 /features.json
   Cache-Control: public, max-age=0, must-revalidate
 /transpositions.json
   Cache-Control: public, max-age=0, must-revalidate
-/catalog.json
+/stockfish/*
   Cache-Control: public, max-age=0, must-revalidate
-
-# KNOWN ISSUE (free WebGPU tier): under COEP require-corp, the MLC model
-# download from the cross-origin CDN may be blocked unless that CDN sends a
-# Cross-Origin-Resource-Policy header. BYOK-cloud and Ollama tiers are
-# unaffected. Resolve at the WebGPU hardening step — options: COEP
-# `credentialless` (Chrome/FF), self-host the model weights same-origin, or
-# gate the WebGPU tier behind a relaxed-header route.
+/sounds/*
+  Cache-Control: public, max-age=0, must-revalidate

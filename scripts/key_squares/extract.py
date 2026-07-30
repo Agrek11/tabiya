@@ -121,9 +121,7 @@ def load_few_shot(path: Path = FEW_SHOT_YML) -> list[FewShotExemplar]:
     return exemplars
 
 
-def build_prompt(
-    record: dict[str, Any], exemplars: Sequence[FewShotExemplar]
-) -> str:
+def build_prompt(record: dict[str, Any], exemplars: Sequence[FewShotExemplar]) -> str:
     """Assemble the user prompt for one opening.
 
     Layout (matches design §2a.3):
@@ -154,16 +152,14 @@ def build_prompt(
     for ex in exemplars:
         lines.append(f"Input — {ex.opening_name} ({ex.opening_slug})")
         lines.append(f"Prose: {ex.prose.strip()}")
-        output_json = json.dumps(
-            {"drafts": [d.model_dump() for d in ex.output]}, indent=2
-        )
+        output_json = json.dumps({"drafts": [d.model_dump() for d in ex.output]}, indent=2)
         lines.append(f"Output:\n{output_json}")
         lines.append("")
     lines.append(
         "Task: identify 0-6 key squares for the position after the main line. "
         "For each: square, role (outpost|control|tension|weak), for_color, "
         "rationale (≤280 chars), source_url (cite a [Source: ...] URL from "
-        "the source material). Output a single JSON object {\"drafts\": [...]}. "
+        'the source material). Output a single JSON object {"drafts": [...]}. '
         "No prose outside the JSON."
     )
     return "\n".join(lines)

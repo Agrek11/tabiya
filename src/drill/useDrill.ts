@@ -518,13 +518,12 @@ export function useDrill(
   // Last-move highlight
   // -------------------------------------------------------------------------
 
-  const lastMove: { from: string; to: string } | null = useMemo(() => {
+  const lastMove: { from: string; to: string } | null = (() => {
     const hist = chess.history({ verbose: true });
     if (hist.length === 0) return null;
     const last = hist[hist.length - 1]!;
     return { from: last.from, to: last.to };
-    // recompute on state change (chess.js is mutable)
-  }, [state, chess]);
+  })();
 
   const legalMovesFrom = useCallback(
     (square: string): string[] => {

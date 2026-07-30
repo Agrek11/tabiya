@@ -6,6 +6,7 @@
  */
 
 import type { LLMClient, LLMResponse, PromptPayload, ProviderName } from './LLMClient';
+import { parseStructuredResponse } from './parseStructuredResponse';
 
 export const DEFAULT_OLLAMA_MODEL = 'llama3.2:3b-instruct';
 export const DEFAULT_OLLAMA_ENDPOINT = 'http://localhost:11434';
@@ -54,6 +55,7 @@ export class OllamaLLMClient implements LLMClient {
     const json = (await r.json()) as OllamaChatResponse;
     return {
       text: json.message?.content ?? '',
+      parsed: parseStructuredResponse(json.message?.content ?? '') ?? undefined,
       modelName: this.modelName,
       usage:
         json.prompt_eval_count !== undefined

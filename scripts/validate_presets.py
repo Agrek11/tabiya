@@ -15,7 +15,6 @@ import sys
 from pathlib import Path
 from typing import Final
 
-
 REPO_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
 PRESETS_PATH: Final[Path] = REPO_ROOT / "scripts" / "curated" / "presets.yml"
 CATALOG_PATH: Final[Path] = REPO_ROOT / "public" / "catalog.json"
@@ -170,12 +169,9 @@ def main() -> int:
             print(f"validate_presets: {e}", file=sys.stderr)
         return 1
 
-    total_refs = sum(
-        len(p.get("lines", [])) for p in presets if isinstance(p.get("lines"), list)
-    )
+    total_refs = sum(len(p.get("lines", [])) for p in presets if isinstance(p.get("lines"), list))
     print(
-        f"validate_presets: OK — {len(presets)} presets, "
-        f"{total_refs} line references all resolve."
+        f"validate_presets: OK — {len(presets)} presets, {total_refs} line references all resolve."
     )
     return 0
 

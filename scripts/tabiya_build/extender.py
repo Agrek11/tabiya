@@ -17,9 +17,9 @@ from .whitelist import DEFAULT_DEPTH, OpeningSpec
 
 logger = logging.getLogger(__name__)
 
-POPULARITY_THRESHOLD = 0.15        # Req 4.6
-SECOND_BRANCH_GAP_MAX = 0.05       # Req 4.5
-HARD_DEPTH_CAP = 20                # Constitution Article 8
+POPULARITY_THRESHOLD = 0.15  # Req 4.6
+SECOND_BRANCH_GAP_MAX = 0.05  # Req 4.5
+HARD_DEPTH_CAP = 20  # Constitution Article 8
 
 StopCode = Literal["depth_reached", "low_popularity", "no_continuations"]
 
@@ -33,9 +33,9 @@ class StopReason:
 class ExtendedLine:
     """One linear extended line, with the stop reason that ended it."""
 
-    moves: list[str]      # SAN moves including the seed
+    moves: list[str]  # SAN moves including the seed
     end_fen: str
-    popularity: float     # popularity at the last extended ply (or 1.0 if seed-only)
+    popularity: float  # popularity at the last extended ply (or 1.0 if seed-only)
     stop: StopReason
 
 

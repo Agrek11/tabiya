@@ -54,3 +54,13 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+.tabiya-skip-link { position: fixed; top: 8px; left: 8px; z-index: 1000; transform: translateY(-150%); padding: 8px 12px; border-radius: 8px; background: #111827; color: #fff; font-weight: 700; }
+.tabiya-skip-link:focus { transform: translateY(0); }
+.tabiya-mobile-navigation { display: none; }
+@media (max-width: 880px) {
+  .tabiya-primary-nav { display: none !important; }
+  .tabiya-mobile-navigation { position: fixed; z-index: 200; right: 0; bottom: 0; left: 0; display: flex; min-height: calc(58px + env(safe-area-inset-bottom)); padding: 7px 6px calc(7px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(127, 127, 127, 0.25); background: #fff; box-shadow: 0 -5px 18px rgba(0, 0, 0, 0.08); }
+  #main-content { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }

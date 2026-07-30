@@ -28,12 +28,17 @@ test('coach Why button is present during a drill', async ({ page }) => {
 
 test('settings shows all provider + sync sections', async ({ page }) => {
   await page.goto('/settings');
-  await expect(page.getByText('AI Coach')).toBeVisible();
-  await expect(page.getByText('Lichess', { exact: true })).toBeVisible();
-  await expect(page.getByText('Chess.com', { exact: true })).toBeVisible();
+  await expect(page.locator('#settings-ai').getByText('AI Coach', { exact: true })).toBeVisible();
+  await expect(page.locator('#settings-lichess').getByText('Lichess', { exact: true })).toBeVisible();
+  await expect(page.locator('#settings-chesscom').getByText('Chess.com', { exact: true })).toBeVisible();
 });
 
 test('dashboard OOB widget shows the disconnected empty state', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText(/Connect Lichess or chess\.com/i)).toBeVisible();
+});
+test('progress page loads local learning metrics', async ({ page }) => {
+  await page.goto('/progress');
+  await expect(page.getByText('Clean recall', { exact: true })).toBeVisible();
+  await expect(page.getByText('Opening performance', { exact: true })).toBeVisible();
 });

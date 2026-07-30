@@ -93,41 +93,41 @@ describe('StockfishWasmEngine (stubbed worker)', () => {
   it('correlates concurrent analyze calls by id, resolving out of order', async () => {
     const { engine, worker } = readyEngine();
 
-    const a = engine.analyze('fen-a', { depth: 12 });
-    const b = engine.analyze('fen-b', { depth: 12 });
+    const a = engine.analyze('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', { depth: 12 });
+    const b = engine.analyze('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1', { depth: 12 });
     // Let the queued `await this.ready` continuations post their messages.
-    await Promise.resolve();
+    await vi.waitFor(() => expect(worker.posted).toHaveLength(3));
 
     const [msgA, msgB] = worker.posted.slice(1) as Array<{ id: string; fen: string }>;
-    expect(msgA.fen).toBe('fen-a');
-    expect(msgB.fen).toBe('fen-b');
+    expect(msgA.fen).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    expect(msgB.fen).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1');
     expect(msgA.id).not.toBe(msgB.id);
 
     // Resolve B first — A must stay pending and keep its own result.
-    worker.emit({ type: 'analysis', id: msgB.id, analysis: ANALYSIS('fen-b') });
-    await expect(b).resolves.toMatchObject({ fen: 'fen-b' });
+    worker.emit({ type: 'analysis', id: msgB.id, analysis: ANALYSIS('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1') });
+    await expect(b).resolves.toMatchObject({ fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1' });
 
-    worker.emit({ type: 'analysis', id: msgA.id, analysis: ANALYSIS('fen-a') });
-    await expect(a).resolves.toMatchObject({ fen: 'fen-a' });
+    worker.emit({ type: 'analysis', id: msgA.id, analysis: ANALYSIS('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1') });
+    await expect(a).resolves.toMatchObject({ fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1' });
   });
 
-  it('rejects an aborted analyze with AbortError and posts stop', async () => {
+  it('rejects an aborted analyze with AbortError and posts a request cancel', async () => {
     const { engine, worker } = readyEngine();
     const ctrl = new AbortController();
 
-    const p = engine.analyze('fen-a', { depth: 12, signal: ctrl.signal });
-    await Promise.resolve();
+    const p = engine.analyze('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', { depth: 12, signal: ctrl.signal });
+    await vi.waitFor(() => expect(worker.posted).toHaveLength(2));
     ctrl.abort();
 
     await expect(p).rejects.toMatchObject({ name: 'AbortError' });
-    expect(worker.posted.at(-1)).toEqual({ type: 'stop' });
+    expect(worker.posted.at(-1)).toMatchObject({ type: 'cancel' });
   });
 
   it('an already-aborted signal rejects immediately', async () => {
     const { engine } = readyEngine();
     const ctrl = new AbortController();
     ctrl.abort();
-    await expect(engine.analyze('fen-a', { depth: 12, signal: ctrl.signal })).rejects.toMatchObject({
+    await expect(engine.analyze('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', { depth: 12, signal: ctrl.signal })).rejects.toMatchObject({
       name: 'AbortError',
     });
   });
@@ -141,16 +141,16 @@ describe('StockfishWasmEngine (stubbed worker)', () => {
 
   it('a per-job error message rejects only that job', async () => {
     const { engine, worker } = readyEngine();
-    const a = engine.analyze('bad-fen', { depth: 12 });
-    const b = engine.analyze('fen-b', { depth: 12 });
-    await Promise.resolve();
+    const a = engine.analyze('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1', { depth: 12 });
+    const b = engine.analyze('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1', { depth: 12 });
+    await vi.waitFor(() => expect(worker.posted).toHaveLength(3));
 
     const [msgA, msgB] = worker.posted.slice(1) as Array<{ id: string }>;
     worker.emit({ type: 'error', id: msgA.id, message: 'invalid fen' });
     await expect(a).rejects.toThrow('invalid fen');
 
-    worker.emit({ type: 'analysis', id: msgB.id, analysis: ANALYSIS('fen-b') });
-    await expect(b).resolves.toMatchObject({ fen: 'fen-b' });
+    worker.emit({ type: 'analysis', id: msgB.id, analysis: ANALYSIS('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1') });
+    await expect(b).resolves.toMatchObject({ fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1' });
   });
 
   it('stop() is idempotent', () => {

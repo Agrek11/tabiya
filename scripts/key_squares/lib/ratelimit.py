@@ -73,9 +73,7 @@ class TokenBucketLimiter:
         bucket = self._bucket_for(host)
         now = self._clock()
         elapsed = max(0.0, now - bucket.last_ts)
-        bucket.tokens = min(
-            bucket.capacity, bucket.tokens + elapsed * bucket.refill_rate_rps
-        )
+        bucket.tokens = min(bucket.capacity, bucket.tokens + elapsed * bucket.refill_rate_rps)
         bucket.last_ts = now
         if bucket.tokens < 1.0:
             needed = 1.0 - bucket.tokens

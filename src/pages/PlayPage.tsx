@@ -38,6 +38,13 @@ type Status =
   | { kind: 'draw'; reason: string }
   | { kind: 'resigned' };
 
+type MoveFeedback = {
+  cpLoss: number;
+  bestMove: string;
+  playedMove: string;
+  verdict: 'excellent' | 'good' | 'inaccuracy' | 'mistake';
+};
+
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 function deriveStatus(game: Chess, playerColor: 'white' | 'black'): Status {
@@ -72,6 +79,7 @@ export function PlayPage() {
   const [engine, setEngine] = useState<ChessEngine | null>(null);
   const [engineError, setEngineError] = useState(false);
   const [lastMove, setLastMove] = useState<{ from: string; to: string } | null>(null);
+  const [lastFeedback, setLastFeedback] = useState<MoveFeedback | null>(null);
   const busyRef = useRef(false);
 
   // Load the engine once.
@@ -91,6 +99,7 @@ export function PlayPage() {
     setFen(gameRef.current.fen());
     setLastMove(null);
     setStatus({ kind: 'playing' });
+    setLastFeedback(null);
     busyRef.current = false;
   }, [startFen]);
 
@@ -139,11 +148,21 @@ export function PlayPage() {
     const g = gameRef.current;
     if (g.turn() !== playerCode) return false;
     try {
+      const beforeFen = g.fen();
       const mv = g.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
       playMoveSound();
       setLastMove({ from: mv.from, to: mv.to });
       setFen(g.fen());
       setStatus(deriveStatus(g, playerColor));
+      if (engine) {
+        void evaluateMoveFeedback(engine, beforeFen, mv.san)
+          .then((feedback) => {
+            setLastFeedback(feedback);
+          })
+          .catch(() => {
+            // Non-fatal: if eval fails, keep play loop uninterrupted.
+          });
+      }
       return true;
     } catch {
       return false; // illegal
@@ -215,6 +234,27 @@ export function PlayPage() {
             {!engine && !engineError ? (
               <div style={{ fontSize: 12.5, color: t.inkSoft, marginTop: 6, fontFamily: fonts.sans }}>
                 Loading engine…
+              </div>
+            ) : null}
+            {lastFeedback ? (
+              <div
+                style={{
+                  marginTop: 10,
+                  padding: '8px 10px',
+                  borderRadius: 10,
+                  border: `0.5px solid ${t.border}`,
+                  background: t.surfaceAlt,
+                  fontFamily: fonts.sans,
+                  fontSize: 12.5,
+                  color: t.ink,
+                  lineHeight: 1.45,
+                }}
+              >
+                <strong style={{ color: feedbackColor(lastFeedback.verdict, t) }}>
+                  {feedbackLabel(lastFeedback.verdict)}
+                </strong>{' '}
+                ({lastFeedback.playedMove}, ~{Math.round(lastFeedback.cpLoss)} cp loss). Best was{' '}
+                <strong>{lastFeedback.bestMove || '—'}</strong>.
               </div>
             ) : null}
           </Card>
@@ -298,4 +338,65 @@ function ghostBtn(t: ReturnType<typeof useTokens>): React.CSSProperties {
     fontFamily: fonts.sans,
     cursor: 'pointer',
   };
+}
+
+async function evaluateMoveFeedback(
+  engine: ChessEngine,
+  fen: string,
+  playedMoveSan: string,
+): Promise<MoveFeedback> {
+  const [best, played] = await Promise.all([
+    engine.analyze(fen, { depth: 14, multipv: 1, movetimeMs: 260 }),
+    engine.analyze(fen, {
+      depth: 14,
+      multipv: 1,
+      movetimeMs: 260,
+      searchMovesSan: [playedMoveSan],
+    }),
+  ]);
+  const bestCp = best.pvs[0]?.scoreCp ?? 0;
+  const playedCp = played.pvs[0]?.scoreCp ?? bestCp;
+  const cpLoss = Math.max(0, bestCp - playedCp);
+  return {
+    cpLoss,
+    bestMove: best.bestmove,
+    playedMove: playedMoveSan,
+    verdict:
+      cpLoss <= 40
+        ? 'excellent'
+        : cpLoss <= 90
+          ? 'good'
+          : cpLoss <= 180
+            ? 'inaccuracy'
+            : 'mistake',
+  };
+}
+
+function feedbackLabel(verdict: MoveFeedback['verdict']): string {
+  switch (verdict) {
+    case 'excellent':
+      return 'Excellent move';
+    case 'good':
+      return 'Good practical move';
+    case 'inaccuracy':
+      return 'Inaccuracy';
+    case 'mistake':
+      return 'Mistake';
+  }
+}
+
+function feedbackColor(
+  verdict: MoveFeedback['verdict'],
+  t: ReturnType<typeof useTokens>,
+): string {
+  switch (verdict) {
+    case 'excellent':
+      return t.success;
+    case 'good':
+      return t.brand;
+    case 'inaccuracy':
+      return '#d97706';
+    case 'mistake':
+      return t.red;
+  }
 }

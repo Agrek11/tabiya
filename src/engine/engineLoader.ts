@@ -18,7 +18,7 @@ export function loadStockfishEngine(): Promise<ChessEngine> {
   if (!enginePromise) {
     enginePromise = import('./StockfishWasmEngine')
       .then(({ StockfishWasmEngine }) => {
-        const engine = new StockfishWasmEngine();
+        const engine = new StockfishWasmEngine({ onFatal: () => { enginePromise = null; } });
         // Surface a handshake failure as a rejected load so the singleton is
         // not poisoned by a permanently-pending engine.
         return engine.ready.then(() => engine);

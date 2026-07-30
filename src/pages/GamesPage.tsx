@@ -39,6 +39,7 @@ type Summary = {
   oobCount: number;
   openings: number;
   weakOpenings: WeakOpening[];
+  recentGameIds: string[];
 };
 
 const EMPTY_SUMMARY: Summary = {
@@ -47,6 +48,7 @@ const EMPTY_SUMMARY: Summary = {
   oobCount: 0,
   openings: 0,
   weakOpenings: [],
+  recentGameIds: [],
 };
 
 async function loadSummary(): Promise<Summary> {
@@ -75,6 +77,7 @@ async function loadSummary(): Promise<Summary> {
     oobCount: oob.length,
     openings: openings.size,
     weakOpenings,
+    recentGameIds: games.slice(0, 5).map((g) => g.id),
   };
 }
 
@@ -215,6 +218,42 @@ export function GamesPage() {
           </p>
         </Card>
       </div>
+      <div style={{ marginTop: 18 }}>
+        <Card>
+          <CardTitle>Opponent Scouting</CardTitle>
+          <p style={{ fontSize: 12.5, color: t.inkSoft, fontFamily: fonts.sans, lineHeight: 1.6, margin: 0 }}>
+            Build a deterministic profile from synced games on the{' '}
+            <Link to="/scout" style={{ color: t.brand }}>Scout page</Link>.
+          </p>
+        </Card>
+      </div>
+      {summary.recentGameIds.length > 0 ? (
+        <div style={{ marginTop: 18 }}>
+          <Card>
+            <CardTitle>Review recent games</CardTitle>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {summary.recentGameIds.map((id) => (
+                <Link
+                  key={id}
+                  to={`/review/${id}`}
+                  style={{
+                    textDecoration: 'none',
+                    border: `0.5px solid ${t.border}`,
+                    borderRadius: 999,
+                    padding: '6px 10px',
+                    color: t.brand,
+                    fontFamily: fonts.mono,
+                    fontSize: 12,
+                    background: t.surface,
+                  }}
+                >
+                  Review {id}
+                </Link>
+              ))}
+            </div>
+          </Card>
+        </div>
+      ) : null}
     </PageBody>
   );
 }

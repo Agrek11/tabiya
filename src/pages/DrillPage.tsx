@@ -71,7 +71,7 @@ import { TranspositionBanner } from '../components/drill/TranspositionBanner';
 import { useSpotlightOverlay } from '../ui/board/useSpotlightOverlay';
 import { useKeySquareOverlay } from '../hooks/useKeySquareOverlay';
 import { useTransposition } from '../hooks/useTransposition';
-import { getRepository, getSrsRepository } from '../storage';
+import { getGhostLineRepository, getRepository, getSrsRepository } from '../storage';
 import type { Family, Line, Opening } from '../storage/types';
 
 type CatalogState =
@@ -93,6 +93,8 @@ const MODE_LABELS: Record<ModeId, string> = {
 };
 
 const MODE_PILL_TARGET_RADIUS = 12;
+const GHOST_FAMILY_ID = 'ghost-family';
+const GHOST_OPENING_ID = 'ghost-opening';
 
 function fireGrandConfetti(): void {
   const colors = ['#F4A300', '#E25822', '#FFD166', '#06D6A0', '#118AB2', '#FFFFFF'];
@@ -160,6 +162,10 @@ export function DrillPage() {
   const [modeMenuOpen, setModeMenuOpen] = useState(false);
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
 
+  const isGhostLine = useCallback((line: Line): boolean => {
+    return line.opening_id === GHOST_OPENING_ID || line.tags.includes('ghost-line');
+  }, []);
+
   const closeOpeningMenu = useCallback(() => {
     setOpeningMenuOpen(false);
     setOpeningSearch('');
@@ -180,9 +186,10 @@ export function DrillPage() {
     let cancelled = false;
     void (async () => {
       try {
-        const [openings, families] = await Promise.all([
+        const [openings, families, ghostLines] = await Promise.all([
           repo.listOpenings(),
           repo.listFamilies(),
+          getGhostLineRepository().listAll(),
         ]);
         if (cancelled) return;
         if (openings.length === 0) {
@@ -190,7 +197,50 @@ export function DrillPage() {
           return;
         }
         const allLineLists = await Promise.all(openings.map((o) => repo.listLines(o.id)));
-        const lines = allLineLists.flat();
+        const ghostAsLines: Line[] = ghostLines.map((g) => ({
+          id: g.id,
+          opening_id: GHOST_OPENING_ID,
+          variation_id: g.variation_id,
+          name: g.name,
+          moves: g.moves,
+          depth: g.depth,
+          end_fen: g.end_fen,
+          popularity: g.popularity,
+          tags: g.tags,
+          strategic_notes: g.strategic_notes,
+          key_squares: g.key_squares,
+          forks: g.forks,
+        }));
+        const lines = [...allLineLists.flat(), ...ghostAsLines];
+        const openingsAug: Opening[] =
+          ghostAsLines.length === 0
+            ? openings
+            : [
+                ...openings,
+                {
+                  id: GHOST_OPENING_ID,
+                  family_id: GHOST_FAMILY_ID,
+                  name: 'Ghost Corrections',
+                  eco: 'GHOST',
+                  color: 'white',
+                  line_ids: ghostAsLines.map((l) => l.id),
+                  is_gambit: false,
+                },
+              ];
+        const familiesAug: Family[] =
+          ghostAsLines.length === 0
+            ? families
+            : [
+                ...families,
+                {
+                  id: GHOST_FAMILY_ID,
+                  name: 'Ghost Corrections',
+                  category: 'uncategorized',
+                  eco_range: 'GHOST',
+                  tier: 3,
+                  opening_ids: [GHOST_OPENING_ID],
+                },
+              ];
         if (cancelled) return;
 
         let startLine: Line | null = null;
@@ -202,7 +252,7 @@ export function DrillPage() {
         }
         if (startLine === null && requestedFamily) {
           const famOpeningIds = new Set(
-            openings.filter((o) => o.family_id === requestedFamily).map((o) => o.id),
+            openingsAug.filter((o) => o.family_id === requestedFamily).map((o) => o.id),
           );
           startLine = lines.find((l) => famOpeningIds.has(l.opening_id)) ?? null;
         }
@@ -213,10 +263,10 @@ export function DrillPage() {
           setCatalog({ kind: 'error', message: 'Catalog has no lines.' });
           return;
         }
-        const startOpening = openings.find((o) => o.id === startLine!.opening_id);
+        const startOpening = openingsAug.find((o) => o.id === startLine!.opening_id);
         const startFamilyId = startOpening?.family_id ?? '';
 
-        setCatalog({ kind: 'ready', openings, lines, families });
+        setCatalog({ kind: 'ready', openings: openingsAug, lines, families: familiesAug });
         setSelectedFamilyId(startFamilyId);
         setSelectedLineId(startLine.id);
       } catch (err) {
@@ -249,7 +299,11 @@ export function DrillPage() {
     } else {
       const valid = dueLineIds
         .filter((id) => catalog.lines.some((l) => l.id === id))
-        .filter((id) => !effective.isFiltered || effective.lineIds.has(id));
+        .filter((id) => {
+          const line = catalog.lines.find((l) => l.id === id);
+          if (!line) return false;
+          return !effective.isFiltered || effective.lineIds.has(id) || isGhostLine(line);
+        });
       if (valid.length === 0) {
         setQueueState({ kind: 'exhausted', total: 0 });
       } else {
@@ -560,6 +614,37 @@ export function DrillPage() {
     },
     [navigate]
   );
+  const onTranspositionRoulette = useCallback((): void => {
+    if (transposition.matches.length < 2) return;
+    const idx = Math.floor(Math.random() * transposition.matches.length);
+    const pick = transposition.matches[idx];
+    if (pick) onTranspositionJump(pick.lineId);
+  }, [onTranspositionJump, transposition.matches]);
+  const onGambitDiversion = useCallback((): void => {
+    if (catalog.kind !== 'ready') return;
+    if (activeOpening?.is_gambit) return;
+    const lineById = new Map(catalog.lines.map((l) => [l.id, l] as const));
+    const openingById = new Map(catalog.openings.map((o) => [o.id, o] as const));
+    const gambitMatch = transposition.matches.find((m) => {
+      const line = lineById.get(m.lineId);
+      if (!line) return false;
+      const opening = openingById.get(line.opening_id);
+      return opening?.is_gambit === true;
+    });
+    if (gambitMatch) onTranspositionJump(gambitMatch.lineId);
+  }, [catalog, activeOpening?.is_gambit, transposition.matches, onTranspositionJump]);
+  const hasGambitDiversion = useMemo(() => {
+    if (catalog.kind !== 'ready') return false;
+    if (activeOpening?.is_gambit) return false;
+    const lineById = new Map(catalog.lines.map((l) => [l.id, l] as const));
+    const openingById = new Map(catalog.openings.map((o) => [o.id, o] as const));
+    return transposition.matches.some((m) => {
+      const line = lineById.get(m.lineId);
+      if (!line) return false;
+      const opening = openingById.get(line.opening_id);
+      return opening?.is_gambit === true;
+    });
+  }, [catalog, activeOpening?.is_gambit, transposition.matches]);
 
   // Keyboard nav.
   useEffect(() => {
@@ -672,7 +757,7 @@ export function DrillPage() {
   );
   const linesForFamily = catalog.lines
     .filter((l) => familyOpeningIds.has(l.opening_id))
-    .filter((l) => !effective.isFiltered || effective.lineIds.has(l.id));
+    .filter((l) => !effective.isFiltered || effective.lineIds.has(l.id) || isGhostLine(l));
   const filteredLines = filterLines(linesForFamily, lineSearch);
   const familiesWithLines = catalog.families
     .filter((f) =>
@@ -685,13 +770,27 @@ export function DrillPage() {
       if (!effective.isFiltered) return true;
       return catalog.lines.some((l) => {
         const op = catalog.openings.find((o) => o.id === l.opening_id);
-        return op?.family_id === f.id && effective.lineIds.has(l.id);
+        return op?.family_id === f.id && (effective.lineIds.has(l.id) || isGhostLine(l));
       });
     });
   const filteredFamilies = filterFamilies(familiesWithLines, openingSearch);
 
   // Drill stats — wired where available.
   const accuracySoFar = totalPly > 0 ? Math.round((currentPly / totalPly) * 100) : 0;
+  const silentCoachLine = (() => {
+    if (!activeLine) return null;
+    if (selectedSquare) {
+      const ks = activeLine.key_squares.find((k) => k.square === selectedSquare);
+      if (ks) return `${selectedSquare}: ${ks.note}`;
+    }
+    if (state.kind === 'awaiting_player' && nextIdx !== undefined) {
+      const san = drillMoves[nextIdx];
+      if (san) return `Expected move: ${san}.`;
+    }
+    const firstKey = activeLine.key_squares[0];
+    if (firstKey) return `${firstKey.square}: ${firstKey.note}`;
+    return null;
+  })();
 
   const isExplainViewActive =
     explainMode === 'explain' && explainReady && activeLine !== null;
@@ -1041,6 +1140,22 @@ export function DrillPage() {
                   />
                 ) : null}
               </div>
+              {silentCoachLine ? (
+                <div
+                  style={{
+                    marginTop: 2,
+                    padding: '8px 10px',
+                    borderRadius: 10,
+                    border: `0.5px solid ${t.border}`,
+                    background: t.surfaceAlt,
+                    color: t.ink,
+                    fontFamily: fonts.sans,
+                    fontSize: 12.5,
+                  }}
+                >
+                  Silent Coach: {silentCoachLine}
+                </div>
+              ) : null}
             </div>
 
             {/* COL 2 — Moves card on top, WhyThisMove card on bottom */}
@@ -1059,6 +1174,8 @@ export function DrillPage() {
                 matches={transposition.matches}
                 truncatedCount={transposition.truncated}
                 onJump={onTranspositionJump}
+                onRoulette={onTranspositionRoulette}
+                onDiversion={hasGambitDiversion ? onGambitDiversion : undefined}
               />
               <Card>
                 <CardTitle>Moves</CardTitle>

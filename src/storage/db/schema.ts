@@ -17,13 +17,15 @@
 import type { IDBPDatabase, IDBPTransaction } from 'idb';
 
 export const DB_NAME = 'tabiya';
-export const DB_VERSION = 3;
+export const DB_VERSION = 5;
 
 export const STORE_SRS = 'srs_state';
 export const STORE_EVENTS = 'session_events';
 export const STORE_REPERTOIRE = 'repertoire_pick';
 export const STORE_LICHESS_GAMES = 'lichess_games';
 export const STORE_LICHESS_OOB = 'lichess_oob_events';
+export const STORE_GAME_ANALYSIS = 'game_analysis';
+export const STORE_GHOST_LINES = 'ghost_lines';
 
 /** Out-of-line key used by the single-row repertoire pick store. */
 export const REPERTOIRE_KEY = 'current';
@@ -75,6 +77,24 @@ export function runMigrations(
       });
       s.createIndex('by_detectedAt', 'detectedAt', { unique: false });
       s.createIndex('by_lineId', 'lineId', { unique: false });
+    }
+  }
+  // v3 -> v4: game_analysis cache (Phase 5 substrate).
+  if (oldVersion < 4) {
+    if (!db.objectStoreNames.contains(STORE_GAME_ANALYSIS)) {
+      const s = db.createObjectStore(STORE_GAME_ANALYSIS, { keyPath: 'id' });
+      s.createIndex('by_game', 'gameId', { unique: false });
+      s.createIndex('by_enginePreset', 'enginePreset', { unique: false });
+      s.createIndex('by_updatedAt', 'updatedAt', { unique: false });
+    }
+  }
+  // v4 -> v5: ghost_lines cache (Phase 5 ghost injection substrate).
+  if (oldVersion < 5) {
+    if (!db.objectStoreNames.contains(STORE_GHOST_LINES)) {
+      const s = db.createObjectStore(STORE_GHOST_LINES, { keyPath: 'id' });
+      s.createIndex('by_parentLineId', 'parent_line_id', { unique: false });
+      s.createIndex('by_gameId', 'game_id', { unique: false });
+      s.createIndex('by_createdAt', 'created_at', { unique: false });
     }
   }
 }

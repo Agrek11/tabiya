@@ -19,6 +19,7 @@
 
 import { getWebgpuLlmFlag } from '../storage/featureFlags';
 import type { LLMClient, LLMResponse, PromptPayload, ProviderName } from './LLMClient';
+import { parseStructuredResponse } from './parseStructuredResponse';
 
 export const DEFAULT_WEBGPU_MODEL = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
 
@@ -75,8 +76,10 @@ export class WebLLMClient implements LLMClient {
       temperature: p.temperature ?? 0.6,
       stop: p.stops,
     });
+    const text = res.choices[0]?.message.content ?? '';
     return {
-      text: res.choices[0]?.message.content ?? '',
+      text,
+      parsed: parseStructuredResponse(text) ?? undefined,
       modelName: this.modelName,
       usage: res.usage
         ? { input: res.usage.prompt_tokens, output: res.usage.completion_tokens }
